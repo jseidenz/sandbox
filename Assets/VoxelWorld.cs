@@ -17,6 +17,8 @@ public class VoxelWorld : MonoBehaviour
 
         public void ApplyHeightmap(Color[] pixels, float heightmap_height)
         {
+            m_heightmap_height = heightmap_height;
+
             for (int y = 0; y < m_height_in_voxels; ++y)
             {
                 for (int x = 0; x < m_width_in_voxels; ++x)
@@ -37,7 +39,8 @@ public class VoxelWorld : MonoBehaviour
         {
             m_mesh = new Mesh();
             m_mesh.name = $"VoxelLayer({pos_y})";
-            m_material = cube_prefab.GetComponent<MeshRenderer>().sharedMaterial;
+            m_material = GameObject.Instantiate(cube_prefab.GetComponent<MeshRenderer>().sharedMaterial);
+            m_material.color = new Color(m_heightmap_height, m_heightmap_height, m_heightmap_height);
 
             var vertices = new Vector3[m_voxel_count * 4];
             var normals = new Vector3[m_voxel_count * 4];
@@ -59,17 +62,18 @@ public class VoxelWorld : MonoBehaviour
                     float pos_x = (float)x;
                     float pos_x_plus_one = pos_x + voxel_size;
 
-                    var normal = Vector3.up;
-
                     vertices[vert_idx + 0] = new Vector3(pos_x, pos_y, pos_z);
                     vertices[vert_idx + 1] = new Vector3(pos_x_plus_one, pos_y, pos_z);
                     vertices[vert_idx + 2] = new Vector3(pos_x, pos_y, pos_z_plus_one);
                     vertices[vert_idx + 3] = new Vector3(pos_x_plus_one, pos_y, pos_z_plus_one);
 
+                    var normal = Vector3.up;
+
                     normals[vert_idx + 0] = normal;
                     normals[vert_idx + 1] = normal;
                     normals[vert_idx + 2] = normal;
                     normals[vert_idx + 3] = normal;
+
 
                     triangles[triangle_idx + 0] = vert_idx + 0;
                     triangles[triangle_idx + 1] = vert_idx + 2;
@@ -86,7 +90,7 @@ public class VoxelWorld : MonoBehaviour
             m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             m_mesh.vertices = vertices;
             m_mesh.normals = normals;
-            m_mesh.triangles = triangles;
+            m_mesh.triangles = triangles;            
             
         }
 
@@ -98,6 +102,7 @@ public class VoxelWorld : MonoBehaviour
         bool[] m_grid;
         int m_width_in_voxels;
         int m_height_in_voxels;
+        float m_heightmap_height;
         Mesh m_mesh;
         Material m_material;
         int m_voxel_count;
