@@ -83,9 +83,11 @@ public class VoxelWorld : MonoBehaviour
                 }
             }
 
+            m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             m_mesh.vertices = vertices;
             m_mesh.normals = normals;
             m_mesh.triangles = triangles;
+            
         }
 
         public void Render(float dt)
