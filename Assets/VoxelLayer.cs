@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class VoxelMap : MonoBehaviour {
+public class VoxelLayer : MonoBehaviour {
 
 	private static string[] fillTypeNames = {"Filled", "Empty"};
 	private static string[] radiusNames = {"0", "1", "2", "3", "4", "5"};
