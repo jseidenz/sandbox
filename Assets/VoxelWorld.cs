@@ -32,6 +32,7 @@ public class VoxelWorld : MonoBehaviour
         {
             m_mesh = new Mesh();
             m_mesh.name = $"VoxelLayer({pos_y})";
+            m_material = cube_prefab.GetComponent<MeshRenderer>().sharedMaterial;
 
             var vertices = new Vector3[(m_height_in_voxels) * (m_width_in_voxels) * 4];
             var normals = new Vector3[(m_height_in_voxels) * (m_width_in_voxels) * 4];
@@ -93,10 +94,16 @@ public class VoxelWorld : MonoBehaviour
             m_mesh.triangles = triangles;
         }
 
+        public void Render(float dt)
+        {
+            Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
+        }
+
         bool[] m_grid;
         int m_width_in_voxels;
         int m_height_in_voxels;
         Mesh m_mesh;
+        Material m_material;
     }
 
     Layer[] m_layers;
@@ -131,6 +138,15 @@ public class VoxelWorld : MonoBehaviour
             m_layers[y].Triangulate(cube_prefab, pos_y);
         }
 
-        GameObject.Destroy(cube_prefab);
+        GameObject.Destroy(cube_prefab);        
+    }
+
+    private void LateUpdate()
+    {
+        float dt = Time.deltaTime;
+        foreach(var layer in m_layers)
+        {
+            layer.Render(dt);
+        }
     }
 }
