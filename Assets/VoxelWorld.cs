@@ -3,6 +3,8 @@
 public class VoxelWorld : MonoBehaviour 
 {
     [SerializeField] int m_grid_height_in_voxels;
+    [SerializeField] Color[] m_colors;
+
     int m_grid_width_in_voxels;
     int m_grid_depth_in_voxels;
 
@@ -17,8 +19,6 @@ public class VoxelWorld : MonoBehaviour
 
         public void ApplyHeightmap(Color[] pixels, float heightmap_height)
         {
-            m_heightmap_height = heightmap_height;
-
             for (int y = 0; y < m_height_in_voxels; ++y)
             {
                 for (int x = 0; x < m_width_in_voxels; ++x)
@@ -35,12 +35,12 @@ public class VoxelWorld : MonoBehaviour
             }
         }
 
-        public void Triangulate(GameObject cube_prefab, float pos_y)
+        public void Triangulate(GameObject cube_prefab, float pos_y, Color color)
         {
             m_mesh = new Mesh();
             m_mesh.name = $"VoxelLayer({pos_y})";
             m_material = GameObject.Instantiate(cube_prefab.GetComponent<MeshRenderer>().sharedMaterial);
-            m_material.color = new Color(m_heightmap_height, m_heightmap_height, m_heightmap_height);
+            m_material.color = color;
 
             var vertices = new Vector3[m_voxel_count * 4];
             var normals = new Vector3[m_voxel_count * 4];
@@ -102,7 +102,6 @@ public class VoxelWorld : MonoBehaviour
         bool[] m_grid;
         int m_width_in_voxels;
         int m_height_in_voxels;
-        float m_heightmap_height;
         Mesh m_mesh;
         Material m_material;
         int m_voxel_count;
@@ -137,7 +136,16 @@ public class VoxelWorld : MonoBehaviour
         {
             float pos_y = (float)y;
 
-            m_layers[y].Triangulate(cube_prefab, pos_y);
+            float layer_heightmap_height = y * cell_height_in_color_space;
+
+            var color_idx = (int)((float)m_colors.Length * (float)y / (float)m_grid_height_in_voxels);
+
+            var color = m_colors[color_idx];
+
+            float layer_brightness = 0.25f + 0.75f * layer_heightmap_height;
+            color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
+
+            m_layers[y].Triangulate(cube_prefab, pos_y, color);
         }
 
         GameObject.Destroy(cube_prefab);        
