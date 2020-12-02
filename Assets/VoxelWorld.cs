@@ -23,7 +23,12 @@ public class VoxelWorld : MonoBehaviour
                 {
                     var cell_idx = y * m_width_in_voxels + x;
                     var height = pixels[cell_idx].r;
-                    m_grid[cell_idx] = height >= heightmap_height;
+                    bool is_filled = height >= heightmap_height;
+                    m_grid[cell_idx] = is_filled;
+                    if(is_filled)
+                    {
+                        ++m_voxel_count;
+                    }
                 }
             }
         }
@@ -34,9 +39,9 @@ public class VoxelWorld : MonoBehaviour
             m_mesh.name = $"VoxelLayer({pos_y})";
             m_material = cube_prefab.GetComponent<MeshRenderer>().sharedMaterial;
 
-            var vertices = new Vector3[(m_height_in_voxels) * (m_width_in_voxels) * 4];
-            var normals = new Vector3[(m_height_in_voxels) * (m_width_in_voxels) * 4];
-            var triangles = new int[m_width_in_voxels * m_height_in_voxels * 6];
+            var vertices = new Vector3[m_voxel_count * 4];
+            var normals = new Vector3[m_voxel_count * 4];
+            var triangles = new int[m_voxel_count * 6];
 
             float voxel_size = 1f;
             int vert_idx = 0;
@@ -48,6 +53,9 @@ public class VoxelWorld : MonoBehaviour
                 float pos_z_plus_one = pos_z + voxel_size;
                 for (int x = 0; x < m_width_in_voxels; ++x)
                 {
+                    int cell_idx = y * m_width_in_voxels + x;
+                    if (!m_grid[cell_idx]) continue;
+
                     float pos_x = (float)x;
                     float pos_x_plus_one = pos_x + voxel_size;
 
@@ -64,28 +72,14 @@ public class VoxelWorld : MonoBehaviour
                     normals[vert_idx + 3] = normal;
 
                     triangles[triangle_idx + 0] = vert_idx + 0;
-                    triangles[triangle_idx + 1] = vert_idx + 1;
-                    triangles[triangle_idx + 2] = vert_idx + 2;
-                    triangles[triangle_idx + 3] = vert_idx + 3;
-                    triangles[triangle_idx + 4] = vert_idx + 1;
-                    triangles[triangle_idx + 5] = vert_idx + 2;
+                    triangles[triangle_idx + 1] = vert_idx + 2;
+                    triangles[triangle_idx + 2] = vert_idx + 1;
+                    triangles[triangle_idx + 3] = vert_idx + 1;
+                    triangles[triangle_idx + 4] = vert_idx + 2;
+                    triangles[triangle_idx + 5] = vert_idx + 3;
 
                     vert_idx += 4;
                     triangle_idx += 6;
-                }
-            }
-
-            for (int y = 0; y < m_height_in_voxels; ++y)
-            {
-                float pos_z = (float)y;
-                for (int x = 0; x < m_width_in_voxels; ++x)
-                {
-                    float pos_x = (float)x;
-                    var cell_idx = y * m_width_in_voxels + x;
-                    if (!m_grid[cell_idx]) continue;
-
-                    var cube = GameObject.Instantiate(cube_prefab);
-                    cube.transform.localPosition = new Vector3(pos_x, pos_y, pos_z);
                 }
             }
 
@@ -104,6 +98,7 @@ public class VoxelWorld : MonoBehaviour
         int m_height_in_voxels;
         Mesh m_mesh;
         Material m_material;
+        int m_voxel_count;
     }
 
     Layer[] m_layers;
