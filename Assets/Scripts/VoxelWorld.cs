@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Runtime.InteropServices;
+using UnityEngine.Rendering;
 
 public class VoxelWorld : MonoBehaviour
 {
@@ -11,6 +13,13 @@ public class VoxelWorld : MonoBehaviour
 
     class Layer
     {
+        [StructLayout(LayoutKind.Sequential)]
+        struct Vertex
+        {
+            public Vector3 m_position;
+            public Vector3 m_normal;
+        }
+
         public Layer(int width_in_voxels, int height_in_voxels)
         {
             m_grid = new bool[width_in_voxels * height_in_voxels];
@@ -46,8 +55,11 @@ public class VoxelWorld : MonoBehaviour
             m_mesh.name = $"VoxelLayer({pos_y})";
             m_material = material;
 
-            var vertices = new Vector3[m_voxel_count * 4];
-            var normals = new Vector3[m_voxel_count * 4];
+            var vertex_count = m_voxel_count * 4;
+            m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            m_mesh.SetVertexBufferParams(vertex_count, m_vertex_attribute_descriptors);
+
+            var vertices = new Vertex[vertex_count];
             var triangles = new int[m_voxel_count * 6];
 
             float voxel_size = 1f;
@@ -66,18 +78,31 @@ public class VoxelWorld : MonoBehaviour
                     float pos_x = (float)x;
                     float pos_x_plus_one = pos_x + voxel_size;
 
-                    vertices[vert_idx + 0] = new Vector3(pos_x, pos_y, pos_z);
-                    vertices[vert_idx + 1] = new Vector3(pos_x_plus_one, pos_y, pos_z);
-                    vertices[vert_idx + 2] = new Vector3(pos_x, pos_y, pos_z_plus_one);
-                    vertices[vert_idx + 3] = new Vector3(pos_x_plus_one, pos_y, pos_z_plus_one);
-
                     var normal = Vector3.up;
 
-                    normals[vert_idx + 0] = normal;
-                    normals[vert_idx + 1] = normal;
-                    normals[vert_idx + 2] = normal;
-                    normals[vert_idx + 3] = normal;
+                    vertices[vert_idx + 0] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x, pos_y, pos_z),
+                        m_normal = normal
+                    };
 
+                    vertices[vert_idx + 1] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x_plus_one, pos_y, pos_z),
+                        m_normal = normal
+                    };
+
+                    vertices[vert_idx + 2] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x, pos_y, pos_z_plus_one),
+                        m_normal = normal
+                    };
+
+                    vertices[vert_idx + 3] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x_plus_one, pos_y, pos_z_plus_one),
+                        m_normal = normal
+                    };
 
                     triangles[triangle_idx + 0] = vert_idx + 0;
                     triangles[triangle_idx + 1] = vert_idx + 2;
@@ -91,10 +116,9 @@ public class VoxelWorld : MonoBehaviour
                 }
             }
 
-            m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            m_mesh.vertices = vertices;
-            m_mesh.normals = normals;
-            m_mesh.triangles = triangles;
+            m_mesh.SetVertexBufferData(vertices, 0, 0, vertex_count);
+            m_mesh.SetTriangles(triangles, 0, false);
+            m_mesh.RecalculateBounds();
 
             m_collider.sharedMesh = m_mesh;
             if (!m_collider.gameObject.activeSelf)
@@ -113,8 +137,14 @@ public class VoxelWorld : MonoBehaviour
         int m_height_in_voxels;
         Mesh m_mesh;
         Material m_material;
-        MeshCollider m_collider;
+        MeshCollider m_collider;        
         int m_voxel_count;
+
+        VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
+        {
+            new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
+            new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
+        };
     }
 
     Layer[] m_layers;
