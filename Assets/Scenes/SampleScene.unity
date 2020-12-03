@@ -176,41 +176,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-        type: 3}
-      propertyPath: m_colors.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-        type: 3}
-      propertyPath: m_colors.Array.data[0].r
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-        type: 3}
-      propertyPath: m_colors.Array.data[0].g
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-        type: 3}
-      propertyPath: m_colors.Array.data[0].b
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-        type: 3}
-      propertyPath: m_colors.Array.data[0].a
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-        type: 3}
-      propertyPath: m_grid_height_in_voxels
-      value: 64
-      objectReference: {fileID: 0}
-    - target: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-        type: 3}
-      propertyPath: m_material
-      value: 
-      objectReference: {fileID: 2100000, guid: a97ad6d1bb63f2542b01d7e96f039932, type: 2}
     - target: {fileID: 7225977169084572380, guid: f68439f6cf81f4349b0e2b0901997f2f,
         type: 3}
       propertyPath: m_LocalPosition.x
