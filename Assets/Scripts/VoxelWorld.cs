@@ -82,49 +82,49 @@ public class VoxelWorld : MonoBehaviour
 
                     vertices[vert_idx + 0] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, bot_y, pos_z),
+                        m_position = new Vector3(pos_x, top_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 1] = new Vertex
                     {
-                        m_position = new Vector3(pos_x_plus_one, bot_y, pos_z),
+                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 2] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, bot_y, pos_z_plus_one),
+                        m_position = new Vector3(pos_x, top_y, pos_z_plus_one),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 3] = new Vertex
                     {
-                        m_position = new Vector3(pos_x_plus_one, bot_y, pos_z_plus_one),
+                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z_plus_one),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 4] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, top_y, pos_z),
+                        m_position = new Vector3(pos_x, bot_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 5] = new Vertex
                     {
-                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z),
+                        m_position = new Vector3(pos_x_plus_one, bot_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 6] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, top_y, pos_z_plus_one),
+                        m_position = new Vector3(pos_x, bot_y, pos_z_plus_one),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 7] = new Vertex
                     {
-                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z_plus_one),
+                        m_position = new Vector3(pos_x_plus_one, bot_y, pos_z_plus_one),
                         m_normal = normal
                     };
 
@@ -136,11 +136,11 @@ public class VoxelWorld : MonoBehaviour
                     triangles[triangle_idx + 5] = vert_idx + 3;
 
                     triangles[triangle_idx + 6] = vert_idx + 0;
-                    triangles[triangle_idx + 7] = vert_idx + 2;
-                    triangles[triangle_idx + 8] = vert_idx + 1;
-                    triangles[triangle_idx + 9] = vert_idx + 1;
-                    triangles[triangle_idx + 10] = vert_idx + 2;
-                    triangles[triangle_idx + 11] = vert_idx + 3;
+                    triangles[triangle_idx + 7] = vert_idx + 1;
+                    triangles[triangle_idx + 8] = vert_idx + 4;
+                    triangles[triangle_idx + 9] = vert_idx + 4;
+                    triangles[triangle_idx + 10] = vert_idx + 1;
+                    triangles[triangle_idx + 11] = vert_idx + 5;
 
                     triangles[triangle_idx + 12] = vert_idx + 0;
                     triangles[triangle_idx + 13] = vert_idx + 2;
