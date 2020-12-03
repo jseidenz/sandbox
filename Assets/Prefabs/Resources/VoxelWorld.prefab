@@ -44,8 +44,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_tuneables:
+    m_layer_brightness_factor: 0.65
     m_layer_colors:
-    - m_color: {r: 1, g: 1, b: 1, a: 0}
-      m_height: 0
+    - m_color: {r: 0.33922213, g: 0.7264151, b: 0.58716875, a: 1}
+      m_height: 10.44
+    - m_color: {r: 0.2144482, g: 0.4433962, b: 0.20705765, a: 1}
+      m_height: 12.93
+    - m_color: {r: 0.15744035, g: 0.5471698, b: 0.45188293, a: 0}
+      m_height: 76.4
   m_grid_height_in_voxels: 32
   m_material: {fileID: 2100000, guid: a97ad6d1bb63f2542b01d7e96f039932, type: 2}

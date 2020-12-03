@@ -14,6 +14,8 @@ public class VoxelWorld : MonoBehaviour
             public float m_height;
         }
 
+
+        public float m_layer_brightness_factor;
         public LayerColor[] m_layer_colors;
     }
 
@@ -190,9 +192,8 @@ public class VoxelWorld : MonoBehaviour
             return mesh;
         }
 
-        public void Triangulate(float bot_y, float top_y, Color color)
+        public void Triangulate(float bot_y, float top_y)
         {
-            m_material.color = color;
             m_top_mesh = TriangulateMesh(bot_y, top_y);
 
             m_collider.sharedMesh = m_top_mesh;
@@ -202,8 +203,9 @@ public class VoxelWorld : MonoBehaviour
             }
         }
 
-        public void Render(float dt)
+        public void Render(float dt, Color color)
         {
+            m_material.color = color;
             Graphics.DrawMesh(m_top_mesh, Matrix4x4.identity, m_material, 0);
         }
 
@@ -256,27 +258,34 @@ public class VoxelWorld : MonoBehaviour
             float bot_y = (float)(y - 1);
             float top_y = (float)y;
 
-            float layer_heightmap_height = y * cell_height_in_color_space;
 
-
-            var color_idx = (int)((float)layer_colors.Length * (float)y / (float)m_grid_height_in_voxels);
-
-            var color = layer_colors[color_idx].m_color;
-
-            float layer_brightness = 0.25f + 0.75f * layer_heightmap_height;
-            color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
-
-
-            m_layers[y].Triangulate(bot_y, top_y, color);
+            m_layers[y].Triangulate(bot_y, top_y);
         }
     }
 
     private void LateUpdate()
     {
         float dt = Time.deltaTime;
-        foreach(var layer in m_layers)
+        var layer_colors = m_tuneables.m_layer_colors;
+
+        for (int y = 0; y < m_layers.Length; ++y)
         {
-            layer.Render(dt);
+            var color = Color.white;
+            var top_y = (float)y;
+
+            foreach(var layer_color in layer_colors)
+            {
+                if (top_y > layer_color.m_height) continue;                
+
+                color = layer_color.m_color;
+                break;
+            }
+            
+            var layer_brightness = m_tuneables.m_layer_brightness_factor + (1 - m_tuneables.m_layer_brightness_factor) * (y / (m_layers.Length - 1));
+
+            color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
+
+            m_layers[y].Render(dt, color);
         }
     }
 }
