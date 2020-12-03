@@ -143,18 +143,25 @@ public class VoxelWorld : MonoBehaviour
                     triangles[triangle_idx + 11] = vert_idx + 5;
 
                     triangles[triangle_idx + 12] = vert_idx + 0;
-                    triangles[triangle_idx + 13] = vert_idx + 2;
-                    triangles[triangle_idx + 14] = vert_idx + 1;
-                    triangles[triangle_idx + 15] = vert_idx + 1;
-                    triangles[triangle_idx + 16] = vert_idx + 2;
-                    triangles[triangle_idx + 17] = vert_idx + 3;
+                    triangles[triangle_idx + 13] = vert_idx + 4;
+                    triangles[triangle_idx + 14] = vert_idx + 2;
+                    triangles[triangle_idx + 15] = vert_idx + 2;
+                    triangles[triangle_idx + 16] = vert_idx + 4;
+                    triangles[triangle_idx + 17] = vert_idx + 6;
 
-                    triangles[triangle_idx + 18] = vert_idx + 0;
-                    triangles[triangle_idx + 19] = vert_idx + 2;
-                    triangles[triangle_idx + 20] = vert_idx + 1;
-                    triangles[triangle_idx + 21] = vert_idx + 1;
-                    triangles[triangle_idx + 22] = vert_idx + 2;
-                    triangles[triangle_idx + 23] = vert_idx + 3;
+                    triangles[triangle_idx + 18] = vert_idx + 1;
+                    triangles[triangle_idx + 19] = vert_idx + 3;
+                    triangles[triangle_idx + 20] = vert_idx + 5;
+                    triangles[triangle_idx + 21] = vert_idx + 3;
+                    triangles[triangle_idx + 22] = vert_idx + 7;
+                    triangles[triangle_idx + 23] = vert_idx + 5;
+
+                    triangles[triangle_idx + 24] = vert_idx + 2;
+                    triangles[triangle_idx + 25] = vert_idx + 6;
+                    triangles[triangle_idx + 26] = vert_idx + 3;
+                    triangles[triangle_idx + 27] = vert_idx + 3;
+                    triangles[triangle_idx + 28] = vert_idx + 6;
+                    triangles[triangle_idx + 29] = vert_idx + 7;
 
                     vert_idx += 8;
                     triangle_idx += 30;
