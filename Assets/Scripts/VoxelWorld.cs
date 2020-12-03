@@ -4,8 +4,16 @@ using UnityEngine.Rendering;
 
 public class VoxelWorld : MonoBehaviour
 {
-    [SerializeField] int m_grid_height_in_voxels;
-    [SerializeField] Color[] m_colors;
+    [System.Serializable]
+    public class LiveTuneable
+    {
+        public Color[] m_colors;
+    }
+
+    public LiveTuneable m_tuneables;
+
+
+    [SerializeField] int m_grid_height_in_voxels;    
     [SerializeField] Material m_material;
 
     int m_grid_width_in_voxels;
@@ -236,9 +244,9 @@ public class VoxelWorld : MonoBehaviour
 
             float layer_heightmap_height = y * cell_height_in_color_space;
 
-            var color_idx = (int)((float)m_colors.Length * (float)y / (float)m_grid_height_in_voxels);
+            var color_idx = (int)((float)m_tuneables.m_colors.Length * (float)y / (float)m_grid_height_in_voxels);
 
-            var color = m_colors[color_idx];
+            var color = m_tuneables.m_colors[color_idx];
 
             float layer_brightness = 0.25f + 0.75f * layer_heightmap_height;
             color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);

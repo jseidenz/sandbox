@@ -14,7 +14,9 @@ public class Game : MonoBehaviour
 
     async Task<VoxelWorld> CreateVoxelWorld()
     {
-        return GameObject.Instantiate(m_voxel_world);
+        var voxel_world = GameObject.Instantiate(m_voxel_world);
+        voxel_world.m_tuneables = m_voxel_world.m_tuneables;
+        return voxel_world;
     }
 
     async Task<GameObject> CreateAvatar()
