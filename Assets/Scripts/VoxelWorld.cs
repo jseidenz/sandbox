@@ -55,12 +55,12 @@ public class VoxelWorld : MonoBehaviour
             mesh.name = $"VoxelLayer({bot_y})";
             m_material = material;
 
-            var vertex_count = m_voxel_count * 4;
+            var vertex_count = m_voxel_count * 8;
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             mesh.SetVertexBufferParams(vertex_count, m_vertex_attribute_descriptors);
 
             var vertices = new Vertex[vertex_count];
-            var triangles = new int[m_voxel_count * 6];
+            var triangles = new int[m_voxel_count * 30];
 
             float voxel_size = 1f;
             int vert_idx = 0;
@@ -82,23 +82,47 @@ public class VoxelWorld : MonoBehaviour
 
                     vertices[vert_idx + 0] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, top_y, pos_z),
+                        m_position = new Vector3(pos_x, bot_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 1] = new Vertex
                     {
-                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z),
+                        m_position = new Vector3(pos_x_plus_one, bot_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 2] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, top_y, pos_z_plus_one),
+                        m_position = new Vector3(pos_x, bot_y, pos_z_plus_one),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 3] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x_plus_one, bot_y, pos_z_plus_one),
+                        m_normal = normal
+                    };
+
+                    vertices[vert_idx + 4] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x, top_y, pos_z),
+                        m_normal = normal
+                    };
+
+                    vertices[vert_idx + 5] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z),
+                        m_normal = normal
+                    };
+
+                    vertices[vert_idx + 6] = new Vertex
+                    {
+                        m_position = new Vector3(pos_x, top_y, pos_z_plus_one),
+                        m_normal = normal
+                    };
+
+                    vertices[vert_idx + 7] = new Vertex
                     {
                         m_position = new Vector3(pos_x_plus_one, top_y, pos_z_plus_one),
                         m_normal = normal
@@ -111,8 +135,29 @@ public class VoxelWorld : MonoBehaviour
                     triangles[triangle_idx + 4] = vert_idx + 2;
                     triangles[triangle_idx + 5] = vert_idx + 3;
 
-                    vert_idx += 4;
-                    triangle_idx += 6;
+                    triangles[triangle_idx + 6] = vert_idx + 0;
+                    triangles[triangle_idx + 7] = vert_idx + 2;
+                    triangles[triangle_idx + 8] = vert_idx + 1;
+                    triangles[triangle_idx + 9] = vert_idx + 1;
+                    triangles[triangle_idx + 10] = vert_idx + 2;
+                    triangles[triangle_idx + 11] = vert_idx + 3;
+
+                    triangles[triangle_idx + 12] = vert_idx + 0;
+                    triangles[triangle_idx + 13] = vert_idx + 2;
+                    triangles[triangle_idx + 14] = vert_idx + 1;
+                    triangles[triangle_idx + 15] = vert_idx + 1;
+                    triangles[triangle_idx + 16] = vert_idx + 2;
+                    triangles[triangle_idx + 17] = vert_idx + 3;
+
+                    triangles[triangle_idx + 18] = vert_idx + 0;
+                    triangles[triangle_idx + 19] = vert_idx + 2;
+                    triangles[triangle_idx + 20] = vert_idx + 1;
+                    triangles[triangle_idx + 21] = vert_idx + 1;
+                    triangles[triangle_idx + 22] = vert_idx + 2;
+                    triangles[triangle_idx + 23] = vert_idx + 3;
+
+                    vert_idx += 8;
+                    triangle_idx += 30;
                 }
             }
 
