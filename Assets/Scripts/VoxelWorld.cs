@@ -35,7 +35,7 @@ public class VoxelWorld : MonoBehaviour
             public Vector3 m_normal;
         }
 
-        public Layer(int width_in_voxels, int height_in_voxels)
+        public Layer(int width_in_voxels, int height_in_voxels, Material material)
         {
             m_grid = new bool[width_in_voxels * height_in_voxels];
             m_width_in_voxels = width_in_voxels;
@@ -44,6 +44,7 @@ public class VoxelWorld : MonoBehaviour
             var collider_go = new GameObject("VoxelCollider");
             collider_go.gameObject.SetActive(false);
             m_collider = collider_go.AddComponent<MeshCollider>();
+            m_material = material;
         }
 
         public void ApplyHeightmap(Color[] pixels, float heightmap_height)
@@ -64,11 +65,10 @@ public class VoxelWorld : MonoBehaviour
             }
         }
 
-        public Mesh TriangulateMesh(float bot_y, float top_y, Material material)
+        public Mesh TriangulateMesh(float bot_y, float top_y)
         {
             var mesh = new Mesh();
             mesh.name = $"VoxelLayer({bot_y})";
-            m_material = material;
 
             var vertex_count = m_voxel_count * 8;
             mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
@@ -190,9 +190,10 @@ public class VoxelWorld : MonoBehaviour
             return mesh;
         }
 
-        public void Triangulate(float bot_y, float top_y, Material material)
+        public void Triangulate(float bot_y, float top_y, Color color)
         {
-            m_top_mesh = TriangulateMesh(bot_y, top_y, material);
+            m_material.color = color;
+            m_top_mesh = TriangulateMesh(bot_y, top_y);
 
             m_collider.sharedMesh = m_top_mesh;
             if (!m_collider.gameObject.activeSelf)
@@ -240,7 +241,10 @@ public class VoxelWorld : MonoBehaviour
         {
             float layer_heightmap_height = y * cell_height_in_color_space;
 
-            m_layers[y] = new Layer(m_grid_width_in_voxels, m_grid_depth_in_voxels);
+
+            var material = GameObject.Instantiate(m_material);
+
+            m_layers[y] = new Layer(m_grid_width_in_voxels, m_grid_depth_in_voxels, material);
             m_layers[y].ApplyHeightmap(pixels, layer_heightmap_height);
         }
 
@@ -262,10 +266,8 @@ public class VoxelWorld : MonoBehaviour
             float layer_brightness = 0.25f + 0.75f * layer_heightmap_height;
             color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
 
-            var material = GameObject.Instantiate(m_material);
-            material.color = color;
 
-            m_layers[y].Triangulate(bot_y, top_y, material);
+            m_layers[y].Triangulate(bot_y, top_y, color);
         }
     }
 
