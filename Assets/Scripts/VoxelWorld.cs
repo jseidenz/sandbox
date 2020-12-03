@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class VoxelWorld : MonoBehaviour 
+public class VoxelWorld : MonoBehaviour
 {
     [SerializeField] int m_grid_height_in_voxels;
     [SerializeField] Color[] m_colors;

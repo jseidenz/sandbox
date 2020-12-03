@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 458b27d057e6277478e85e7d242fe1a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_grid_height_in_voxels: 64
+  m_grid_height_in_voxels: 32
   m_colors:
   - {r: 1, g: 1, b: 1, a: 1}
   m_material: {fileID: 2100000, guid: a97ad6d1bb63f2542b01d7e96f039932, type: 2}
