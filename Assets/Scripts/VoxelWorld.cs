@@ -16,6 +16,10 @@ public class VoxelWorld : MonoBehaviour
             m_grid = new bool[width_in_voxels * height_in_voxels];
             m_width_in_voxels = width_in_voxels;
             m_height_in_voxels = height_in_voxels;
+
+            var collider_go = new GameObject("VoxelCollider");
+            collider_go.gameObject.SetActive(false);
+            m_collider = collider_go.AddComponent<MeshCollider>();
         }
 
         public void ApplyHeightmap(Color[] pixels, float heightmap_height)
@@ -90,8 +94,13 @@ public class VoxelWorld : MonoBehaviour
             m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             m_mesh.vertices = vertices;
             m_mesh.normals = normals;
-            m_mesh.triangles = triangles;            
-            
+            m_mesh.triangles = triangles;
+
+            m_collider.sharedMesh = m_mesh;
+            if (!m_collider.gameObject.activeSelf)
+            {
+                m_collider.gameObject.SetActive(true);
+            }
         }
 
         public void Render(float dt)
@@ -104,6 +113,7 @@ public class VoxelWorld : MonoBehaviour
         int m_height_in_voxels;
         Mesh m_mesh;
         Material m_material;
+        MeshCollider m_collider;
         int m_voxel_count;
     }
 
