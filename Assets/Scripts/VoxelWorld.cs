@@ -7,7 +7,14 @@ public class VoxelWorld : MonoBehaviour
     [System.Serializable]
     public class LiveTuneable
     {
-        public Color[] m_colors;
+        [System.Serializable]        
+        public struct LayerColor
+        {
+            public Color m_color;
+            public float m_height;
+        }
+
+        public LayerColor[] m_layer_colors;
     }
 
     public LiveTuneable m_tuneables;
@@ -237,6 +244,9 @@ public class VoxelWorld : MonoBehaviour
             m_layers[y].ApplyHeightmap(pixels, layer_heightmap_height);
         }
 
+
+        var layer_colors = m_tuneables.m_layer_colors;
+
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         {
             float bot_y = (float)(y - 1);
@@ -244,9 +254,10 @@ public class VoxelWorld : MonoBehaviour
 
             float layer_heightmap_height = y * cell_height_in_color_space;
 
-            var color_idx = (int)((float)m_tuneables.m_colors.Length * (float)y / (float)m_grid_height_in_voxels);
 
-            var color = m_tuneables.m_colors[color_idx];
+            var color_idx = (int)((float)layer_colors.Length * (float)y / (float)m_grid_height_in_voxels);
+
+            var color = layer_colors[color_idx].m_color;
 
             float layer_brightness = 0.25f + 0.75f * layer_heightmap_height;
             color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
