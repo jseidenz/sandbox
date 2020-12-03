@@ -49,15 +49,15 @@ public class VoxelWorld : MonoBehaviour
             }
         }
 
-        public void Triangulate(GameObject cube_prefab, float pos_y, Material material)
+        public Mesh TriangulateMesh(float bot_y, float top_y, Material material)
         {
-            m_mesh = new Mesh();
-            m_mesh.name = $"VoxelLayer({pos_y})";
+            var mesh = new Mesh();
+            mesh.name = $"VoxelLayer({bot_y})";
             m_material = material;
 
             var vertex_count = m_voxel_count * 4;
-            m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-            m_mesh.SetVertexBufferParams(vertex_count, m_vertex_attribute_descriptors);
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            mesh.SetVertexBufferParams(vertex_count, m_vertex_attribute_descriptors);
 
             var vertices = new Vertex[vertex_count];
             var triangles = new int[m_voxel_count * 6];
@@ -82,25 +82,25 @@ public class VoxelWorld : MonoBehaviour
 
                     vertices[vert_idx + 0] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, pos_y, pos_z),
+                        m_position = new Vector3(pos_x, top_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 1] = new Vertex
                     {
-                        m_position = new Vector3(pos_x_plus_one, pos_y, pos_z),
+                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 2] = new Vertex
                     {
-                        m_position = new Vector3(pos_x, pos_y, pos_z_plus_one),
+                        m_position = new Vector3(pos_x, top_y, pos_z_plus_one),
                         m_normal = normal
                     };
 
                     vertices[vert_idx + 3] = new Vertex
                     {
-                        m_position = new Vector3(pos_x_plus_one, pos_y, pos_z_plus_one),
+                        m_position = new Vector3(pos_x_plus_one, top_y, pos_z_plus_one),
                         m_normal = normal
                     };
 
@@ -116,11 +116,18 @@ public class VoxelWorld : MonoBehaviour
                 }
             }
 
-            m_mesh.SetVertexBufferData(vertices, 0, 0, vertex_count);
-            m_mesh.SetTriangles(triangles, 0, false);
-            m_mesh.RecalculateBounds();
+            mesh.SetVertexBufferData(vertices, 0, 0, vertex_count);
+            mesh.SetTriangles(triangles, 0, false);
+            mesh.RecalculateBounds();
 
-            m_collider.sharedMesh = m_mesh;
+            return mesh;
+        }
+
+        public void Triangulate(float bot_y, float top_y, Material material)
+        {
+            m_top_mesh = TriangulateMesh(bot_y, top_y, material);
+
+            m_collider.sharedMesh = m_top_mesh;
             if (!m_collider.gameObject.activeSelf)
             {
                 m_collider.gameObject.SetActive(true);
@@ -129,13 +136,13 @@ public class VoxelWorld : MonoBehaviour
 
         public void Render(float dt)
         {
-            Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
+            Graphics.DrawMesh(m_top_mesh, Matrix4x4.identity, m_material, 0);
         }
 
         bool[] m_grid;
         int m_width_in_voxels;
         int m_height_in_voxels;
-        Mesh m_mesh;
+        Mesh m_top_mesh;
         Material m_material;
         MeshCollider m_collider;        
         int m_voxel_count;
@@ -170,11 +177,10 @@ public class VoxelWorld : MonoBehaviour
             m_layers[y].ApplyHeightmap(pixels, layer_heightmap_height);
         }
 
-        var cube_prefab = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         {
-            float pos_y = (float)y;
+            float bot_y = (float)(y - 1);
+            float top_y = (float)y;
 
             float layer_heightmap_height = y * cell_height_in_color_space;
 
@@ -188,10 +194,8 @@ public class VoxelWorld : MonoBehaviour
             var material = GameObject.Instantiate(m_material);
             material.color = color;
 
-            m_layers[y].Triangulate(cube_prefab, pos_y, material);
+            m_layers[y].Triangulate(bot_y, top_y, material);
         }
-
-        GameObject.Destroy(cube_prefab);        
     }
 
     private void LateUpdate()
