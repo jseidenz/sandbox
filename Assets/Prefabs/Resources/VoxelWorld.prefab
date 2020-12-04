@@ -54,4 +54,4 @@ MonoBehaviour:
       m_height: 76.4
   m_grid_height_in_voxels: 32
   m_material: {fileID: 2100000, guid: a97ad6d1bb63f2542b01d7e96f039932, type: 2}
-  m_voxel_size_in_meters: 0.75
+  m_voxel_size_in_meters: 1.25
