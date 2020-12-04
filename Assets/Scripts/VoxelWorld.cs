@@ -28,7 +28,7 @@ public class VoxelWorld : MonoBehaviour
     int m_grid_width_in_voxels;
     int m_grid_depth_in_voxels;
 
-    class Layer
+    class VoxelLayer
     {
         [StructLayout(LayoutKind.Sequential)]
         struct Vertex
@@ -37,7 +37,7 @@ public class VoxelWorld : MonoBehaviour
             public Vector3 m_normal;
         }
 
-        public Layer(int width_in_voxels, int height_in_voxels, Material material)
+        public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material)
         {
             m_grid = new bool[width_in_voxels * height_in_voxels];
             m_width_in_voxels = width_in_voxels;
@@ -224,7 +224,7 @@ public class VoxelWorld : MonoBehaviour
         };
     }
 
-    Layer[] m_layers;
+    VoxelLayer[] m_layers;
 
     void Awake()
     {
@@ -235,7 +235,7 @@ public class VoxelWorld : MonoBehaviour
         m_grid_depth_in_voxels = height_map_tex.height;
         m_grid_width_in_voxels = height_map_tex.width;
 
-        m_layers = new Layer[m_grid_height_in_voxels];
+        m_layers = new VoxelLayer[m_grid_height_in_voxels];
 
         float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
 
@@ -246,7 +246,7 @@ public class VoxelWorld : MonoBehaviour
 
             var material = GameObject.Instantiate(m_material);
 
-            m_layers[y] = new Layer(m_grid_width_in_voxels, m_grid_depth_in_voxels, material);
+            m_layers[y] = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, material);
             m_layers[y].ApplyHeightmap(pixels, layer_heightmap_height);
         }
 
