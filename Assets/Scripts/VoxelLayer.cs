@@ -14,7 +14,7 @@ public class VoxelLayer
         public Vector3 m_normal;
     }
 
-    public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material, float iso_level)
+    public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material, float iso_level, float bot_y, float top_y)
     {
         m_density_grid = new float[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
@@ -28,6 +28,8 @@ public class VoxelLayer
 
         m_mesh = new Mesh();
         m_mesh.name = "VoxelLayer";
+        m_bot_y = bot_y;
+        m_top_y = top_y;
     }
 
     public void ApplyHeightmap(Color[] pixels, float min_height, float max_height)
@@ -46,9 +48,9 @@ public class VoxelLayer
         }
     }
 
-    public void Triangulate(float bot_y, float top_y)
+    public void Triangulate()
     {
-        MarchMesh(bot_y, top_y);
+        MarchMesh();
 
         m_collider.sharedMesh = m_mesh;
         if (!m_collider.gameObject.activeSelf)
@@ -207,7 +209,7 @@ public class VoxelLayer
     }
 
 
-    public void MarchMesh(float bot_y, float top_y)
+    public void MarchMesh()
     {
         var mesh = m_mesh;
         mesh.Clear();
@@ -253,8 +255,8 @@ public class VoxelLayer
                     m_right_x = right_x,
                     m_near_z = near_z,
                     m_far_z = far_z,
-                    m_bot_y = bot_y,
-                    m_top_y = top_y,
+                    m_bot_y = m_bot_y,
+                    m_top_y = m_top_y,
                     m_left_near_density = left_near_density,
                     m_right_near_density = right_near_density,
                     m_left_far_density = left_far_density,
@@ -506,6 +508,8 @@ public class VoxelLayer
     Material m_material;
     MeshCollider m_collider;
     float m_iso_level;
+    float m_bot_y;
+    float m_top_y;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {

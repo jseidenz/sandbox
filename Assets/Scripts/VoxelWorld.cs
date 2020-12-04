@@ -50,23 +50,13 @@ public class VoxelWorld : MonoBehaviour
 
             float iso_level = y / (float)m_grid_height_in_voxels;
 
-            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, material, iso_level);
-            layer.ApplyHeightmap(pixels, layer_min_height, layer_max_height);
-
-            m_layers[y] = layer;
-            
-        }
-
-
-        var layer_colors = m_tuneables.m_layer_colors;
-
-        for (int y = 0; y < m_grid_height_in_voxels; ++y)
-        {
             float bot_y = (float)(y - 1) * VoxelLayer.VOXEL_HEIGHT;
             float top_y = (float)y * VoxelLayer.VOXEL_HEIGHT;
 
-
-            m_layers[y].Triangulate(bot_y, top_y);
+            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, material, iso_level, bot_y, top_y);
+            layer.ApplyHeightmap(pixels, layer_min_height, layer_max_height);
+            layer.Triangulate();
+            m_layers[y] = layer;            
         }
     }
 
