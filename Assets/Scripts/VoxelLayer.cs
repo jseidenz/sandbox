@@ -14,6 +14,7 @@ public class VoxelLayer
     public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material)
     {
         m_grid = new bool[width_in_voxels * height_in_voxels];
+        m_density_grid = new float[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
 
@@ -23,7 +24,7 @@ public class VoxelLayer
         m_material = material;
     }
 
-    public void ApplyHeightmap(Color[] pixels, float heightmap_height)
+    public void ApplyHeightmap(Color[] pixels, float min_height, float max_height)
     {
         for (int y = 0; y < m_height_in_voxels; ++y)
         {
@@ -31,9 +32,13 @@ public class VoxelLayer
             {
                 var cell_idx = y * m_width_in_voxels + x;
                 var height = pixels[cell_idx].r;
-                bool is_filled = height >= heightmap_height;
+                bool is_filled = height >= min_height;
                 m_grid[cell_idx] = is_filled;
-                if(is_filled)
+
+                float density = Mathf.Clamp01((height - min_height) / (max_height - min_height));
+
+                m_density_grid[cell_idx] = density;
+                if (is_filled)
                 {
                     ++m_voxel_count;
                 }
@@ -311,6 +316,7 @@ public class VoxelLayer
     }
 
     bool[] m_grid;
+    float[] m_density_grid;
     int m_width_in_voxels;
     int m_height_in_voxels;
     Mesh m_mesh;

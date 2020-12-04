@@ -43,13 +43,14 @@ public class VoxelWorld : MonoBehaviour
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         {
-            float layer_heightmap_height = y * cell_height_in_color_space;
+            float layer_min_height = y * cell_height_in_color_space;
+            float layer_max_height = (y + 1) * cell_height_in_color_space;
 
 
             var material = GameObject.Instantiate(m_material);
 
             m_layers[y] = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, material);
-            m_layers[y].ApplyHeightmap(pixels, layer_heightmap_height);
+            m_layers[y].ApplyHeightmap(pixels, layer_min_height, layer_max_height);
         }
 
 
