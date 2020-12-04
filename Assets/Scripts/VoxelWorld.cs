@@ -34,8 +34,8 @@ public class VoxelWorld : MonoBehaviour
     {
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
 
-        m_grid_depth_in_voxels = 128; // height_map_tex.height;
-        m_grid_width_in_voxels = 128; //height_map_tex.width;
+        m_grid_depth_in_voxels = 100; // height_map_tex.height;
+        m_grid_width_in_voxels = 100; //height_map_tex.width;
 
         var pixels = height_map_tex.GetPixels(0, 0, m_grid_width_in_voxels, m_grid_depth_in_voxels);
 

@@ -21,19 +21,22 @@ public class DigTool : MonoBehaviour
         if (Input.GetKey(KeyCode.Mouse1))
         {
             var camera = Camera.main;
-            RaycastHit hit;
             var ray = camera.ScreenPointToRay(Input.mousePosition);
+            if (Input.GetKeyDown(KeyCode.Mouse1))
+            {                
+                RaycastHit hit;                
 
-            if (Physics.Raycast(ray, out hit))
-            {
-                if(Input.GetKeyDown(KeyCode.Mouse1))
+                if (Physics.Raycast(ray, out hit))
                 {
                     m_locked_fill_height = hit.point.y + VoxelLayer.VOXEL_HEIGHT;
                 }
+            }
 
-                var hit_point = hit.point;
+            var plane = new Plane(Vector3.up, new Vector3(0, m_locked_fill_height, 0));
+            if(plane.Raycast(ray, out var distance))
+            {
+                var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
-
                 VoxelWorld.Instance.AddDensity(hit_point, 1.0f * Time.deltaTime);
             }
         }
