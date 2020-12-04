@@ -259,7 +259,12 @@ public class VoxelLayer
 
                 if(sample_type == 1)
                 {
-                    marcher.Triangle(marcher.LeftTopNear(), marcher.LeftTopEdge(), marcher.NearTopEdge());
+                    var left_top_near = marcher.LeftTopNear();
+                    var left_top_edge = marcher.LeftTopEdge();
+                    var near_top_edge = marcher.NearTopEdge();
+
+                    marcher.Triangle(left_top_near, left_top_edge, near_top_edge);
+                    marcher.ExtrudeTopToBot(near_top_edge, left_top_edge);
                 }
                 else if(sample_type == 2)
                 {
