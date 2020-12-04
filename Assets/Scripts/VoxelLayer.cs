@@ -25,6 +25,9 @@ public class VoxelLayer
         collider_go.gameObject.SetActive(false);
         m_collider = collider_go.AddComponent<MeshCollider>();
         m_material = material;
+
+        m_mesh = new Mesh();
+        m_mesh.name = "VoxelLayer";
     }
 
     public void ApplyHeightmap(Color[] pixels, float min_height, float max_height)
@@ -45,7 +48,7 @@ public class VoxelLayer
 
     public void Triangulate(float bot_y, float top_y)
     {
-        m_mesh = MarchMesh(bot_y, top_y);
+        MarchMesh(bot_y, top_y);
 
         m_collider.sharedMesh = m_mesh;
         if (!m_collider.gameObject.activeSelf)
@@ -204,10 +207,10 @@ public class VoxelLayer
     }
 
 
-    public Mesh MarchMesh(float bot_y, float top_y)
+    public void MarchMesh(float bot_y, float top_y)
     {
-        var mesh = new Mesh();
-        mesh.name = $"VoxelLayer({bot_y})";
+        var mesh = m_mesh;
+        mesh.Clear();
 
         var max_vertex_count = m_width_in_voxels * m_height_in_voxels * 4;
         var max_triangle_count = max_vertex_count * 4;
@@ -487,8 +490,6 @@ public class VoxelLayer
         mesh.SetVertexBufferData(vertices, 0, 0, vert_idx);
         mesh.SetTriangles(triangles, 0, triangle_idx, 0, false);
         mesh.RecalculateBounds();
-
-        return mesh;
     }
 
     public void Render(float dt, Color color)
