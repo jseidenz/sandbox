@@ -23,6 +23,7 @@ public class VoxelWorld : MonoBehaviour
 
     [SerializeField] int m_grid_height_in_voxels;    
     [SerializeField] Material m_material;
+    [SerializeField] float m_voxel_size_in_meters;
 
     int m_grid_width_in_voxels;
     int m_grid_depth_in_voxels;
@@ -52,10 +53,10 @@ public class VoxelWorld : MonoBehaviour
 
             float iso_level = y / (float)m_grid_height_in_voxels;
 
-            float bot_y = (float)(y - 1) * VoxelLayer.VOXEL_HEIGHT;
-            float top_y = (float)y * VoxelLayer.VOXEL_HEIGHT;
+            float bot_y = (float)(y - 1) * m_voxel_size_in_meters;
+            float top_y = (float)y * m_voxel_size_in_meters;
 
-            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, material, iso_level, bot_y, top_y);
+            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, material, iso_level, bot_y, top_y);
             layer.ApplyHeightmap(pixels, layer_min_height, layer_max_height);
             layer.Triangulate();
             m_layers[y] = layer;            
@@ -92,9 +93,11 @@ public class VoxelWorld : MonoBehaviour
 
     public void AddDensity(Vector3 pos, float amount)
     {
-        var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * VoxelLayer.VOXEL_HEIGHT)) * (float)m_layers.Length);
+        var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * m_voxel_size_in_meters)) * (float)m_layers.Length);
         if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
         m_layers[layer_idx].AddDensity(pos, amount);
     }
+
+    public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters;  }
 }

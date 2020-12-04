@@ -4,9 +4,6 @@ using UnityEngine.Rendering;
 
 public class VoxelLayer
 {
-    public const float VOXEL_SIZE = 0.75f;
-    public const float VOXEL_HEIGHT = 0.75f;
-
     [StructLayout(LayoutKind.Sequential)]
     struct Vertex
     {
@@ -14,12 +11,13 @@ public class VoxelLayer
         public Vector3 m_normal;
     }
 
-    public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelLayer(int width_in_voxels, int height_in_voxels, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
         m_density_grid = new float[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
         m_iso_level = iso_level;
+        m_voxel_size_in_meters = voxel_size_in_meters;
 
         var collider_go = new GameObject("VoxelCollider");
         collider_go.gameObject.SetActive(false);
@@ -242,10 +240,10 @@ public class VoxelLayer
 
                 if (sample_type == 0) continue;
 
-                var left_x = (float)x * VOXEL_SIZE;
-                var right_x = left_x + VOXEL_SIZE;
-                var near_z = (float)y * VOXEL_SIZE;
-                var far_z = near_z + VOXEL_SIZE;
+                var left_x = (float)x * m_voxel_size_in_meters;
+                var right_x = left_x + m_voxel_size_in_meters;
+                var near_z = (float)y * m_voxel_size_in_meters;
+                var far_z = near_z + m_voxel_size_in_meters;
 
                 var normal = Vector3.up;
 
@@ -502,10 +500,10 @@ public class VoxelLayer
 
     public void AddDensity(Vector3 pos, float amount)
     {
-        var x = (int)(pos.x / VOXEL_SIZE);
+        var x = (int)(pos.x / m_voxel_size_in_meters);
         if (x < 0 || x > m_width_in_voxels) return;
 
-        var y = (int)(pos.z / VOXEL_SIZE);
+        var y = (int)(pos.z / m_voxel_size_in_meters);
         if (y < 0 || y > m_height_in_voxels) return;
 
         var cell_idx = y * m_width_in_voxels + x;
@@ -525,6 +523,7 @@ public class VoxelLayer
     float m_iso_level;
     float m_bot_y;
     float m_top_y;
+    float m_voxel_size_in_meters;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {

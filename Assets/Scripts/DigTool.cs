@@ -26,7 +26,7 @@ public class DigTool : MonoBehaviour
 
                 if (Physics.Raycast(ray, out hit))
                 {
-                    m_locked_fill_height = hit.point.y + VoxelLayer.VOXEL_HEIGHT;
+                    m_locked_fill_height = hit.point.y + VoxelWorld.Instance.GetVoxelSizeInMeters();
                 }
             }
 
