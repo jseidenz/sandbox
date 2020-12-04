@@ -62,8 +62,8 @@ public class VoxelWorld : MonoBehaviour
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         {
-            float bot_y = (float)(y - 1) * 1f;
-            float top_y = (float)y * 1f;
+            float bot_y = (float)(y - 1) * VoxelLayer.VOXEL_HEIGHT;
+            float top_y = (float)y * VoxelLayer.VOXEL_HEIGHT;
 
 
             m_layers[y].Triangulate(bot_y, top_y);

@@ -4,7 +4,8 @@ using UnityEngine.Rendering;
 
 public class VoxelLayer
 {
-    public const float VOXEL_SIZE = 1.0f;
+    public const float VOXEL_SIZE = 0.75f;
+    public const float VOXEL_HEIGHT = 0.75f;
 
     [StructLayout(LayoutKind.Sequential)]
     struct Vertex
