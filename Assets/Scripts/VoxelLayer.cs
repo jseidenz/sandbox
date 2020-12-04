@@ -170,6 +170,29 @@ public class VoxelLayer
             m_triangles[m_triangle_idx++] = vert_idx_b;
             m_triangles[m_triangle_idx++] = vert_idx_c;
         }
+
+        public void ExtrudeTopToBot(int vert_idx_a, int vert_idx_b)
+        {
+            var vert_a = m_vertices[vert_idx_a];
+            var vert_b = m_vertices[vert_idx_b];
+            var vert_c = vert_a;
+            vert_c.m_position.y = m_bot_y;
+            var vert_idx_c = m_vert_idx;
+            m_vertices[m_vert_idx++] = vert_c;
+
+            var vert_d = vert_b;
+            vert_d.m_position.y = m_bot_y;
+            var vert_idx_d = m_vert_idx;
+            m_vertices[m_vert_idx++] = vert_d;
+
+            m_triangles[m_triangle_idx++] = vert_idx_a;
+            m_triangles[m_triangle_idx++] = vert_idx_b;
+            m_triangles[m_triangle_idx++] = vert_idx_c;
+            m_triangles[m_triangle_idx++] = vert_idx_c;
+            m_triangles[m_triangle_idx++] = vert_idx_b;
+            m_triangles[m_triangle_idx++] = vert_idx_d;
+
+        }
     }
 
 
