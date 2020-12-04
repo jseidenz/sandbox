@@ -330,6 +330,8 @@ public class VoxelLayer
 
                         marcher.Triangle(left_near, left_edge, near_edge);
                         marcher.Triangle(far_edge, right_far, right_edge);
+                        marcher.ExtrudeTopToBot(near_edge, left_edge);
+                        marcher.ExtrudeTopToBot(far_edge, right_edge);
                     }
                 }
                 else if (sample_type == 6)
