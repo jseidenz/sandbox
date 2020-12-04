@@ -168,9 +168,9 @@ public class VoxelLayer
 
     public void Triangulate(float bot_y, float top_y)
     {
-        m_top_mesh = TriangulateMesh(bot_y, top_y);
+        m_mesh = TriangulateMesh(bot_y, top_y);
 
-        m_collider.sharedMesh = m_top_mesh;
+        m_collider.sharedMesh = m_mesh;
         if (!m_collider.gameObject.activeSelf)
         {
             m_collider.gameObject.SetActive(true);
@@ -180,13 +180,13 @@ public class VoxelLayer
     public void Render(float dt, Color color)
     {
         m_material.color = color;
-        Graphics.DrawMesh(m_top_mesh, Matrix4x4.identity, m_material, 0);
+        Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
     }
 
     bool[] m_grid;
     int m_width_in_voxels;
     int m_height_in_voxels;
-    Mesh m_top_mesh;
+    Mesh m_mesh;
     Material m_material;
     MeshCollider m_collider;        
     int m_voxel_count;
