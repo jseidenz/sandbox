@@ -83,6 +83,7 @@ public class VoxelLayer
         public float m_right_far_density;
         public int m_vert_idx;
         public Vector3 m_normal;
+        public float m_iso_level;
         public Vertex[] m_vertices;
 
         public int LeftTopNear()
@@ -165,16 +166,9 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        static float InterpolatePosition(float pos_a, float pos_b, float density_a, float density_b)
+        float InterpolatePosition(float pos_a, float pos_b, float density_a, float density_b)
         {
-            if(density_a < density_b)
-            {
-                return pos_a + (density_b - density_a) * (pos_b - pos_a);
-            }
-            else
-            {
-                return pos_b + (density_a - density_b) * (pos_a - pos_b);
-            }            
+            return pos_a + (m_iso_level - density_a) * (pos_b - pos_a) / (density_b - density_a);
         }
     }
 
@@ -237,6 +231,7 @@ public class VoxelLayer
                     m_right_far_density = right_far_density,
                     m_vert_idx = vert_idx,
                     m_normal = normal,
+                    m_iso_level = m_iso_level,
                     m_vertices = vertices
                 };
 
