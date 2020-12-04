@@ -377,19 +377,37 @@ public class VoxelLayer
                 }
                 else if (sample_type == 10)
                 {
-                    var left_far = marcher.LeftFar();
-                    var left_edge = marcher.LeftEdge();
-                    var near_edge = marcher.NearEdge();
-                    var right_edge = marcher.RightEdge();
-                    var far_edge = marcher.FarEdge();
-                    var right_near = marcher.RightNear();
+                    if (marcher.AverageDensity() > m_iso_level)
+                    {
+                        var left_far = marcher.LeftFar();
+                        var left_edge = marcher.LeftEdge();
+                        var near_edge = marcher.NearEdge();
+                        var right_edge = marcher.RightEdge();
+                        var far_edge = marcher.FarEdge();
+                        var right_near = marcher.RightNear();
 
-                    marcher.Triangle(left_far, far_edge, left_edge);
-                    marcher.Triangle(left_edge, far_edge, right_edge);
-                    marcher.Triangle(left_edge, right_edge, near_edge);
-                    marcher.Triangle(near_edge, right_edge, right_near);
-                    marcher.ExtrudeTopToBot(left_edge, near_edge);
-                    marcher.ExtrudeTopToBot(right_edge, far_edge);
+                        marcher.Triangle(left_far, far_edge, left_edge);
+                        marcher.Triangle(left_edge, far_edge, right_edge);
+                        marcher.Triangle(left_edge, right_edge, near_edge);
+                        marcher.Triangle(near_edge, right_edge, right_near);
+                        marcher.ExtrudeTopToBot(left_edge, near_edge);
+                        marcher.ExtrudeTopToBot(right_edge, far_edge);
+                    }
+                    else
+                    {
+                        var near_edge = marcher.NearEdge();
+                        var right_edge = marcher.RightEdge();
+                        var right_near = marcher.RightNear();
+                        var left_edge = marcher.LeftEdge();
+                        var far_edge = marcher.FarEdge();
+                        var left_far = marcher.LeftFar();
+
+                        marcher.Triangle(near_edge, right_edge, right_near);
+                        marcher.Triangle(left_far, far_edge, left_edge);
+                        marcher.ExtrudeTopToBot(left_edge, far_edge);
+                        marcher.ExtrudeTopToBot(right_edge, near_edge);
+
+                    }
                 }
                 else if (sample_type == 11)
                 {

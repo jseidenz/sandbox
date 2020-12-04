@@ -86,8 +86,8 @@ public class VoxelWorld : MonoBehaviour
 
                 color = layer_color.m_color;
                 break;
-            }
-            
+            }           
+
             var layer_brightness = m_tuneables.m_layer_brightness_factor + (1 - m_tuneables.m_layer_brightness_factor) * (y / (m_layers.Length - 1));
 
             color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
