@@ -175,15 +175,22 @@ public class VoxelLayer
         {
             var vert_a = m_vertices[vert_idx_a];
             var vert_b = m_vertices[vert_idx_b];
+
             var vert_c = vert_a;
-            vert_c.m_position.y = m_bot_y;
-            var vert_idx_c = m_vert_idx;
-            m_vertices[m_vert_idx++] = vert_c;
+            vert_c.m_position.y = m_bot_y;           
 
             var vert_d = vert_b;
             vert_d.m_position.y = m_bot_y;
+
+            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
+            vert_c.m_normal = normal;
+            vert_d.m_normal = normal;
+
+            var vert_idx_c = m_vert_idx;
+            m_vertices[m_vert_idx++] = vert_c;
+
             var vert_idx_d = m_vert_idx;
-            m_vertices[m_vert_idx++] = vert_d;
+            m_vertices[m_vert_idx++] = vert_d;            
 
             m_triangles[m_triangle_idx++] = vert_idx_a;
             m_triangles[m_triangle_idx++] = vert_idx_b;
@@ -268,7 +275,12 @@ public class VoxelLayer
                 }
                 else if(sample_type == 2)
                 {
-                    marcher.Triangle(marcher.NearTopEdge(), marcher.RightTopEdge(), marcher.RightTopNear());
+                    var near_top_edge = marcher.NearTopEdge();
+                    var right_top_edge = marcher.RightTopEdge();
+                    var right_top_near = marcher.RightTopNear();
+
+                    marcher.Triangle(near_top_edge, right_top_edge, right_top_near);
+                    marcher.ExtrudeTopToBot(right_top_edge, near_top_edge);
                 }
                 else if (sample_type == 3)
                 {
