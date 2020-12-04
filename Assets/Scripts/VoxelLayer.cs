@@ -414,6 +414,7 @@ public class VoxelLayer
                     marcher.Triangle(left_near, left_far, near_edge);
                     marcher.Triangle(left_far, right_edge, near_edge);
                     marcher.Triangle(left_far, right_far, right_edge);
+                    marcher.ExtrudeTopToBot(near_edge, right_edge);
                 }
                 else if (sample_type == 14)
                 {
@@ -426,9 +427,10 @@ public class VoxelLayer
                     marcher.Triangle(left_far, right_far, left_edge);
                     marcher.Triangle(left_edge, right_far, near_edge);
                     marcher.Triangle(near_edge, right_far, right_near);
+                    marcher.ExtrudeTopToBot(left_edge, near_edge);
 
                 }
-                else if (sample_type == 15)
+                else if (sample_type == 15) // Full Square
                 {
                     var left_near = marcher.LeftNear();
                     var left_far = marcher.LeftFar();
