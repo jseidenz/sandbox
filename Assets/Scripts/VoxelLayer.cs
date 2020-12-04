@@ -13,11 +13,12 @@ public class VoxelLayer
         public Vector3 m_normal;
     }
 
-    public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material)
+    public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material, float iso_level)
     {
         m_density_grid = new float[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
+        m_iso_level = iso_level;
 
         var collider_go = new GameObject("VoxelCollider");
         collider_go.gameObject.SetActive(false);
@@ -34,9 +35,7 @@ public class VoxelLayer
             for (int x = 0; x < m_width_in_voxels; ++x)
             {
                 var cell_idx = y * m_width_in_voxels + x;
-                var height = pixels[cell_idx].r;
-
-                float density = Mathf.Clamp01((height - min_height) * one_over_height_range);
+                var density = pixels[cell_idx].r;
 
                 m_density_grid[cell_idx] = density;
             }
@@ -210,10 +209,10 @@ public class VoxelLayer
                 var right_far_density = m_density_grid[left_near_cell_idx + m_width_in_voxels + 1];
 
                 int sample_type = 0;
-                if (left_near_density > 0) sample_type |= 1;
-                if (right_near_density > 0) sample_type |= 2;
-                if (right_far_density > 0) sample_type |= 4;
-                if (left_far_density > 0) sample_type |= 8;
+                if (left_near_density >= m_iso_level) sample_type |= 1;
+                if (right_near_density >= m_iso_level) sample_type |= 2;
+                if (right_far_density >= m_iso_level) sample_type |= 4;
+                if (left_far_density >= m_iso_level) sample_type |= 8;
 
                 if (sample_type == 0) continue;
 
@@ -413,7 +412,8 @@ public class VoxelLayer
     int m_height_in_voxels;
     Mesh m_mesh;
     Material m_material;
-    MeshCollider m_collider;     
+    MeshCollider m_collider;
+    float m_iso_level;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
