@@ -15,7 +15,6 @@ public class VoxelLayer
 
     public VoxelLayer(int width_in_voxels, int height_in_voxels, Material material)
     {
-        m_grid = new bool[width_in_voxels * height_in_voxels];
         m_density_grid = new float[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
@@ -36,16 +35,10 @@ public class VoxelLayer
             {
                 var cell_idx = y * m_width_in_voxels + x;
                 var height = pixels[cell_idx].r;
-                bool is_filled = height >= min_height;
-                m_grid[cell_idx] = is_filled;
 
                 float density = Mathf.Clamp01((height - min_height) * one_over_height_range);
 
                 m_density_grid[cell_idx] = density;
-                if (is_filled)
-                {
-                    ++m_voxel_count;
-                }
             }
         }
     }
@@ -415,14 +408,12 @@ public class VoxelLayer
     }
 
 
-    bool[] m_grid;
     float[] m_density_grid;
     int m_width_in_voxels;
     int m_height_in_voxels;
     Mesh m_mesh;
     Material m_material;
-    MeshCollider m_collider;        
-    int m_voxel_count;
+    MeshCollider m_collider;     
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
