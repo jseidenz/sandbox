@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 public class VoxelLayer
@@ -74,7 +74,7 @@ public class VoxelLayer
         public int[] m_triangles;
         public Vertex[] m_vertices;
 
-        public int LeftTopNear()
+        public int LeftNear()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -84,7 +84,7 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        public int RightTopNear()
+        public int RightNear()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -94,7 +94,7 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        public int LeftTopFar()
+        public int LeftFar()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -104,7 +104,7 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        public int RightTopFar()
+        public int RightFar()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -114,7 +114,7 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        public int LeftTopEdge()
+        public int LeftEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -124,7 +124,7 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        public int RightTopEdge()
+        public int RightEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -134,7 +134,7 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        public int NearTopEdge()
+        public int NearEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -144,7 +144,7 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
-        public int FarTopEdge()
+        public int FarEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -266,171 +266,171 @@ public class VoxelLayer
 
                 if(sample_type == 1)
                 {
-                    var left_top_near = marcher.LeftTopNear();
-                    var left_top_edge = marcher.LeftTopEdge();
-                    var near_top_edge = marcher.NearTopEdge();
+                    var left_near = marcher.LeftNear();
+                    var left_edge = marcher.LeftEdge();
+                    var near_edge = marcher.NearEdge();
 
-                    marcher.Triangle(left_top_near, left_top_edge, near_top_edge);
-                    marcher.ExtrudeTopToBot(near_top_edge, left_top_edge);
+                    marcher.Triangle(left_near, left_edge, near_edge);
+                    marcher.ExtrudeTopToBot(near_edge, left_edge);
                 }
                 else if(sample_type == 2)
                 {
-                    var near_top_edge = marcher.NearTopEdge();
-                    var right_top_edge = marcher.RightTopEdge();
-                    var right_top_near = marcher.RightTopNear();
+                    var near_edge = marcher.NearEdge();
+                    var right_edge = marcher.RightEdge();
+                    var right_near = marcher.RightNear();
 
-                    marcher.Triangle(near_top_edge, right_top_edge, right_top_near);
-                    marcher.ExtrudeTopToBot(right_top_edge, near_top_edge);
+                    marcher.Triangle(near_edge, right_edge, right_near);
+                    marcher.ExtrudeTopToBot(right_edge, near_edge);
                 }
                 else if (sample_type == 3)
                 {
-                    var left_top_edge = marcher.LeftTopEdge();
-                    var right_top_near = marcher.RightTopNear();
-                    var left_top_near = marcher.LeftTopNear();
-                    var right_top_edge = marcher.RightTopEdge();
+                    var left_edge = marcher.LeftEdge();
+                    var right_near = marcher.RightNear();
+                    var left_near = marcher.LeftNear();
+                    var right_edge = marcher.RightEdge();
 
-                    marcher.Triangle(left_top_edge, right_top_near, left_top_near);
-                    marcher.Triangle(left_top_edge, right_top_edge, right_top_near);
+                    marcher.Triangle(left_edge, right_near, left_near);
+                    marcher.Triangle(left_edge, right_edge, right_near);
                 }
                 else if (sample_type == 4)
                 {
-                    marcher.Triangle(marcher.FarTopEdge(), marcher.RightTopFar(), marcher.RightTopEdge());
+                    marcher.Triangle(marcher.FarEdge(), marcher.RightFar(), marcher.RightEdge());
                 }
                 else if (sample_type == 5)
                 {
                     if (marcher.AverageDensity() > m_iso_level)
                     {
-                        var left_top_near = marcher.LeftTopNear();
-                        var left_top_edge = marcher.LeftTopEdge();
-                        var near_top_edge = marcher.NearTopEdge();
-                        var right_top_edge = marcher.RightTopEdge();
-                        var far_top_edge = marcher.FarTopEdge();
-                        var right_top_far = marcher.RightTopFar();
+                        var left_near = marcher.LeftNear();
+                        var left_edge = marcher.LeftEdge();
+                        var near_edge = marcher.NearEdge();
+                        var right_edge = marcher.RightEdge();
+                        var far_edge = marcher.FarEdge();
+                        var right_far = marcher.RightFar();
 
-                        marcher.Triangle(left_top_near, left_top_edge, near_top_edge);
-                        marcher.Triangle(left_top_edge, right_top_edge, near_top_edge);
-                        marcher.Triangle(left_top_edge, far_top_edge, right_top_edge);
-                        marcher.Triangle(far_top_edge, right_top_far, right_top_edge);
+                        marcher.Triangle(left_near, left_edge, near_edge);
+                        marcher.Triangle(left_edge, right_edge, near_edge);
+                        marcher.Triangle(left_edge, far_edge, right_edge);
+                        marcher.Triangle(far_edge, right_far, right_edge);
                     }
                     else
                     {
-                        var left_top_near = marcher.LeftTopNear();
-                        var left_top_edge = marcher.LeftTopEdge();
-                        var near_top_edge = marcher.NearTopEdge();
-                        var far_top_edge = marcher.FarTopEdge();
-                        var right_top_far = marcher.RightTopFar();
-                        var right_top_edge = marcher.RightTopEdge();
+                        var left_near = marcher.LeftNear();
+                        var left_edge = marcher.LeftEdge();
+                        var near_edge = marcher.NearEdge();
+                        var far_edge = marcher.FarEdge();
+                        var right_far = marcher.RightFar();
+                        var right_edge = marcher.RightEdge();
 
-                        marcher.Triangle(left_top_near, left_top_edge, near_top_edge);
-                        marcher.Triangle(far_top_edge, right_top_far, right_top_edge);
+                        marcher.Triangle(left_near, left_edge, near_edge);
+                        marcher.Triangle(far_edge, right_far, right_edge);
                     }
                 }
                 else if (sample_type == 6)
                 {
-                    var far_top_edge = marcher.FarTopEdge();
-                    var right_top_far = marcher.RightTopFar();
-                    var right_top_near = marcher.RightTopNear();
-                    var near_top_edge = marcher.NearTopEdge();
+                    var far_edge = marcher.FarEdge();
+                    var right_far = marcher.RightFar();
+                    var right_near = marcher.RightNear();
+                    var near_edge = marcher.NearEdge();
 
-                    marcher.Triangle(far_top_edge, right_top_far, right_top_near);
-                    marcher.Triangle(far_top_edge, right_top_near, near_top_edge);
+                    marcher.Triangle(far_edge, right_far, right_near);
+                    marcher.Triangle(far_edge, right_near, near_edge);
                 }
                 else if (sample_type == 7)
                 {
-                    var left_top_edge = marcher.LeftTopEdge();
-                    var right_top_near = marcher.RightTopNear();
-                    var left_top_near = marcher.LeftTopNear();
-                    var far_top_edge = marcher.FarTopEdge();
-                    var right_top_far = marcher.RightTopFar();
+                    var left_edge = marcher.LeftEdge();
+                    var right_near = marcher.RightNear();
+                    var left_near = marcher.LeftNear();
+                    var far_edge = marcher.FarEdge();
+                    var right_far = marcher.RightFar();
 
-                    marcher.Triangle(left_top_edge, right_top_near, left_top_near);
-                    marcher.Triangle(left_top_edge, far_top_edge, right_top_near);
-                    marcher.Triangle(far_top_edge, right_top_far, right_top_near);
+                    marcher.Triangle(left_edge, right_near, left_near);
+                    marcher.Triangle(left_edge, far_edge, right_near);
+                    marcher.Triangle(far_edge, right_far, right_near);
                 }
                 else if (sample_type == 8)
                 {
-                    marcher.Triangle(marcher.LeftTopFar(), marcher.FarTopEdge(), marcher.LeftTopEdge());
+                    marcher.Triangle(marcher.LeftFar(), marcher.FarEdge(), marcher.LeftEdge());
                 }
                 else if (sample_type == 9)
                 {
-                    var left_top_far = marcher.LeftTopFar();
-                    var far_top_edge = marcher.FarTopEdge();
-                    var near_top_edge = marcher.NearTopEdge();
-                    var left_top_near = marcher.LeftTopNear();
+                    var left_far = marcher.LeftFar();
+                    var far_edge = marcher.FarEdge();
+                    var near_edge = marcher.NearEdge();
+                    var left_near = marcher.LeftNear();
 
-                    marcher.Triangle(left_top_far, far_top_edge, near_top_edge);
-                    marcher.Triangle(left_top_far, near_top_edge, left_top_near);
+                    marcher.Triangle(left_far, far_edge, near_edge);
+                    marcher.Triangle(left_far, near_edge, left_near);
                 }
                 else if (sample_type == 10)
                 {
-                    var left_top_far = marcher.LeftTopFar();
-                    var left_top_edge = marcher.LeftTopEdge();
-                    var near_top_edge = marcher.NearTopEdge();
-                    var right_top_edge = marcher.RightTopEdge();
-                    var far_top_edge = marcher.FarTopEdge();
-                    var right_top_near = marcher.RightTopNear();
+                    var left_far = marcher.LeftFar();
+                    var left_edge = marcher.LeftEdge();
+                    var near_edge = marcher.NearEdge();
+                    var right_edge = marcher.RightEdge();
+                    var far_edge = marcher.FarEdge();
+                    var right_near = marcher.RightNear();
 
-                    marcher.Triangle(left_top_far, far_top_edge, left_top_edge);
-                    marcher.Triangle(left_top_edge, far_top_edge, right_top_edge);
-                    marcher.Triangle(left_top_edge, right_top_edge, near_top_edge);
-                    marcher.Triangle(near_top_edge, right_top_edge, right_top_near);
+                    marcher.Triangle(left_far, far_edge, left_edge);
+                    marcher.Triangle(left_edge, far_edge, right_edge);
+                    marcher.Triangle(left_edge, right_edge, near_edge);
+                    marcher.Triangle(near_edge, right_edge, right_near);
                 }
                 else if (sample_type == 11)
                 {
-                    var left_top_far = marcher.LeftTopFar();
-                    var far_top_edge = marcher.FarTopEdge();
-                    var left_top_near = marcher.LeftTopNear();
-                    var right_top_edge = marcher.RightTopEdge();
-                    var right_top_near = marcher.RightTopNear();
+                    var left_far = marcher.LeftFar();
+                    var far_edge = marcher.FarEdge();
+                    var left_near = marcher.LeftNear();
+                    var right_edge = marcher.RightEdge();
+                    var right_near = marcher.RightNear();
 
-                    marcher.Triangle(left_top_far, far_top_edge, left_top_near);
-                    marcher.Triangle(left_top_near, far_top_edge, right_top_edge);
-                    marcher.Triangle(left_top_near, right_top_edge, right_top_near);
+                    marcher.Triangle(left_far, far_edge, left_near);
+                    marcher.Triangle(left_near, far_edge, right_edge);
+                    marcher.Triangle(left_near, right_edge, right_near);
                 }
                 else if (sample_type == 12)
                 {
-                    var left_top_far = marcher.LeftTopFar();
-                    var right_top_far = marcher.RightTopFar();
-                    var left_top_edge = marcher.LeftTopEdge();
-                    var right_top_edge = marcher.RightTopEdge();
+                    var left_far = marcher.LeftFar();
+                    var right_far = marcher.RightFar();
+                    var left_edge = marcher.LeftEdge();
+                    var right_edge = marcher.RightEdge();
 
-                    marcher.Triangle(left_top_far, right_top_far, left_top_edge);
-                    marcher.Triangle(left_top_edge, right_top_far, right_top_edge);
+                    marcher.Triangle(left_far, right_far, left_edge);
+                    marcher.Triangle(left_edge, right_far, right_edge);
                 }
                 else if (sample_type == 13)
                 {
-                    var left_top_near = marcher.LeftTopNear();
-                    var left_top_far = marcher.LeftTopFar();
-                    var near_top_edge = marcher.NearTopEdge();
-                    var right_top_edge = marcher.RightTopEdge();
-                    var right_top_far = marcher.RightTopFar();
+                    var left_near = marcher.LeftNear();
+                    var left_far = marcher.LeftFar();
+                    var near_edge = marcher.NearEdge();
+                    var right_edge = marcher.RightEdge();
+                    var right_far = marcher.RightFar();
 
-                    marcher.Triangle(left_top_near, left_top_far, near_top_edge);
-                    marcher.Triangle(left_top_far, right_top_edge, near_top_edge);
-                    marcher.Triangle(left_top_far, right_top_far, right_top_edge);
+                    marcher.Triangle(left_near, left_far, near_edge);
+                    marcher.Triangle(left_far, right_edge, near_edge);
+                    marcher.Triangle(left_far, right_far, right_edge);
                 }
                 else if (sample_type == 14)
                 {
-                    var left_top_far = marcher.LeftTopFar();
-                    var right_top_far = marcher.RightTopFar();
-                    var left_top_edge = marcher.LeftTopEdge();
-                    var near_top_edge = marcher.NearTopEdge();
-                    var right_top_near = marcher.RightTopNear();
+                    var left_far = marcher.LeftFar();
+                    var right_far = marcher.RightFar();
+                    var left_edge = marcher.LeftEdge();
+                    var near_edge = marcher.NearEdge();
+                    var right_near = marcher.RightNear();
 
-                    marcher.Triangle(left_top_far, right_top_far, left_top_edge);
-                    marcher.Triangle(left_top_edge, right_top_far, near_top_edge);
-                    marcher.Triangle(near_top_edge, right_top_far, right_top_near);
+                    marcher.Triangle(left_far, right_far, left_edge);
+                    marcher.Triangle(left_edge, right_far, near_edge);
+                    marcher.Triangle(near_edge, right_far, right_near);
 
                 }
                 else if (sample_type == 15)
                 {
-                    var left_top_near = marcher.LeftTopNear();
-                    var left_top_far = marcher.LeftTopFar();
-                    var right_top_near = marcher.RightTopNear();
-                    var right_top_far = marcher.RightTopFar();
+                    var left_near = marcher.LeftNear();
+                    var left_far = marcher.LeftFar();
+                    var right_near = marcher.RightNear();
+                    var right_far = marcher.RightFar();
 
-                    marcher.Triangle(left_top_near, left_top_far, right_top_near);
-                    marcher.Triangle(left_top_far, right_top_far, right_top_near);
+                    marcher.Triangle(left_near, left_far, right_near);
+                    marcher.Triangle(left_far, right_far, right_near);
                 }
 
                 vert_idx = marcher.m_vert_idx;
