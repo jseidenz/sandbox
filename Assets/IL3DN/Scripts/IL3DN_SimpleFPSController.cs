@@ -54,7 +54,10 @@ namespace IL3DN
 
         private void Update()
         {
-            RotateView();
+            if (!Cursor.visible)
+            {
+                RotateView();
+            }
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
             {
