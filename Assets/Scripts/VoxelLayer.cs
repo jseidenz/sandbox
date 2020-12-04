@@ -53,23 +53,9 @@ public class VoxelLayer
         }
     }
 
-    struct TriangleWriter
-    {
-        public int m_triangle_idx;
-        public int[] m_triangles;
 
 
-        public void Triangle(int vert_idx_a, int vert_idx_b, int vert_idx_c)
-        {
-            m_triangles[m_triangle_idx++] = vert_idx_a;
-            m_triangles[m_triangle_idx++] = vert_idx_b;
-            m_triangles[m_triangle_idx++] = vert_idx_c;
-        }
-    }
-
-
-
-    struct VertexWriter
+    struct MeshMarcher
     {
         public float m_left_x;
         public float m_right_x;
@@ -84,6 +70,8 @@ public class VoxelLayer
         public int m_vert_idx;
         public Vector3 m_normal;
         public float m_iso_level;
+        public int m_triangle_idx;
+        public int[] m_triangles;
         public Vertex[] m_vertices;
 
         public int LeftTopNear()
@@ -175,6 +163,13 @@ public class VoxelLayer
         {
             return pos_a + (m_iso_level - density_a) * (pos_b - pos_a) / (density_b - density_a);
         }
+
+        public void Triangle(int vert_idx_a, int vert_idx_b, int vert_idx_c)
+        {
+            m_triangles[m_triangle_idx++] = vert_idx_a;
+            m_triangles[m_triangle_idx++] = vert_idx_b;
+            m_triangles[m_triangle_idx++] = vert_idx_c;
+        }
     }
 
 
@@ -189,12 +184,8 @@ public class VoxelLayer
         var vertices = new Vertex[max_vertex_count];
 
         int vert_idx = 0;
-
-        var tris = new TriangleWriter
-        {
-            m_triangle_idx = 0,
-            m_triangles = new int[max_triangle_count]
-        };
+        int triangle_idx = 0;
+        var triangles = new int[max_triangle_count];
 
         for (int y = 0; y < m_height_in_voxels - 1; ++y)
         {
@@ -222,7 +213,7 @@ public class VoxelLayer
 
                 var normal = Vector3.up;
 
-                var verts = new VertexWriter
+                var marcher = new MeshMarcher
                 {
                     m_left_x = left_x,
                     m_right_x = right_x,
@@ -237,171 +228,173 @@ public class VoxelLayer
                     m_vert_idx = vert_idx,
                     m_normal = normal,
                     m_iso_level = m_iso_level,
-                    m_vertices = vertices
+                    m_vertices = vertices,
+                    m_triangle_idx = triangle_idx,
+                    m_triangles = triangles
                 };
 
 
                 if(sample_type == 1)
                 {
-                    tris.Triangle(verts.LeftTopNear(), verts.LeftTopEdge(), verts.NearTopEdge());
+                    marcher.Triangle(marcher.LeftTopNear(), marcher.LeftTopEdge(), marcher.NearTopEdge());
                 }
                 else if(sample_type == 2)
                 {
-                    tris.Triangle(verts.NearTopEdge(), verts.RightTopEdge(), verts.RightTopNear());
+                    marcher.Triangle(marcher.NearTopEdge(), marcher.RightTopEdge(), marcher.RightTopNear());
                 }
                 else if (sample_type == 3)
                 {
-                    var left_top_edge = verts.LeftTopEdge();
-                    var right_top_near = verts.RightTopNear();
-                    var left_top_near = verts.LeftTopNear();
-                    var right_top_edge = verts.RightTopEdge();
+                    var left_top_edge = marcher.LeftTopEdge();
+                    var right_top_near = marcher.RightTopNear();
+                    var left_top_near = marcher.LeftTopNear();
+                    var right_top_edge = marcher.RightTopEdge();
 
-                    tris.Triangle(left_top_edge, right_top_near, left_top_near);
-                    tris.Triangle(left_top_edge, right_top_edge, right_top_near);
+                    marcher.Triangle(left_top_edge, right_top_near, left_top_near);
+                    marcher.Triangle(left_top_edge, right_top_edge, right_top_near);
                 }
                 else if (sample_type == 4)
                 {
-                    tris.Triangle(verts.FarTopEdge(), verts.RightTopFar(), verts.RightTopEdge());
+                    marcher.Triangle(marcher.FarTopEdge(), marcher.RightTopFar(), marcher.RightTopEdge());
                 }
                 else if (sample_type == 5)
                 {
-                    if (verts.AverageDensity() > m_iso_level)
+                    if (marcher.AverageDensity() > m_iso_level)
                     {
-                        var left_top_near = verts.LeftTopNear();
-                        var left_top_edge = verts.LeftTopEdge();
-                        var near_top_edge = verts.NearTopEdge();
-                        var right_top_edge = verts.RightTopEdge();
-                        var far_top_edge = verts.FarTopEdge();
-                        var right_top_far = verts.RightTopFar();
+                        var left_top_near = marcher.LeftTopNear();
+                        var left_top_edge = marcher.LeftTopEdge();
+                        var near_top_edge = marcher.NearTopEdge();
+                        var right_top_edge = marcher.RightTopEdge();
+                        var far_top_edge = marcher.FarTopEdge();
+                        var right_top_far = marcher.RightTopFar();
 
-                        tris.Triangle(left_top_near, left_top_edge, near_top_edge);
-                        tris.Triangle(left_top_edge, right_top_edge, near_top_edge);
-                        tris.Triangle(left_top_edge, far_top_edge, right_top_edge);
-                        tris.Triangle(far_top_edge, right_top_far, right_top_edge);
+                        marcher.Triangle(left_top_near, left_top_edge, near_top_edge);
+                        marcher.Triangle(left_top_edge, right_top_edge, near_top_edge);
+                        marcher.Triangle(left_top_edge, far_top_edge, right_top_edge);
+                        marcher.Triangle(far_top_edge, right_top_far, right_top_edge);
                     }
                     else
                     {
-                        var left_top_near = verts.LeftTopNear();
-                        var left_top_edge = verts.LeftTopEdge();
-                        var near_top_edge = verts.NearTopEdge();
-                        var far_top_edge = verts.FarTopEdge();
-                        var right_top_far = verts.RightTopFar();
-                        var right_top_edge = verts.RightTopEdge();
+                        var left_top_near = marcher.LeftTopNear();
+                        var left_top_edge = marcher.LeftTopEdge();
+                        var near_top_edge = marcher.NearTopEdge();
+                        var far_top_edge = marcher.FarTopEdge();
+                        var right_top_far = marcher.RightTopFar();
+                        var right_top_edge = marcher.RightTopEdge();
 
-                        tris.Triangle(left_top_near, left_top_edge, near_top_edge);
-                        tris.Triangle(far_top_edge, right_top_far, right_top_edge);
+                        marcher.Triangle(left_top_near, left_top_edge, near_top_edge);
+                        marcher.Triangle(far_top_edge, right_top_far, right_top_edge);
                     }
                 }
                 else if (sample_type == 6)
                 {
-                    var far_top_edge = verts.FarTopEdge();
-                    var right_top_far = verts.RightTopFar();
-                    var right_top_near = verts.RightTopNear();
-                    var near_top_edge = verts.NearTopEdge();
+                    var far_top_edge = marcher.FarTopEdge();
+                    var right_top_far = marcher.RightTopFar();
+                    var right_top_near = marcher.RightTopNear();
+                    var near_top_edge = marcher.NearTopEdge();
 
-                    tris.Triangle(far_top_edge, right_top_far, right_top_near);
-                    tris.Triangle(far_top_edge, right_top_near, near_top_edge);
+                    marcher.Triangle(far_top_edge, right_top_far, right_top_near);
+                    marcher.Triangle(far_top_edge, right_top_near, near_top_edge);
                 }
                 else if (sample_type == 7)
                 {
-                    var left_top_edge = verts.LeftTopEdge();
-                    var right_top_near = verts.RightTopNear();
-                    var left_top_near = verts.LeftTopNear();
-                    var far_top_edge = verts.FarTopEdge();
-                    var right_top_far = verts.RightTopFar();
+                    var left_top_edge = marcher.LeftTopEdge();
+                    var right_top_near = marcher.RightTopNear();
+                    var left_top_near = marcher.LeftTopNear();
+                    var far_top_edge = marcher.FarTopEdge();
+                    var right_top_far = marcher.RightTopFar();
 
-                    tris.Triangle(left_top_edge, right_top_near, left_top_near);
-                    tris.Triangle(left_top_edge, far_top_edge, right_top_near);
-                    tris.Triangle(far_top_edge, right_top_far, right_top_near);
+                    marcher.Triangle(left_top_edge, right_top_near, left_top_near);
+                    marcher.Triangle(left_top_edge, far_top_edge, right_top_near);
+                    marcher.Triangle(far_top_edge, right_top_far, right_top_near);
                 }
                 else if (sample_type == 8)
                 {
-                    tris.Triangle(verts.LeftTopFar(), verts.FarTopEdge(), verts.LeftTopEdge());
+                    marcher.Triangle(marcher.LeftTopFar(), marcher.FarTopEdge(), marcher.LeftTopEdge());
                 }
                 else if (sample_type == 9)
                 {
-                    var left_top_far = verts.LeftTopFar();
-                    var far_top_edge = verts.FarTopEdge();
-                    var near_top_edge = verts.NearTopEdge();
-                    var left_top_near = verts.LeftTopNear();
+                    var left_top_far = marcher.LeftTopFar();
+                    var far_top_edge = marcher.FarTopEdge();
+                    var near_top_edge = marcher.NearTopEdge();
+                    var left_top_near = marcher.LeftTopNear();
 
-                    tris.Triangle(left_top_far, far_top_edge, near_top_edge);
-                    tris.Triangle(left_top_far, near_top_edge, left_top_near);
+                    marcher.Triangle(left_top_far, far_top_edge, near_top_edge);
+                    marcher.Triangle(left_top_far, near_top_edge, left_top_near);
                 }
                 else if (sample_type == 10)
                 {
-                    var left_top_far = verts.LeftTopFar();
-                    var left_top_edge = verts.LeftTopEdge();
-                    var near_top_edge = verts.NearTopEdge();
-                    var right_top_edge = verts.RightTopEdge();
-                    var far_top_edge = verts.FarTopEdge();
-                    var right_top_near = verts.RightTopNear();
+                    var left_top_far = marcher.LeftTopFar();
+                    var left_top_edge = marcher.LeftTopEdge();
+                    var near_top_edge = marcher.NearTopEdge();
+                    var right_top_edge = marcher.RightTopEdge();
+                    var far_top_edge = marcher.FarTopEdge();
+                    var right_top_near = marcher.RightTopNear();
 
-                    tris.Triangle(left_top_far, far_top_edge, left_top_edge);
-                    tris.Triangle(left_top_edge, far_top_edge, right_top_edge);
-                    tris.Triangle(left_top_edge, right_top_edge, near_top_edge);
-                    tris.Triangle(near_top_edge, right_top_edge, right_top_near);
+                    marcher.Triangle(left_top_far, far_top_edge, left_top_edge);
+                    marcher.Triangle(left_top_edge, far_top_edge, right_top_edge);
+                    marcher.Triangle(left_top_edge, right_top_edge, near_top_edge);
+                    marcher.Triangle(near_top_edge, right_top_edge, right_top_near);
                 }
                 else if (sample_type == 11)
                 {
-                    var left_top_far = verts.LeftTopFar();
-                    var far_top_edge = verts.FarTopEdge();
-                    var left_top_near = verts.LeftTopNear();
-                    var right_top_edge = verts.RightTopEdge();
-                    var right_top_near = verts.RightTopNear();
+                    var left_top_far = marcher.LeftTopFar();
+                    var far_top_edge = marcher.FarTopEdge();
+                    var left_top_near = marcher.LeftTopNear();
+                    var right_top_edge = marcher.RightTopEdge();
+                    var right_top_near = marcher.RightTopNear();
 
-                    tris.Triangle(left_top_far, far_top_edge, left_top_near);
-                    tris.Triangle(left_top_near, far_top_edge, right_top_edge);
-                    tris.Triangle(left_top_near, right_top_edge, right_top_near);
+                    marcher.Triangle(left_top_far, far_top_edge, left_top_near);
+                    marcher.Triangle(left_top_near, far_top_edge, right_top_edge);
+                    marcher.Triangle(left_top_near, right_top_edge, right_top_near);
                 }
                 else if (sample_type == 12)
                 {
-                    var left_top_far = verts.LeftTopFar();
-                    var right_top_far = verts.RightTopFar();
-                    var left_top_edge = verts.LeftTopEdge();
-                    var right_top_edge = verts.RightTopEdge();
+                    var left_top_far = marcher.LeftTopFar();
+                    var right_top_far = marcher.RightTopFar();
+                    var left_top_edge = marcher.LeftTopEdge();
+                    var right_top_edge = marcher.RightTopEdge();
 
-                    tris.Triangle(left_top_far, right_top_far, left_top_edge);
-                    tris.Triangle(left_top_edge, right_top_far, right_top_edge);
+                    marcher.Triangle(left_top_far, right_top_far, left_top_edge);
+                    marcher.Triangle(left_top_edge, right_top_far, right_top_edge);
                 }
                 else if (sample_type == 13)
                 {
-                    var left_top_near = verts.LeftTopNear();
-                    var left_top_far = verts.LeftTopFar();
-                    var near_top_edge = verts.NearTopEdge();
-                    var right_top_edge = verts.RightTopEdge();
-                    var right_top_far = verts.RightTopFar();
+                    var left_top_near = marcher.LeftTopNear();
+                    var left_top_far = marcher.LeftTopFar();
+                    var near_top_edge = marcher.NearTopEdge();
+                    var right_top_edge = marcher.RightTopEdge();
+                    var right_top_far = marcher.RightTopFar();
 
-                    tris.Triangle(left_top_near, left_top_far, near_top_edge);
-                    tris.Triangle(left_top_far, right_top_edge, near_top_edge);
-                    tris.Triangle(left_top_far, right_top_far, right_top_edge);
+                    marcher.Triangle(left_top_near, left_top_far, near_top_edge);
+                    marcher.Triangle(left_top_far, right_top_edge, near_top_edge);
+                    marcher.Triangle(left_top_far, right_top_far, right_top_edge);
                 }
                 else if (sample_type == 14)
                 {
-                    var left_top_far = verts.LeftTopFar();
-                    var right_top_far = verts.RightTopFar();
-                    var left_top_edge = verts.LeftTopEdge();
-                    var near_top_edge = verts.NearTopEdge();
-                    var right_top_near = verts.RightTopNear();
+                    var left_top_far = marcher.LeftTopFar();
+                    var right_top_far = marcher.RightTopFar();
+                    var left_top_edge = marcher.LeftTopEdge();
+                    var near_top_edge = marcher.NearTopEdge();
+                    var right_top_near = marcher.RightTopNear();
 
-                    tris.Triangle(left_top_far, right_top_far, left_top_edge);
-                    tris.Triangle(left_top_edge, right_top_far, near_top_edge);
-                    tris.Triangle(near_top_edge, right_top_far, right_top_near);
+                    marcher.Triangle(left_top_far, right_top_far, left_top_edge);
+                    marcher.Triangle(left_top_edge, right_top_far, near_top_edge);
+                    marcher.Triangle(near_top_edge, right_top_far, right_top_near);
 
                 }
                 else if (sample_type == 15)
                 {
-                    var left_top_near = verts.LeftTopNear();
-                    var left_top_far = verts.LeftTopFar();
-                    var right_top_near = verts.RightTopNear();
-                    var right_top_far = verts.RightTopFar();
+                    var left_top_near = marcher.LeftTopNear();
+                    var left_top_far = marcher.LeftTopFar();
+                    var right_top_near = marcher.RightTopNear();
+                    var right_top_far = marcher.RightTopFar();
 
-                    tris.Triangle(left_top_near, left_top_far, right_top_near);
-                    tris.Triangle(left_top_far, right_top_far, right_top_near);
+                    marcher.Triangle(left_top_near, left_top_far, right_top_near);
+                    marcher.Triangle(left_top_far, right_top_far, right_top_near);
                 }
 
-                vert_idx = verts.m_vert_idx;
-
+                vert_idx = marcher.m_vert_idx;
+                triangle_idx = marcher.m_triangle_idx;
             }
         }
 
@@ -409,7 +402,7 @@ public class VoxelLayer
         mesh.SetVertexBufferParams(vert_idx, m_vertex_attribute_descriptors);
 
         mesh.SetVertexBufferData(vertices, 0, 0, vert_idx);
-        mesh.SetTriangles(tris.m_triangles, 0, tris.m_triangle_idx, 0, false);
+        mesh.SetTriangles(triangles, 0, triangle_idx, 0, false);
         mesh.RecalculateBounds();
 
         return mesh;
