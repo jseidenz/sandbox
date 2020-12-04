@@ -28,6 +28,8 @@ public class VoxelWorld : MonoBehaviour
     int m_grid_depth_in_voxels;
     VoxelLayer[] m_layers;
 
+    public static VoxelWorld Instance;
+
     void Awake()
     {
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
@@ -58,6 +60,8 @@ public class VoxelWorld : MonoBehaviour
             layer.Triangulate();
             m_layers[y] = layer;            
         }
+
+        Instance = this;
     }
 
     private void LateUpdate()
@@ -84,5 +88,13 @@ public class VoxelWorld : MonoBehaviour
 
             m_layers[y].Render(dt, color);
         }
+    }
+
+    public void AddDensity(Vector3 pos, float amount)
+    {
+        var layer_idx = (int)(pos.y / (m_grid_height_in_voxels * VoxelLayer.VOXEL_HEIGHT));
+        if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
+
+        m_layers[layer_idx].AddDensity(pos, amount);
     }
 }

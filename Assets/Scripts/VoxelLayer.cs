@@ -500,6 +500,21 @@ public class VoxelLayer
         Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
     }
 
+    public void AddDensity(Vector3 pos, float amount)
+    {
+        var x = (int)(pos.x / VOXEL_SIZE);
+        if (x < 0 || x > m_width_in_voxels) return;
+
+        var y = (int)(pos.z / VOXEL_SIZE);
+        if (y < 0 || y > m_height_in_voxels) return;
+
+        var cell_idx = y * m_width_in_voxels + x;
+
+        m_density_grid[cell_idx] += amount;
+
+        Triangulate();
+    }
+
 
     float[] m_density_grid;
     int m_width_in_voxels;
