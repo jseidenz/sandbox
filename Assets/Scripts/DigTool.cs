@@ -8,9 +8,8 @@ public class DigTool : MonoBehaviour
     {
         if(Input.GetKey(KeyCode.Mouse0))
         {
-            var camera = Camera.main;
+            var ray = GetCameraRay();
             RaycastHit hit;
-            var ray = camera.ScreenPointToRay(Input.mousePosition);
 
             if (Physics.Raycast(ray, out hit))
             {
@@ -20,8 +19,7 @@ public class DigTool : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Mouse1))
         {
-            var camera = Camera.main;
-            var ray = camera.ScreenPointToRay(Input.mousePosition);
+            var ray = GetCameraRay();
             if (Input.GetKeyDown(KeyCode.Mouse1))
             {                
                 RaycastHit hit;                
@@ -40,5 +38,10 @@ public class DigTool : MonoBehaviour
                 VoxelWorld.Instance.AddDensity(hit_point, 1.0f * Time.deltaTime);
             }
         }
+    }
+
+    Ray GetCameraRay()
+    {
+        return Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
     }
 }
