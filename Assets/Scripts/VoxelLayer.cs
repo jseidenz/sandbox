@@ -299,14 +299,14 @@ public class VoxelLayer
 
         static float InterpolatePosition(float pos_a, float pos_b, float density_a, float density_b)
         {
-            if(density_a == density_b)
+            if(density_a < density_b)
             {
-                return pos_a;
+                return pos_a + (density_b - density_a) * (pos_b - pos_a);
             }
-
-            // TODO(FIX THIS):
-            return pos_a +(pos_b - pos_a) * 0.5f;
-            //return pos_a + (density_a) * (pos_b - pos_a) / (density_b - density_a);
+            else
+            {
+                return pos_b + (density_a - density_b) * (pos_a - pos_b);
+            }            
         }
     }
 
