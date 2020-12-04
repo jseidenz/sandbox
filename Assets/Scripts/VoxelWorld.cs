@@ -92,7 +92,7 @@ public class VoxelWorld : MonoBehaviour
 
     public void AddDensity(Vector3 pos, float amount)
     {
-        var layer_idx = (int)(pos.y / (m_grid_height_in_voxels * VoxelLayer.VOXEL_HEIGHT));
+        var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * VoxelLayer.VOXEL_HEIGHT)) * (float)m_layers.Length);
         if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
         m_layers[layer_idx].AddDensity(pos, amount);
