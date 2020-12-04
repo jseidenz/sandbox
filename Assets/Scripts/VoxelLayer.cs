@@ -241,7 +241,7 @@ public class VoxelLayer
         {
             m_vertices[m_vert_idx] = new Vertex
             {
-                m_position = new Vector3(m_left_x, m_top_y, m_near_z),
+                m_position = new Vector3(m_left_x, m_top_y, m_far_z),
                 m_normal = m_normal
             };
             return m_vert_idx++;
@@ -304,7 +304,9 @@ public class VoxelLayer
                 return pos_a;
             }
 
-            return pos_a + (density_a) * (pos_b - pos_a) / (density_b - density_a);
+            // TODO(FIX THIS):
+            return pos_a +(pos_b - pos_a) * 0.5f;
+            //return pos_a + (density_a) * (pos_b - pos_a) / (density_b - density_a);
         }
     }
 
@@ -342,8 +344,8 @@ public class VoxelLayer
                 int sample_type = 0;
                 if (left_near_density > 0) sample_type |= 1;
                 if (right_near_density > 0) sample_type |= 2;
-                if (left_far_density > 0) sample_type |= 4;
-                if (right_far_density > 0) sample_type |= 8;
+                if (right_far_density > 0) sample_type |= 4;
+                if (left_far_density > 0) sample_type |= 8;
 
                 if (sample_type == 0) continue;
 
@@ -380,7 +382,6 @@ public class VoxelLayer
                 {
                     tris.Triangle(verts.NearTopEdge(), verts.RightTopEdge(), verts.RightTopNear());
                 }
-                /*
                 else if (sample_type == 3)
                 {
                     var left_top_edge = verts.LeftTopEdge();
@@ -516,7 +517,6 @@ public class VoxelLayer
                     tris.Triangle(left_top_near, left_top_far, right_top_near);
                     tris.Triangle(left_top_far, right_top_far, right_top_near);
                 }
-                */
 
                 vert_idx = verts.m_vert_idx;
 
