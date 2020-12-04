@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 
 public class VoxelLayer
 {
-    public const float VOXEL_SIZE = 1f;
+    public const float VOXEL_SIZE = 1.0f;
 
     [StructLayout(LayoutKind.Sequential)]
     struct Vertex
@@ -166,6 +166,11 @@ public class VoxelLayer
             return m_vert_idx++;
         }
 
+        public float AverageDensity()
+        {
+            return (m_left_near_density + m_left_far_density + m_right_near_density + m_right_far_density) / 4f;
+        }
+
         float InterpolatePosition(float pos_a, float pos_b, float density_a, float density_b)
         {
             return pos_a + (m_iso_level - density_a) * (pos_b - pos_a) / (density_b - density_a);
@@ -260,17 +265,32 @@ public class VoxelLayer
                 }
                 else if (sample_type == 5)
                 {
-                    var left_top_near = verts.LeftTopNear();
-                    var left_top_edge = verts.LeftTopEdge();
-                    var near_top_edge = verts.NearTopEdge();
-                    var right_top_edge = verts.RightTopEdge();
-                    var far_top_edge = verts.FarTopEdge();
-                    var right_top_far = verts.RightTopFar();
+                    if (verts.AverageDensity() > m_iso_level)
+                    {
+                        var left_top_near = verts.LeftTopNear();
+                        var left_top_edge = verts.LeftTopEdge();
+                        var near_top_edge = verts.NearTopEdge();
+                        var right_top_edge = verts.RightTopEdge();
+                        var far_top_edge = verts.FarTopEdge();
+                        var right_top_far = verts.RightTopFar();
 
-                    tris.Triangle(left_top_near, left_top_edge, near_top_edge);
-                    tris.Triangle(left_top_edge, right_top_edge, near_top_edge);
-                    tris.Triangle(left_top_edge, far_top_edge, right_top_edge);
-                    tris.Triangle(far_top_edge, right_top_far, right_top_edge);
+                        tris.Triangle(left_top_near, left_top_edge, near_top_edge);
+                        tris.Triangle(left_top_edge, right_top_edge, near_top_edge);
+                        tris.Triangle(left_top_edge, far_top_edge, right_top_edge);
+                        tris.Triangle(far_top_edge, right_top_far, right_top_edge);
+                    }
+                    else
+                    {
+                        var left_top_near = verts.LeftTopNear();
+                        var left_top_edge = verts.LeftTopEdge();
+                        var near_top_edge = verts.NearTopEdge();
+                        var far_top_edge = verts.FarTopEdge();
+                        var right_top_far = verts.RightTopFar();
+                        var right_top_edge = verts.RightTopEdge();
+
+                        tris.Triangle(left_top_near, left_top_edge, near_top_edge);
+                        tris.Triangle(far_top_edge, right_top_far, right_top_edge);
+                    }
                 }
                 else if (sample_type == 6)
                 {
