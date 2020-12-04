@@ -30,7 +30,7 @@ public class VoxelLayer
         m_top_y = top_y;
     }
 
-    public void ApplyHeightmap(Color[] pixels, float min_height, float max_height)
+    public void ApplyHeightmap(float[] densities, float min_height, float max_height)
     {
         float one_over_height_range = 1f / (max_height - min_height);
 
@@ -39,9 +39,8 @@ public class VoxelLayer
             for (int x = 0; x < m_width_in_voxels; ++x)
             {
                 var cell_idx = y * m_width_in_voxels + x;
-                var density = pixels[cell_idx].r;
 
-                m_density_grid[cell_idx] = density;
+                m_density_grid[cell_idx] = densities[cell_idx];
             }
         }
     }

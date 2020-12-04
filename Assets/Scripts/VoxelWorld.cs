@@ -38,7 +38,22 @@ public class VoxelWorld : MonoBehaviour
         m_grid_depth_in_voxels = 100; // height_map_tex.height;
         m_grid_width_in_voxels = 100; //height_map_tex.width;
 
-        var pixels = height_map_tex.GetPixels(0, 0, m_grid_width_in_voxels, m_grid_depth_in_voxels);
+        var pixels = height_map_tex.GetPixels();
+        var height_map_width = height_map_tex.width;
+        var height_map_height = height_map_tex.height;
+        var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
+
+        for(int y = 0; y < m_grid_depth_in_voxels; ++y)
+        {
+            for(int x = 0; x < m_grid_width_in_voxels; ++x)
+            {
+                var density_idx = y * m_grid_width_in_voxels + x;
+                var pixel_idx = y * height_map_width + x;
+                var density = pixels[pixel_idx].r;
+
+                densities[density_idx] = density;
+            }
+        }
 
         m_layers = new VoxelLayer[m_grid_height_in_voxels];
 
@@ -57,7 +72,7 @@ public class VoxelWorld : MonoBehaviour
             float top_y = (float)y * m_voxel_size_in_meters;
 
             var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, material, iso_level, bot_y, top_y);
-            layer.ApplyHeightmap(pixels, layer_min_height, layer_max_height);
+            layer.ApplyHeightmap(densities, layer_min_height, layer_max_height);
             layer.Triangulate();
             m_layers[y] = layer;            
         }
