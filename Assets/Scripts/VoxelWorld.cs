@@ -28,6 +28,7 @@ public class VoxelWorld : MonoBehaviour
     int m_grid_width_in_voxels;
     int m_grid_depth_in_voxels;
     VoxelLayer[] m_layers;
+    bool[] m_empty_occlusion_grid;
 
     public static VoxelWorld Instance;
 
@@ -41,8 +42,9 @@ public class VoxelWorld : MonoBehaviour
         var pixels = height_map_tex.GetPixels();
         var height_map_width = height_map_tex.width;
         var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
+        m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
 
-        for(int y = 0; y < m_grid_depth_in_voxels; ++y)
+        for (int y = 0; y < m_grid_depth_in_voxels; ++y)
         {
             for(int x = 0; x < m_grid_width_in_voxels; ++x)
             {
@@ -73,20 +75,20 @@ public class VoxelWorld : MonoBehaviour
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         {
-            var layer_below = default(VoxelLayer);
-            var layer_above = default(VoxelLayer);
+            var layer_above_occlusion_grid = m_empty_occlusion_grid;
+            var layer_below_occlusion_grid = m_empty_occlusion_grid;
 
             if(y > 0)
             {
-                layer_below = m_layers[y - 1];
+                layer_below_occlusion_grid = m_layers[y - 1].GetOcclusionGrid();
             }
 
             if(y < m_grid_height_in_voxels - 2)
             {
-                layer_above = m_layers[y + 1];
+                layer_above_occlusion_grid = m_layers[y + 1].GetOcclusionGrid();
             }
 
-            m_layers[y].SetAboveBelowLayers(layer_above, layer_below);
+            m_layers[y].SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
         }
 
         for(int y = 0; y < m_layers.Length; ++y)

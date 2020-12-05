@@ -31,10 +31,10 @@ public class VoxelLayer
         m_top_y = top_y;
     }
 
-    public void SetAboveBelowLayers(VoxelLayer layer_above, VoxelLayer layer_below)
+    public void SetAboveAndBelowOcclusionGrids(bool[] layer_above_occlusion_grid, bool[] layer_below_occlusion_grid)
     {
-        m_layer_above = layer_above;
-        m_layer_below = layer_below;
+        m_layer_above_occlusion_grid = layer_above_occlusion_grid;
+        m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
     public void ApplyHeightmap(float[] densities, float min_height, float max_height)
@@ -235,6 +235,15 @@ public class VoxelLayer
             {
                 int left_near_cell_idx = y * m_width_in_voxels + x;
 
+                var is_occluded = false;
+
+                if(m_layer_above_occlusion_grid[left_near_cell_idx])
+                {
+                    is_occluded = true;
+                    m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                    continue;
+                }
+
                 var left_near_density = m_density_grid[left_near_cell_idx];
                 var right_near_density = m_density_grid[left_near_cell_idx + 1];
                 var left_far_density = m_density_grid[left_near_cell_idx + m_width_in_voxels];
@@ -244,9 +253,7 @@ public class VoxelLayer
                 if (left_near_density >= m_iso_level) sample_type |= 1;
                 if (right_near_density >= m_iso_level) sample_type |= 2;
                 if (right_far_density >= m_iso_level) sample_type |= 4;
-                if (left_far_density >= m_iso_level) sample_type |= 8;
-
-                var is_occluded = false;
+                if (left_far_density >= m_iso_level) sample_type |= 8;                
 
                 if (sample_type == 0)
                 {
@@ -515,6 +522,11 @@ public class VoxelLayer
         Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
     }
 
+    public bool[] GetOcclusionGrid()
+    {
+        return m_occlusion_grid;
+    }
+
     public void AddDensity(Vector3 pos, float amount)
     {
         var x = (int)(pos.x / m_voxel_size_in_meters);
@@ -530,8 +542,8 @@ public class VoxelLayer
         Triangulate();
     }
 
-    VoxelLayer m_layer_above;
-    VoxelLayer m_layer_below;
+    bool[] m_layer_above_occlusion_grid;
+    bool[] m_layer_below_occlusion_grid;
     float[] m_density_grid;
     bool[] m_occlusion_grid;
     int m_width_in_voxels;
