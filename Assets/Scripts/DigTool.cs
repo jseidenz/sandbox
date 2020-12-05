@@ -15,7 +15,7 @@ public class DigTool : MonoBehaviour
             if(CameraRayCast(out var hit))
             {
                 float teleport_vertical_offset = 1f;
-                transform.position = hit.point + new Vector3(0, teleport_vertical_offset, 0);
+                GetComponent<IL3DN.IL3DN_SimpleFPSController>().Teleport(hit.point + new Vector3(0, teleport_vertical_offset, 0));
             }
         }
 

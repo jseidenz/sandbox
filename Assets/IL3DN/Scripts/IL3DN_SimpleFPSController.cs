@@ -269,6 +269,13 @@ namespace IL3DN
         {
             isInSpecialSurface = false;
         }
+
+        public void Teleport(Vector3 position)
+        {
+            m_CharacterController.enabled = false;
+            transform.position = position;
+            m_CharacterController.enabled = true;
+        }
     }
 }
 
