@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Runtime.InteropServices;
 using UnityEngine.Rendering;
+using System.Collections.Generic;
 
 public class VoxelWorld : MonoBehaviour
 {
@@ -29,8 +30,15 @@ public class VoxelWorld : MonoBehaviour
     int m_grid_depth_in_voxels;
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
+    List<DensityChange> m_density_changes = new List<DensityChange>();
 
     public static VoxelWorld Instance;
+
+    struct DensityChange
+    {
+        public Vector3 m_position;
+        public float m_amount;
+    }
 
     void Awake()
     {
@@ -108,6 +116,8 @@ public class VoxelWorld : MonoBehaviour
 
     private void LateUpdate()
     {
+        UpdateDensityChanges();
+
         float dt = Time.deltaTime;
         var layer_colors = m_tuneables.m_layer_colors;
 
@@ -132,12 +142,25 @@ public class VoxelWorld : MonoBehaviour
         }
     }
 
+    void UpdateDensityChanges()
+    {
+        foreach(var density_change in m_density_changes)
+        {
+            var pos = density_change.m_position;
+            var amount = density_change.m_amount;
+
+            var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * m_voxel_size_in_meters)) * (float)m_layers.Length);
+            if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
+
+            m_layers[layer_idx].AddDensity(pos, amount);
+        }
+
+        m_density_changes.Clear();
+    }
+
     public void AddDensity(Vector3 pos, float amount)
     {
-        var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * m_voxel_size_in_meters)) * (float)m_layers.Length);
-        if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
-
-        m_layers[layer_idx].AddDensity(pos, amount);
+        m_density_changes.Add(new DensityChange { m_position = pos, m_amount = amount });
     }
 
     public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters;  }
