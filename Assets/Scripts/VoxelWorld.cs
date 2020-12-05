@@ -145,6 +145,8 @@ public class VoxelWorld : MonoBehaviour
 
     void UpdateDensityChanges()
     {
+        if (m_density_changes.Count == 0) return;
+
         bool is_occlusion_above_dirty = false;
         for(int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
@@ -163,19 +165,6 @@ public class VoxelWorld : MonoBehaviour
                 is_occlusion_above_dirty = layer.Triangulate();
             }
         }
-
-        foreach(var density_change in m_density_changes)
-        {
-            var pos = density_change.m_position;
-            var amount = density_change.m_amount;
-
-            var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * m_voxel_size_in_meters)) * (float)m_layers.Length);
-            if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
-
-            m_layers[layer_idx].AddDensity(pos, amount);
-            m_layers[layer_idx].Triangulate();
-        }
-
         m_density_changes.Clear();
         
     }
