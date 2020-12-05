@@ -91,7 +91,7 @@ public class VoxelWorld : MonoBehaviour
             m_layers[y].SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
         }
 
-        for(int y = 0; y < m_layers.Length; ++y)
+        for(int y = m_layers.Length - 1; y >= 0; --y)
         {
             float layer_min_height = y * cell_height_in_color_space;
             float layer_max_height = (y + 1) * cell_height_in_color_space;
