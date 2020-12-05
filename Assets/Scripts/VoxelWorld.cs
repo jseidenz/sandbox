@@ -19,6 +19,7 @@ public class VoxelWorld : MonoBehaviour
         public float m_layer_brightness_factor;
         public LayerColor[] m_layer_colors;
         public float m_water_height;
+        public Gradient m_height_gradient = new Gradient();
     }
 
     public LiveTuneable m_tuneables;
@@ -30,7 +31,6 @@ public class VoxelWorld : MonoBehaviour
     [SerializeField] Material m_material;
     [SerializeField] float m_voxel_size_in_meters;
     [SerializeField] float m_ground_plane_size;
-    [SerializeField] Gradient m_height_gradient = new Gradient();
     [SerializeField] GameObject m_water;
 
     VoxelLayer[] m_layers;
@@ -150,21 +150,14 @@ public class VoxelWorld : MonoBehaviour
         float dt = Time.deltaTime;
         var layer_colors = m_tuneables.m_layer_colors;
 
+        float world_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters;
+
         for (int y = 0; y < m_layers.Length; ++y)
         {
-            var color = Color.white;
+            float layer_height_over_world_height = y / world_height_in_meters;
+            var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
+
             var top_y = (float)y;
-
-            foreach(var layer_color in layer_colors)
-            {
-                if (top_y > layer_color.m_height) continue;                
-
-                color = layer_color.m_color;
-                break;
-            }
-
-
-            color = ApplyLayerBrightnessColor(y, color);
 
             m_layers[y].Render(dt, color);
         }

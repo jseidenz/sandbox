@@ -154,7 +154,7 @@ Material:
     - _ShallowOpacity: 0.2
     - _Shininess: 0.15
     - _Size: 1.25
-    - _Smoothness: 1.48
+    - _Smoothness: 1.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _Speed: 0.025
@@ -163,7 +163,7 @@ Material:
     - _TessValue: 16
     - _Tiling: 0.05
     - _TranslucencyViewDependency: 0
-    - _Transparency: 3.11
+    - _Transparency: 10
     - _UVSec: 0
     - _WaterDepth: 0
     - _WaterFalloff: -0.905
