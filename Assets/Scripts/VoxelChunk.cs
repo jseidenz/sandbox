@@ -74,10 +74,8 @@ public class VoxelChunk
     {
         bool has_occlusion_changed = MarchMesh(scratch_buffer);
 
-        if (!m_collider.gameObject.activeSelf)
-        {
-            m_collider.gameObject.SetActive(true);
-        }
+        m_collider.gameObject.SetActive(false);
+        m_collider.gameObject.SetActive(true);
 
         return has_occlusion_changed;
     }
