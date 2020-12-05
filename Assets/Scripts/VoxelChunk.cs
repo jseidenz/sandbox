@@ -14,10 +14,10 @@ public class VoxelChunk
         public Vector3 m_normal;
     }
 
-    public VoxelChunk(int grid_offset, int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelChunk(int grid_offset, int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, bool[] layer_occlusion_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
         m_layer_density_grid = layer_density_grid;
-        m_occlusion_grid = new bool[layer_width_in_voxels * layer_height_in_voxels];
+        m_layer_occlusion_grid = layer_occlusion_grid;
         m_layer_width_in_voxels = layer_width_in_voxels;
         m_layer_height_in_voxels = layer_height_in_voxels;
         m_iso_level = iso_level;
@@ -26,6 +26,7 @@ public class VoxelChunk
         var collider_go = new GameObject("VoxelCollider");
         collider_go.gameObject.SetActive(false);
         m_collider = collider_go.AddComponent<MeshCollider>();
+        m_collider.sharedMesh = m_mesh;
         m_material = material;
 
         m_mesh = new Mesh();
@@ -40,24 +41,10 @@ public class VoxelChunk
         m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
-    public void ApplyHeightmap(float[] densities, float min_height, float max_height)
-    {
-        for (int y = 0; y < m_layer_height_in_voxels; ++y)
-        {
-            for (int x = 0; x < m_layer_width_in_voxels; ++x)
-            {
-                var cell_idx = y * m_layer_width_in_voxels + x;
-
-                m_layer_density_grid[cell_idx] = densities[cell_idx];
-            }
-        }
-    }
-
     public bool Triangulate()
     {
         bool has_occlusion_changed = MarchMesh();
 
-        m_collider.sharedMesh = m_mesh;
         if (!m_collider.gameObject.activeSelf)
         {
             m_collider.gameObject.SetActive(true);
@@ -255,10 +242,10 @@ public class VoxelChunk
                 if (sample_type != SAMPLE_TYPE_FULL_SQUARE)
                 {
                     var is_occluding = false;
-                    if (m_occlusion_grid[left_near_cell_idx] != is_occluding)
+                    if (m_layer_occlusion_grid[left_near_cell_idx] != is_occluding)
                     {
                         has_occlusion_changed = true;
-                        m_occlusion_grid[left_near_cell_idx] = is_occluding;
+                        m_layer_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
 
                     if(sample_type == SAMPLE_TYPE_EMTPY)
@@ -269,10 +256,10 @@ public class VoxelChunk
                 else
                 {
                     var is_occluding = true;
-                    if (m_occlusion_grid[left_near_cell_idx] != is_occluding)
+                    if (m_layer_occlusion_grid[left_near_cell_idx] != is_occluding)
                     {
                         has_occlusion_changed = true;
-                        m_occlusion_grid[left_near_cell_idx] = is_occluding;
+                        m_layer_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
                     
                     bool is_occluded = m_layer_above_occlusion_grid[left_near_cell_idx];
@@ -537,11 +524,6 @@ public class VoxelChunk
         Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
     }
 
-    public bool[] GetOcclusionGrid()
-    {
-        return m_occlusion_grid;
-    }
-
     public void AddDensity(Vector3 pos, float amount)
     {
         var x = (int)(pos.x / m_voxel_size_in_meters);
@@ -558,7 +540,7 @@ public class VoxelChunk
     bool[] m_layer_above_occlusion_grid;
     bool[] m_layer_below_occlusion_grid;
     float[] m_layer_density_grid;
-    bool[] m_occlusion_grid;
+    bool[] m_layer_occlusion_grid;
     int m_layer_width_in_voxels;
     int m_layer_height_in_voxels;
     Mesh m_mesh;
