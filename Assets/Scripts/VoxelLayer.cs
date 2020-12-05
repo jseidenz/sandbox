@@ -52,15 +52,17 @@ public class VoxelLayer
         }
     }
 
-    public void Triangulate()
+    public bool Triangulate()
     {
-        MarchMesh();
+        bool has_occlusion_changed = MarchMesh();
 
         m_collider.sharedMesh = m_mesh;
         if (!m_collider.gameObject.activeSelf)
         {
             m_collider.gameObject.SetActive(true);
         }
+
+        return has_occlusion_changed;
     }
 
 
@@ -212,7 +214,7 @@ public class VoxelLayer
     }
 
 
-    public void MarchMesh()
+    public bool MarchMesh()
     {
         var mesh = m_mesh;
         mesh.Clear();
@@ -225,6 +227,8 @@ public class VoxelLayer
         int vert_idx = 0;
         int triangle_idx = 0;
         var triangles = new int[max_triangle_count];
+
+        bool has_occlusion_changed = false;
 
         for (int y = 0; y < m_height_in_voxels - 1; ++y)
         {
@@ -240,7 +244,13 @@ public class VoxelLayer
                 if(m_layer_above_occlusion_grid[left_near_cell_idx])
                 {
                     is_occluded = true;
-                    m_occlusion_grid[left_near_cell_idx] = is_occluded;
+
+                    if (m_occlusion_grid[left_near_cell_idx] != is_occluded)
+                    {
+                        has_occlusion_changed = true;
+                        m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                    }
+
                     continue;
                 }
 
@@ -257,7 +267,12 @@ public class VoxelLayer
 
                 if (sample_type == 0)
                 {
-                    m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                    if (m_occlusion_grid[left_near_cell_idx] != is_occluded)
+                    {
+                        has_occlusion_changed = true;
+                        m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                    }
+
                     continue;
                 }
 
@@ -500,8 +515,11 @@ public class VoxelLayer
                     is_occluded = true;
                 }
 
-
-                m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                if(m_occlusion_grid[left_near_cell_idx] != is_occluded)
+                {
+                    has_occlusion_changed = true;
+                    m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                }
 
                 vert_idx = marcher.m_vert_idx;
                 triangle_idx = marcher.m_triangle_idx;
@@ -514,6 +532,8 @@ public class VoxelLayer
         mesh.SetVertexBufferData(vertices, 0, 0, vert_idx);
         mesh.SetTriangles(triangles, 0, triangle_idx, 0, false);
         mesh.RecalculateBounds();
+
+        return has_occlusion_changed;
     }
 
     public void Render(float dt, Color color)
