@@ -40,7 +40,6 @@ public class VoxelWorld : MonoBehaviour
 
         var pixels = height_map_tex.GetPixels();
         var height_map_width = height_map_tex.width;
-        var height_map_height = height_map_tex.height;
         var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
 
         for(int y = 0; y < m_grid_depth_in_voxels; ++y)
@@ -59,11 +58,8 @@ public class VoxelWorld : MonoBehaviour
 
         float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
 
-        for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
-        {
-            float layer_min_height = y * cell_height_in_color_space;
-            float layer_max_height = (y + 1) * cell_height_in_color_space;
-
+        for (int y = 0; y < m_grid_height_in_voxels; ++y)
+        { 
             var material = GameObject.Instantiate(m_material);
 
             float iso_level = y / (float)m_grid_height_in_voxels;
@@ -72,10 +68,38 @@ public class VoxelWorld : MonoBehaviour
             float top_y = (float)y * m_voxel_size_in_meters;
 
             var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, material, iso_level, bot_y, top_y);
+            m_layers[y] = layer;
+        }
+
+        for (int y = 0; y < m_grid_height_in_voxels; ++y)
+        {
+            var layer_below = default(VoxelLayer);
+            var layer_above = default(VoxelLayer);
+
+            if(y > 0)
+            {
+                layer_below = m_layers[y - 1];
+            }
+
+            if(y < m_grid_height_in_voxels - 2)
+            {
+                layer_above = m_layers[y + 1];
+            }
+
+            m_layers[y].SetAboveBelowLayers(layer_above, layer_below);
+        }
+
+        for(int y = 0; y < m_layers.Length; ++y)
+        {
+            float layer_min_height = y * cell_height_in_color_space;
+            float layer_max_height = (y + 1) * cell_height_in_color_space;
+
+            var layer = m_layers[y];
+
             layer.ApplyHeightmap(densities, layer_min_height, layer_max_height);
             layer.Triangulate();
-            m_layers[y] = layer;            
         }
+
 
         Instance = this;
     }

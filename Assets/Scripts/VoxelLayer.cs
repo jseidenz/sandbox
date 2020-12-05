@@ -31,6 +31,12 @@ public class VoxelLayer
         m_top_y = top_y;
     }
 
+    public void SetAboveBelowLayers(VoxelLayer layer_above, VoxelLayer layer_below)
+    {
+        m_layer_above = layer_above;
+        m_layer_below = layer_below;
+    }
+
     public void ApplyHeightmap(float[] densities, float min_height, float max_height)
     {
         float one_over_height_range = 1f / (max_height - min_height);
@@ -524,7 +530,8 @@ public class VoxelLayer
         Triangulate();
     }
 
-
+    VoxelLayer m_layer_above;
+    VoxelLayer m_layer_below;
     float[] m_density_grid;
     bool[] m_occlusion_grid;
     int m_width_in_voxels;
