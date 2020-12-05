@@ -47,7 +47,7 @@ MonoBehaviour:
     m_layer_brightness_factor: 0.65
     m_layer_colors:
     - m_color: {r: 0.33922213, g: 0.7264151, b: 0.58716875, a: 1}
-      m_height: 10.44
+      m_height: 9.28
     - m_color: {r: 0.2144482, g: 0.4433962, b: 0.20705765, a: 1}
       m_height: 12.93
     - m_color: {r: 0.15744035, g: 0.5471698, b: 0.45188293, a: 0}

@@ -75,7 +75,10 @@ public class VoxelChunk
         bool has_occlusion_changed = MarchMesh(scratch_buffer);
 
         m_collider.gameObject.SetActive(false);
-        m_collider.gameObject.SetActive(true);
+        if (!m_is_empty)
+        {
+            m_collider.gameObject.SetActive(true);
+        }
 
         return has_occlusion_changed;
     }
@@ -537,6 +540,8 @@ public class VoxelChunk
         mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_idx, 0, false);
         mesh.RecalculateBounds();
 
+        m_is_empty = triangle_idx == 0;
+
         return has_occlusion_changed;
     }
 
@@ -578,7 +583,10 @@ public class VoxelChunk
 
     public void Render(float dt, Material material)
     {
-        Graphics.DrawMesh(m_mesh, Matrix4x4.identity, material, 0);
+        if (!m_is_empty)
+        {
+            Graphics.DrawMesh(m_mesh, Matrix4x4.identity, material, 0);
+        }
     }
 
     bool[] m_layer_above_occlusion_grid;
@@ -596,6 +604,7 @@ public class VoxelChunk
     int m_density_grid_x;
     int m_density_grid_y;
     int m_chunk_dimension_in_voxels;
+    bool m_is_empty;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
