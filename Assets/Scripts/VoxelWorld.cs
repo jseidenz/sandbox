@@ -33,6 +33,8 @@ public class VoxelWorld : MonoBehaviour
     bool[] m_empty_occlusion_grid;
     List<DensityChange> m_density_changes = new List<DensityChange>();
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
+    HashSet<int> m_dirty_chunk_indices = new HashSet<int>();
+    HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
 
     public static VoxelWorld Instance;
 
@@ -153,23 +155,28 @@ public class VoxelWorld : MonoBehaviour
     {
         if (m_density_changes.Count == 0) return;
 
-        bool is_occlusion_above_dirty = false;
-        for(int y = m_grid_height_in_voxels - 1; y >= 0; --y)
+        m_dirty_chunk_indices.Clear();
+        m_dirty_chunk_occlusion_indices.Clear();
+
+        for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
-            bool has_applied_density_change = false;
             var layer = m_layers[y];
             foreach(var density_change in m_density_changes)
             {
                 if (density_change.m_layer_idx != y) continue;
 
-                layer.AddDensity(density_change.m_position, density_change.m_amount);
-                has_applied_density_change = true;
+                layer.AddDensity(density_change.m_position, density_change.m_amount, m_dirty_chunk_indices);
             }
 
-            if(has_applied_density_change || is_occlusion_above_dirty)
+            if(m_dirty_chunk_indices.Count != 0)
             {
-                is_occlusion_above_dirty = layer.Triangulate(m_voxel_chunk_scratch_buffer);
+                layer.Triangulate(m_voxel_chunk_scratch_buffer, m_dirty_chunk_indices, m_dirty_chunk_occlusion_indices);
             }
+
+            var temp = m_dirty_chunk_indices;
+            m_dirty_chunk_indices = m_dirty_chunk_occlusion_indices;
+            m_dirty_chunk_occlusion_indices = temp;
+            m_dirty_chunk_occlusion_indices.Clear();
         }
         m_density_changes.Clear();
         

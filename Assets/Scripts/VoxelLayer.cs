@@ -15,6 +15,8 @@ public class VoxelLayer
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
         m_voxel_size_in_meters = voxel_size_in_meters;
+        m_voxel_chunk_dimensions = voxel_chunk_dimensions;
+        m_one_over_voxel_chunk_dimensions = 1f / (float)voxel_chunk_dimensions;
 
         m_material = material;
 
@@ -55,16 +57,25 @@ public class VoxelLayer
         }
     }
 
-    public bool Triangulate(VoxelChunk.ScratchBuffer scratch_buffer)
+    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer)
     {
-        bool has_occlusion_changed = false;
         foreach(var chunk in m_voxel_chunks)
         {
-            var has_chunk_occlusion_changed = chunk.Triangulate(scratch_buffer);
-            has_occlusion_changed = has_occlusion_changed || has_chunk_occlusion_changed;
+            chunk.Triangulate(scratch_buffer);
         }
+    }
 
-        return has_occlusion_changed;
+    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<int> dirty_chunk_indices, HashSet<int> dirty_chunk_occlusion_indices)
+    {
+        foreach(var chunk_idx in dirty_chunk_indices)
+        {
+            var chunk = m_voxel_chunks[chunk_idx];
+            bool occlusion_dirtied = chunk.Triangulate(scratch_buffer);
+            if(occlusion_dirtied)
+            {
+                dirty_chunk_occlusion_indices.Add(chunk_idx);
+            }
+        }
     }
 
 
@@ -83,7 +94,7 @@ public class VoxelLayer
         return m_occlusion_grid;
     }
 
-    public void AddDensity(Vector3 pos, float amount)
+    public void AddDensity(Vector3 pos, float amount, HashSet<int> dirty_chunk_indices)
     {
         var x = (int)(pos.x / m_voxel_size_in_meters);
         if (x < 0 || x > m_width_in_voxels) return;
@@ -94,6 +105,25 @@ public class VoxelLayer
         var cell_idx = y * m_width_in_voxels + x;
 
         m_density_grid[cell_idx] += amount;
+
+        for(int i = -1; i <= 1; ++i)
+        {
+            for(int j = -1; j <= 1; ++j)
+            {
+                dirty_chunk_indices.Add(GetVoxelChunkIdxClamped(x + i, y + j));
+            }
+        }        
+    }
+
+    int GetVoxelChunkIdxClamped(int density_grid_x, int density_grid_y)
+    {
+        density_grid_x = System.Math.Min(System.Math.Max(density_grid_x, 0), m_width_in_voxels);
+        density_grid_y = System.Math.Min(System.Math.Max(density_grid_y, 0), m_height_in_voxels);
+
+        var chunk_grid_x = (int)(density_grid_x * m_one_over_voxel_chunk_dimensions);
+        var chunk_grid_y = (int)(density_grid_y * m_one_over_voxel_chunk_dimensions);
+
+        return chunk_grid_y * m_width_in_chunks + chunk_grid_x;
     }
 
     bool[] m_layer_above_occlusion_grid;
@@ -106,6 +136,8 @@ public class VoxelLayer
     int m_height_in_chunks;
     Material m_material;
     float m_voxel_size_in_meters;
+    float m_one_over_voxel_chunk_dimensions;
+    int m_voxel_chunk_dimensions;
     VoxelChunk[] m_voxel_chunks;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
