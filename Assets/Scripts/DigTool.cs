@@ -3,7 +3,11 @@ using System.Threading.Tasks;
 
 public class DigTool : MonoBehaviour 
 {
+    [SerializeField] float m_fill_rate;
+    [SerializeField] float m_dig_rate;
+
     float m_locked_fill_height;
+    
     void Update()
     {
         if(Input.GetKey(KeyCode.Mouse0))
@@ -13,7 +17,7 @@ public class DigTool : MonoBehaviour
 
             if (Physics.Raycast(ray, out hit))
             {
-                VoxelWorld.Instance.AddDensity(hit.point, -1.0f * Time.deltaTime);
+                VoxelWorld.Instance.AddDensity(hit.point, -m_dig_rate * Time.deltaTime);
             }
         }
 
@@ -35,7 +39,7 @@ public class DigTool : MonoBehaviour
             {
                 var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
-                VoxelWorld.Instance.AddDensity(hit_point, 1.0f * Time.deltaTime);
+                VoxelWorld.Instance.AddDensity(hit_point, m_fill_rate * Time.deltaTime);
             }
         }
     }

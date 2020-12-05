@@ -42,8 +42,6 @@ public class VoxelChunk
 
     public void ApplyHeightmap(float[] densities, float min_height, float max_height)
     {
-        float one_over_height_range = 1f / (max_height - min_height);
-
         for (int y = 0; y < m_layer_height_in_voxels; ++y)
         {
             for (int x = 0; x < m_layer_width_in_voxels; ++x)

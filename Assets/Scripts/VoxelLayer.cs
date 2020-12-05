@@ -51,14 +51,17 @@ public class VoxelLayer
 
     public void SetAboveAndBelowOcclusionGrids(bool[] layer_above_occlusion_grid, bool[] layer_below_occlusion_grid)
     {
+        foreach(var chunk in m_voxel_chunks)
+        {
+            chunk.SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
+        }
+
         m_layer_above_occlusion_grid = layer_above_occlusion_grid;
         m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
     public void ApplyHeightmap(float[] densities, float min_height, float max_height)
     {
-        float one_over_height_range = 1f / (max_height - min_height);
-
         for (int y = 0; y < m_height_in_voxels; ++y)
         {
             for (int x = 0; x < m_width_in_voxels; ++x)
