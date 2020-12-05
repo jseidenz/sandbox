@@ -32,10 +32,7 @@ public class VoxelWorld : MonoBehaviour
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
     List<DensityChange> m_density_changes = new List<DensityChange>();
-    VoxelChunk.Vertex[] m_vertices_scratch_buffer;
-    VoxelChunk.Edge[] m_edge_scratch_space;
-    Dictionary<int, VoxelChunk.WeldingInfo> m_welding_info_scratch_space = new Dictionary<int, VoxelChunk.WeldingInfo>();
-    System.UInt16[] m_indices_scratch_buffer;
+    VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
 
     public static VoxelWorld Instance;
 
@@ -55,10 +52,12 @@ public class VoxelWorld : MonoBehaviour
         var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
         m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
 
-        m_vertices_scratch_buffer = new VoxelChunk.Vertex[System.UInt16.MaxValue];
-        m_indices_scratch_buffer = new System.UInt16[m_vertices_scratch_buffer.Length * 24];
-        m_edge_scratch_space = new VoxelChunk.Edge[m_vertices_scratch_buffer.Length];
-        m_welding_info_scratch_space = new Dictionary<int, VoxelChunk.WeldingInfo>();
+        m_voxel_chunk_scratch_buffer = new VoxelChunk.ScratchBuffer
+        {
+            m_vertices = new VoxelChunk.Vertex[System.UInt16.MaxValue],
+            m_triangles = new System.UInt16[System.UInt16.MaxValue * 24],
+            m_edges = new VoxelChunk.Edge[System.UInt16.MaxValue],
+        };
 
         for (int y = 0; y < m_grid_depth_in_voxels; ++y)
         {
@@ -115,7 +114,7 @@ public class VoxelWorld : MonoBehaviour
             var layer = m_layers[y];
 
             layer.ApplyHeightmap(densities, layer_min_height, layer_max_height);
-            layer.Triangulate(m_vertices_scratch_buffer, m_indices_scratch_buffer, m_edge_scratch_space, m_welding_info_scratch_space);
+            layer.Triangulate(m_voxel_chunk_scratch_buffer);
         }
 
 
@@ -169,7 +168,7 @@ public class VoxelWorld : MonoBehaviour
 
             if(has_applied_density_change || is_occlusion_above_dirty)
             {
-                is_occlusion_above_dirty = layer.Triangulate(m_vertices_scratch_buffer, m_indices_scratch_buffer, m_edge_scratch_space, m_welding_info_scratch_space);
+                is_occlusion_above_dirty = layer.Triangulate(m_voxel_chunk_scratch_buffer);
             }
         }
         m_density_changes.Clear();

@@ -8,16 +8,18 @@ public class VoxelChunk
     const int SAMPLE_TYPE_FULL_SQUARE = 15;
     const int SAMPLE_TYPE_EMTPY = 0;
 
+    public struct ScratchBuffer
+    {
+        public VoxelChunk.Vertex[] m_vertices;
+        public System.UInt16[] m_triangles;
+        public VoxelChunk.Edge[] m_edges;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Vertex
     {
         public Vector3 m_position;
         public Vector3 m_normal;
-    }
-
-    public struct WeldingInfo
-    {
-
     }
 
     public struct Edge
@@ -68,9 +70,9 @@ public class VoxelChunk
         m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
-    public bool Triangulate(VoxelChunk.Vertex[] vertices_scratch_buffer, System.UInt16[] indices_screatch_buffer, VoxelChunk.Edge[] edge_scratch_space, Dictionary<int, VoxelChunk.WeldingInfo> welding_info_scratch_space)
+    public bool Triangulate(VoxelChunk.ScratchBuffer scratch_buffer)
     {
-        bool has_occlusion_changed = MarchMesh(vertices_scratch_buffer, indices_screatch_buffer, edge_scratch_space, welding_info_scratch_space);
+        bool has_occlusion_changed = MarchMesh(scratch_buffer);
 
         if (!m_collider.gameObject.activeSelf)
         {
@@ -211,7 +213,7 @@ public class VoxelChunk
     }
 
 
-    bool MarchMesh(Vertex[] vertex_scratch_buffer, System.UInt16[] triangle_scratch_buffer, Edge[] edge_scratch_space, Dictionary<int, WeldingInfo> welding_info_scratch_space)
+    bool MarchMesh(ScratchBuffer scratch_buffer)
     {
         var mesh = m_mesh;
         mesh.Clear();
@@ -303,11 +305,11 @@ public class VoxelChunk
                     m_vert_idx = vert_idx,
                     m_normal = normal,
                     m_iso_level = m_iso_level,
-                    m_vertices = vertex_scratch_buffer,
+                    m_vertices = scratch_buffer.m_vertices,
                     m_triangle_idx = triangle_idx,
-                    m_triangles = triangle_scratch_buffer,
+                    m_triangles = scratch_buffer.m_triangles,
                     m_edge_idx = edge_idx,
-                    m_edges = edge_scratch_space
+                    m_edges = scratch_buffer.m_edges
                 };
 
 
@@ -528,13 +530,13 @@ public class VoxelChunk
             }
         }
 
-        FinalizeEdges(vertex_scratch_buffer, triangle_scratch_buffer, edge_scratch_space, ref vert_idx, ref triangle_idx, ref edge_idx);
+        FinalizeEdges(scratch_buffer.m_vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, ref vert_idx, ref triangle_idx, ref edge_idx);
 
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
         mesh.SetVertexBufferParams(vert_idx, m_vertex_attribute_descriptors);
 
-        mesh.SetVertexBufferData(vertex_scratch_buffer, 0, 0, vert_idx);
-        mesh.SetTriangles(triangle_scratch_buffer, 0, triangle_idx, 0, false);
+        mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_idx);
+        mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_idx, 0, false);
         mesh.RecalculateBounds();
 
         return has_occlusion_changed;
