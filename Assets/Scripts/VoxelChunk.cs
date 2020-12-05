@@ -14,8 +14,11 @@ public class VoxelChunk
         public Vector3 m_normal;
     }
 
-    public VoxelChunk(int grid_offset, int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, bool[] layer_occlusion_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelChunk(int density_grid_x, int density_grid_y, int dimensions_in_voxels, int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, bool[] layer_occlusion_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
+        m_density_grid_x = density_grid_x;
+        m_density_grid_y = density_grid_y;
+        m_chunk_dimension_in_voxels = dimensions_in_voxels;
         m_layer_density_grid = layer_density_grid;
         m_layer_occlusion_grid = layer_occlusion_grid;
         m_layer_width_in_voxels = layer_width_in_voxels;
@@ -71,7 +74,6 @@ public class VoxelChunk
         public Vector3 m_normal;
         public float m_iso_level;
         public int m_triangle_idx;
-        public int m_grid_offset;
         public int[] m_triangles;
         public Vertex[] m_vertices;
 
@@ -208,7 +210,7 @@ public class VoxelChunk
         var mesh = m_mesh;
         mesh.Clear();
 
-        var max_vertex_count = m_layer_width_in_voxels * m_layer_height_in_voxels * 4;
+        var max_vertex_count = m_chunk_dimension_in_voxels * m_chunk_dimension_in_voxels * 4;
         var max_triangle_count = max_vertex_count * 4;
 
         var vertices = new Vertex[max_vertex_count];
@@ -219,12 +221,12 @@ public class VoxelChunk
 
         bool has_occlusion_changed = false;
 
-        for (int y = 0; y < m_layer_height_in_voxels - 1; ++y)
+        for (int y = m_density_grid_y; y < m_density_grid_y + m_chunk_dimension_in_voxels - 1; ++y)
         {
             var near_z = (float)y * m_voxel_size_in_meters;
             var far_z = near_z + m_voxel_size_in_meters;
 
-            for (int x = 0; x < m_layer_width_in_voxels - 1; ++x)
+            for (int x = m_density_grid_x; x < m_density_grid_x + m_chunk_dimension_in_voxels - 1; ++x)
             {
                 int left_near_cell_idx = y * m_layer_width_in_voxels + x;
 
@@ -289,7 +291,6 @@ public class VoxelChunk
                     m_iso_level = m_iso_level,
                     m_vertices = vertices,
                     m_triangle_idx = triangle_idx,
-                    m_grid_offset = m_grid_offset,
                     m_triangles = triangles
                 };
 
@@ -526,19 +527,6 @@ public class VoxelChunk
         Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
     }
 
-    public void AddDensity(Vector3 pos, float amount)
-    {
-        var x = (int)(pos.x / m_voxel_size_in_meters);
-        if (x < 0 || x > m_layer_width_in_voxels) return;
-
-        var y = (int)(pos.z / m_voxel_size_in_meters);
-        if (y < 0 || y > m_layer_height_in_voxels) return;
-
-        var cell_idx = y * m_layer_width_in_voxels + x;
-
-        m_layer_density_grid[cell_idx] += amount;
-    }
-
     bool[] m_layer_above_occlusion_grid;
     bool[] m_layer_below_occlusion_grid;
     float[] m_layer_density_grid;
@@ -552,7 +540,9 @@ public class VoxelChunk
     float m_bot_y;
     float m_top_y;
     float m_voxel_size_in_meters;
-    int m_grid_offset;
+    int m_density_grid_x;
+    int m_density_grid_y;
+    int m_chunk_dimension_in_voxels;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
