@@ -28,6 +28,7 @@ public class VoxelWorld : MonoBehaviour
     [SerializeField] int m_grid_depth_in_voxels;
     [SerializeField] Material m_material;
     [SerializeField] float m_voxel_size_in_meters;
+    [SerializeField] float m_ground_plane_size;
 
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
@@ -35,6 +36,7 @@ public class VoxelWorld : MonoBehaviour
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
     HashSet<int> m_dirty_chunk_indices = new HashSet<int>();
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
+    GameObject m_ground_plane;
 
     public static VoxelWorld Instance;
 
@@ -119,6 +121,15 @@ public class VoxelWorld : MonoBehaviour
             layer.Triangulate(m_voxel_chunk_scratch_buffer);
         }
 
+        m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        m_ground_plane.name = "GroundPlane";
+
+        var ground_plane_material = GameObject.Instantiate(m_material);
+        ground_plane_material.color = ApplyLayerBrightnessColor(0, m_tuneables.m_layer_colors[0].m_color);
+
+        m_ground_plane.GetComponent<MeshRenderer>().sharedMaterial = ground_plane_material;
+        m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
+        m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
 
         Instance = this;
     }
@@ -141,14 +152,19 @@ public class VoxelWorld : MonoBehaviour
 
                 color = layer_color.m_color;
                 break;
-            }           
+            }
 
-            var layer_brightness = m_tuneables.m_layer_brightness_factor + (1 - m_tuneables.m_layer_brightness_factor) * (y / (m_layers.Length - 1));
 
-            color = new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
+            color = ApplyLayerBrightnessColor(y, color);
 
             m_layers[y].Render(dt, color);
         }
+    }
+
+    Color ApplyLayerBrightnessColor(int y, Color color)
+    {   
+        var layer_brightness = m_tuneables.m_layer_brightness_factor + (1 - m_tuneables.m_layer_brightness_factor) * (y / (m_layers.Length - 1));
+        return new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
     }
 
     void UpdateDensityChanges()
