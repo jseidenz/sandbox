@@ -8,7 +8,7 @@ public class VoxelChunk
     const int SAMPLE_TYPE_EMTPY = 0;
 
     [StructLayout(LayoutKind.Sequential)]
-    struct Vertex
+    public struct Vertex
     {
         public Vector3 m_position;
         public Vector3 m_normal;
@@ -56,9 +56,9 @@ public class VoxelChunk
         m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
-    public bool Triangulate()
+    public bool Triangulate(VoxelChunk.Vertex[] vertices_scratch_buffer, System.UInt16[] indices_screatch_buffer)
     {
-        bool has_occlusion_changed = MarchMesh();
+        bool has_occlusion_changed = MarchMesh(vertices_scratch_buffer, indices_screatch_buffer);
 
         if (!m_collider.gameObject.activeSelf)
         {
@@ -82,14 +82,14 @@ public class VoxelChunk
         public float m_right_near_density;
         public float m_left_far_density;
         public float m_right_far_density;
-        public int m_vert_idx;
+        public System.UInt16 m_vert_idx;
         public Vector3 m_normal;
         public float m_iso_level;
         public int m_triangle_idx;
-        public int[] m_triangles;
+        public System.UInt16[] m_triangles;
         public Vertex[] m_vertices;
 
-        public int LeftNear()
+        public System.UInt16 LeftNear()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -99,7 +99,7 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public int RightNear()
+        public System.UInt16 RightNear()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -109,7 +109,7 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public int LeftFar()
+        public System.UInt16 LeftFar()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -119,7 +119,7 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public int RightFar()
+        public System.UInt16 RightFar()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -129,7 +129,7 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public int LeftEdge()
+        public System.UInt16 LeftEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -139,7 +139,7 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public int RightEdge()
+        public System.UInt16 RightEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -149,7 +149,7 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public int NearEdge()
+        public System.UInt16 NearEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -159,7 +159,7 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public int FarEdge()
+        public System.UInt16 FarEdge()
         {
             m_vertices[m_vert_idx] = new Vertex
             {
@@ -179,14 +179,14 @@ public class VoxelChunk
             return pos_a + (m_iso_level - density_a) * (pos_b - pos_a) / (density_b - density_a);
         }
 
-        public void Triangle(int vert_idx_a, int vert_idx_b, int vert_idx_c)
+        public void Triangle(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b, System.UInt16 vert_idx_c)
         {
             m_triangles[m_triangle_idx++] = vert_idx_a;
             m_triangles[m_triangle_idx++] = vert_idx_b;
             m_triangles[m_triangle_idx++] = vert_idx_c;
         }
 
-        public void ExtrudeTopToBot(int vert_idx_a, int vert_idx_b)
+        public void ExtrudeTopToBot(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b)
         {
             var vert_a = m_vertices[vert_idx_a];
             var vert_b = m_vertices[vert_idx_b];
@@ -217,19 +217,14 @@ public class VoxelChunk
     }
 
 
-    bool MarchMesh()
+    bool MarchMesh(Vertex[] vertex_scratch_buffer, System.UInt16[] triangle_scratch_buffer)
     {
         var mesh = m_mesh;
         mesh.Clear();
 
-        var max_vertex_count = m_chunk_dimension_in_voxels * m_chunk_dimension_in_voxels * 4;
-        var max_triangle_count = max_vertex_count * 4;
 
-        var vertices = new Vertex[max_vertex_count];
-
-        int vert_idx = 0;
+        System.UInt16 vert_idx = 0;
         int triangle_idx = 0;
-        var triangles = new int[max_triangle_count];
 
         bool has_occlusion_changed = false;
 
@@ -313,9 +308,9 @@ public class VoxelChunk
                     m_vert_idx = vert_idx,
                     m_normal = normal,
                     m_iso_level = m_iso_level,
-                    m_vertices = vertices,
+                    m_vertices = vertex_scratch_buffer,
                     m_triangle_idx = triangle_idx,
-                    m_triangles = triangles
+                    m_triangles = triangle_scratch_buffer
                 };
 
 
@@ -535,11 +530,11 @@ public class VoxelChunk
             }
         }
 
-        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
         mesh.SetVertexBufferParams(vert_idx, m_vertex_attribute_descriptors);
 
-        mesh.SetVertexBufferData(vertices, 0, 0, vert_idx);
-        mesh.SetTriangles(triangles, 0, triangle_idx, 0, false);
+        mesh.SetVertexBufferData(vertex_scratch_buffer, 0, 0, vert_idx);
+        mesh.SetTriangles(triangle_scratch_buffer, 0, triangle_idx, 0, false);
         mesh.RecalculateBounds();
 
         return has_occlusion_changed;

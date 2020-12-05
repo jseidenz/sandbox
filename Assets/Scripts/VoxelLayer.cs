@@ -4,16 +4,6 @@ using UnityEngine.Rendering;
 
 public class VoxelLayer
 {
-    const int SAMPLE_TYPE_FULL_SQUARE = 15;
-    const int SAMPLE_TYPE_EMTPY = 0;
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct Vertex
-    {
-        public Vector3 m_position;
-        public Vector3 m_normal;
-    }
-
     public VoxelLayer(int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
@@ -64,12 +54,12 @@ public class VoxelLayer
         }
     }
 
-    public bool Triangulate()
+    public bool Triangulate(VoxelChunk.Vertex[] vertices_scratch_buffer, System.UInt16[] indices_screatch_buffer)
     {
         bool has_occlusion_changed = false;
         foreach(var chunk in m_voxel_chunks)
         {
-            var has_chunk_occlusion_changed = chunk.Triangulate();
+            var has_chunk_occlusion_changed = chunk.Triangulate(vertices_scratch_buffer, indices_screatch_buffer);
             has_occlusion_changed = has_occlusion_changed || has_chunk_occlusion_changed;
         }
 

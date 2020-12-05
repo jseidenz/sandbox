@@ -32,6 +32,8 @@ public class VoxelWorld : MonoBehaviour
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
     List<DensityChange> m_density_changes = new List<DensityChange>();
+    VoxelChunk.Vertex[] m_vertices_scratch_buffer;
+    System.UInt16[] m_indices_scratch_buffer;
 
     public static VoxelWorld Instance;
 
@@ -50,6 +52,9 @@ public class VoxelWorld : MonoBehaviour
         var height_map_width = height_map_tex.width;
         var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
         m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
+
+        m_vertices_scratch_buffer = new VoxelChunk.Vertex[System.UInt16.MaxValue];
+        m_indices_scratch_buffer = new System.UInt16[m_vertices_scratch_buffer.Length * 24];
 
         for (int y = 0; y < m_grid_depth_in_voxels; ++y)
         {
@@ -106,7 +111,7 @@ public class VoxelWorld : MonoBehaviour
             var layer = m_layers[y];
 
             layer.ApplyHeightmap(densities, layer_min_height, layer_max_height);
-            layer.Triangulate();
+            layer.Triangulate(m_vertices_scratch_buffer, m_indices_scratch_buffer);
         }
 
 
@@ -160,7 +165,7 @@ public class VoxelWorld : MonoBehaviour
 
             if(has_applied_density_change || is_occlusion_above_dirty)
             {
-                is_occlusion_above_dirty = layer.Triangulate();
+                is_occlusion_above_dirty = layer.Triangulate(m_vertices_scratch_buffer, m_indices_scratch_buffer);
             }
         }
         m_density_changes.Clear();
