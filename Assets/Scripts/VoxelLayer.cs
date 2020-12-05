@@ -44,7 +44,8 @@ public class VoxelLayer
         {
             for(int x = 0; x < m_width_in_chunks; ++x)
             {
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(width_in_voxels, height_in_voxels, m_density_grid, voxel_size_in_meters, material, iso_level, bot_y, top_y);
+                int grid_offset = y * voxel_chunk_dimensions + x;
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(grid_offset, width_in_voxels, height_in_voxels, m_density_grid, voxel_size_in_meters, material, iso_level, bot_y, top_y);
             }
         }
     }

@@ -14,7 +14,7 @@ public class VoxelChunk
         public Vector3 m_normal;
     }
 
-    public VoxelChunk(int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelChunk(int grid_offset, int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
         m_layer_density_grid = layer_density_grid;
         m_occlusion_grid = new bool[layer_width_in_voxels * layer_height_in_voxels];
@@ -568,6 +568,7 @@ public class VoxelChunk
     float m_bot_y;
     float m_top_y;
     float m_voxel_size_in_meters;
+    int m_grid_offset;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
