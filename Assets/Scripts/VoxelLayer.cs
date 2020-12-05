@@ -279,7 +279,7 @@ public class VoxelLayer
                 }
 
                 bool is_occluded = m_layer_above_occlusion_grid[left_near_cell_idx];
-                if (is_occluded) continue;
+                //if (is_occluded) continue;
 
                 var left_x = (float)x * m_voxel_size_in_meters;
                 var right_x = left_x + m_voxel_size_in_meters;
