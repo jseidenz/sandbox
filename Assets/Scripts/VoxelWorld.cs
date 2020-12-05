@@ -154,9 +154,19 @@ public class VoxelWorld : MonoBehaviour
 
     public Color GetColorForLayer(int layer_idx)
     {
-        float world_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters;
-        float layer_height_over_world_height = layer_idx / world_height_in_meters;
+        float layer_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters;
+        float layer_height_over_world_height = layer_idx / layer_height_in_meters;
+
         var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
+        if(layer_height_in_meters > m_tuneables.m_water_height)
+        {
+            Color.RGBToHSV(color, out var hue, out var saturation, out var value);
+
+            hue += Mathf.Sin(layer_height_over_world_height * m_tuneables.m_hue_variation_rate) * m_tuneables.m_hue_variaton_amount;
+            saturation += Mathf.Sin(layer_height_over_world_height * m_tuneables.m_saturation_variation_rate) * m_tuneables.m_saturation_variation_amount;
+
+            color = Color.HSVToRGB(hue, saturation, value);
+        }
         return color;
     }
 
