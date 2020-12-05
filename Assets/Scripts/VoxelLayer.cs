@@ -39,6 +39,14 @@ public class VoxelLayer
         m_width_in_chunks = width_in_voxels / voxel_chunk_dimensions;
         m_height_in_chunks = height_in_voxels / voxel_chunk_dimensions;
         m_voxel_chunks = new VoxelChunk[m_width_in_chunks * m_height_in_chunks];
+
+        for(int y = 0; y < m_height_in_chunks; ++y)
+        {
+            for(int x = 0; x < m_width_in_chunks; ++x)
+            {
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(width_in_voxels, height_in_voxels, m_density_grid, voxel_size_in_meters, material, iso_level, bot_y, top_y);
+            }
+        }
     }
 
     public void SetAboveAndBelowOcclusionGrids(bool[] layer_above_occlusion_grid, bool[] layer_below_occlusion_grid)

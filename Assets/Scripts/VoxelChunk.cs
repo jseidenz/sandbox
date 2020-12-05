@@ -14,12 +14,12 @@ public class VoxelChunk
         public Vector3 m_normal;
     }
 
-    public VoxelChunk(int width_in_voxels, int height_in_voxels, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelChunk(int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
-        m_density_grid = new float[width_in_voxels * height_in_voxels];
-        m_occlusion_grid = new bool[width_in_voxels * height_in_voxels];
-        m_width_in_voxels = width_in_voxels;
-        m_height_in_voxels = height_in_voxels;
+        m_layer_density_grid = layer_density_grid;
+        m_occlusion_grid = new bool[layer_width_in_voxels * layer_height_in_voxels];
+        m_layer_width_in_voxels = layer_width_in_voxels;
+        m_layer_height_in_voxels = layer_height_in_voxels;
         m_iso_level = iso_level;
         m_voxel_size_in_meters = voxel_size_in_meters;
 
@@ -44,13 +44,13 @@ public class VoxelChunk
     {
         float one_over_height_range = 1f / (max_height - min_height);
 
-        for (int y = 0; y < m_height_in_voxels; ++y)
+        for (int y = 0; y < m_layer_height_in_voxels; ++y)
         {
-            for (int x = 0; x < m_width_in_voxels; ++x)
+            for (int x = 0; x < m_layer_width_in_voxels; ++x)
             {
-                var cell_idx = y * m_width_in_voxels + x;
+                var cell_idx = y * m_layer_width_in_voxels + x;
 
-                m_density_grid[cell_idx] = densities[cell_idx];
+                m_layer_density_grid[cell_idx] = densities[cell_idx];
             }
         }
     }
@@ -222,7 +222,7 @@ public class VoxelChunk
         var mesh = m_mesh;
         mesh.Clear();
 
-        var max_vertex_count = m_width_in_voxels * m_height_in_voxels * 4;
+        var max_vertex_count = m_layer_width_in_voxels * m_layer_height_in_voxels * 4;
         var max_triangle_count = max_vertex_count * 4;
 
         var vertices = new Vertex[max_vertex_count];
@@ -233,19 +233,19 @@ public class VoxelChunk
 
         bool has_occlusion_changed = false;
 
-        for (int y = 0; y < m_height_in_voxels - 1; ++y)
+        for (int y = 0; y < m_layer_height_in_voxels - 1; ++y)
         {
             var near_z = (float)y * m_voxel_size_in_meters;
             var far_z = near_z + m_voxel_size_in_meters;
 
-            for (int x = 0; x < m_width_in_voxels - 1; ++x)
+            for (int x = 0; x < m_layer_width_in_voxels - 1; ++x)
             {
-                int left_near_cell_idx = y * m_width_in_voxels + x;
+                int left_near_cell_idx = y * m_layer_width_in_voxels + x;
 
-                var left_near_density = m_density_grid[left_near_cell_idx];
-                var right_near_density = m_density_grid[left_near_cell_idx + 1];
-                var left_far_density = m_density_grid[left_near_cell_idx + m_width_in_voxels];
-                var right_far_density = m_density_grid[left_near_cell_idx + m_width_in_voxels + 1];
+                var left_near_density = m_layer_density_grid[left_near_cell_idx];
+                var right_near_density = m_layer_density_grid[left_near_cell_idx + 1];
+                var left_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels];
+                var right_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels + 1];
 
                 int sample_type = 0;
                 if (left_near_density >= m_iso_level) sample_type |= 1;
@@ -547,22 +547,22 @@ public class VoxelChunk
     public void AddDensity(Vector3 pos, float amount)
     {
         var x = (int)(pos.x / m_voxel_size_in_meters);
-        if (x < 0 || x > m_width_in_voxels) return;
+        if (x < 0 || x > m_layer_width_in_voxels) return;
 
         var y = (int)(pos.z / m_voxel_size_in_meters);
-        if (y < 0 || y > m_height_in_voxels) return;
+        if (y < 0 || y > m_layer_height_in_voxels) return;
 
-        var cell_idx = y * m_width_in_voxels + x;
+        var cell_idx = y * m_layer_width_in_voxels + x;
 
-        m_density_grid[cell_idx] += amount;
+        m_layer_density_grid[cell_idx] += amount;
     }
 
     bool[] m_layer_above_occlusion_grid;
     bool[] m_layer_below_occlusion_grid;
-    float[] m_density_grid;
+    float[] m_layer_density_grid;
     bool[] m_occlusion_grid;
-    int m_width_in_voxels;
-    int m_height_in_voxels;
+    int m_layer_width_in_voxels;
+    int m_layer_height_in_voxels;
     Mesh m_mesh;
     Material m_material;
     MeshCollider m_collider;
