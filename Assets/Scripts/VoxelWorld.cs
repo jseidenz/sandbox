@@ -8,15 +8,13 @@ public class VoxelWorld : MonoBehaviour
     [System.Serializable]
     public class LiveTuneable
     {
-        [System.Serializable]        
-        public struct LayerColor
-        {
-            public Color m_color;
-            public float m_height;
-        }
-
         public float m_water_height;
         public Gradient m_height_gradient = new Gradient();
+
+        public float m_saturation_variation_rate;
+        public float m_saturation_variation_amount;
+        public float m_hue_variation_rate;
+        public float m_hue_variaton_amount;
     }
 
     public LiveTuneable m_tuneables;
@@ -125,7 +123,7 @@ public class VoxelWorld : MonoBehaviour
         m_ground_plane.name = "GroundPlane";
 
         var ground_plane_material = GameObject.Instantiate(m_material);
-        ground_plane_material.color = m_tuneables.m_height_gradient.Evaluate(0);
+        ground_plane_material.color = GetColorForLayer(0);
 
         var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
         ground_plane_mesh_renderer.sharedMaterial = ground_plane_material;
@@ -146,15 +144,20 @@ public class VoxelWorld : MonoBehaviour
 
         float dt = Time.deltaTime;
 
-        float world_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters;
-
         for (int y = 0; y < m_layers.Length; ++y)
         {
-            float layer_height_over_world_height = y / world_height_in_meters;
-            var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
+            var color = GetColorForLayer(y);
 
             m_layers[y].Render(dt, color);
         }
+    }
+
+    public Color GetColorForLayer(int layer_idx)
+    {
+        float world_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters;
+        float layer_height_over_world_height = layer_idx / world_height_in_meters;
+        var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
+        return color;
     }
 
     void UpdateDensityChanges()
