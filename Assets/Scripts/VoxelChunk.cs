@@ -253,10 +253,10 @@ public class VoxelChunk
                 var right_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset + right_density_idx_offset];
 
                 int sample_type = 0;
-                if (left_near_density > m_iso_level) sample_type |= 1;
-                if (right_near_density > m_iso_level) sample_type |= 2;
-                if (right_far_density > m_iso_level) sample_type |= 4;
-                if (left_far_density > m_iso_level) sample_type |= 8;
+                if (left_near_density >= m_iso_level) sample_type |= 1;
+                if (right_near_density >= m_iso_level) sample_type |= 2;
+                if (right_far_density >= m_iso_level) sample_type |= 4;
+                if (left_far_density >= m_iso_level) sample_type |= 8;
 
 
                 if (sample_type != SAMPLE_TYPE_FULL_SQUARE)
