@@ -15,9 +15,6 @@ public class VoxelWorld : MonoBehaviour
             public float m_height;
         }
 
-
-        public float m_layer_brightness_factor;
-        public LayerColor[] m_layer_colors;
         public float m_water_height;
         public Gradient m_height_gradient = new Gradient();
     }
@@ -128,7 +125,7 @@ public class VoxelWorld : MonoBehaviour
         m_ground_plane.name = "GroundPlane";
 
         var ground_plane_material = GameObject.Instantiate(m_material);
-        ground_plane_material.color = ApplyLayerBrightnessColor(0, m_tuneables.m_layer_colors[0].m_color);
+        ground_plane_material.color = m_tuneables.m_height_gradient.Evaluate(0);
 
         var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
         ground_plane_mesh_renderer.sharedMaterial = ground_plane_material;
@@ -148,7 +145,6 @@ public class VoxelWorld : MonoBehaviour
         UpdateDensityChanges();
 
         float dt = Time.deltaTime;
-        var layer_colors = m_tuneables.m_layer_colors;
 
         float world_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters;
 
@@ -157,16 +153,8 @@ public class VoxelWorld : MonoBehaviour
             float layer_height_over_world_height = y / world_height_in_meters;
             var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
 
-            var top_y = (float)y;
-
             m_layers[y].Render(dt, color);
         }
-    }
-
-    Color ApplyLayerBrightnessColor(int y, Color color)
-    {   
-        var layer_brightness = m_tuneables.m_layer_brightness_factor + (1 - m_tuneables.m_layer_brightness_factor) * (y / (m_layers.Length - 1));
-        return new Color(color.r * layer_brightness, color.g * layer_brightness, color.b * layer_brightness);
     }
 
     void UpdateDensityChanges()

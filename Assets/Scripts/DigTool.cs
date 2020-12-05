@@ -10,12 +10,18 @@ public class DigTool : MonoBehaviour
     
     void Update()
     {
-        if(Input.GetKey(KeyCode.Mouse0))
+        if (Input.GetKey(KeyCode.T))
         {
-            var ray = GetCameraRay();
-            RaycastHit hit;
+            if(CameraRayCast(out var hit))
+            {
+                float teleport_vertical_offset = 1f;
+                transform.position = hit.point + new Vector3(0, teleport_vertical_offset, 0);
+            }
+        }
 
-            if (Physics.Raycast(ray, out hit))
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            if (CameraRayCast(out var hit))
             {
                 VoxelWorld.Instance.AddDensity(hit.point, -m_dig_rate * Time.deltaTime);
             }
@@ -23,19 +29,18 @@ public class DigTool : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Mouse1))
         {
-            var ray = GetCameraRay();
             if (Input.GetKeyDown(KeyCode.Mouse1))
             {                
-                RaycastHit hit;                
-
-                if (Physics.Raycast(ray, out hit))
+                if (CameraRayCast(out var hit))
                 {
                     m_locked_fill_height = hit.point.y + VoxelWorld.Instance.GetVoxelSizeInMeters();
                 }
             }
 
             var plane = new Plane(Vector3.up, new Vector3(0, m_locked_fill_height, 0));
-            if(plane.Raycast(ray, out var distance))
+
+            var ray = GetCameraRay();
+            if (plane.Raycast(ray, out var distance))
             {
                 var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
@@ -47,5 +52,12 @@ public class DigTool : MonoBehaviour
     Ray GetCameraRay()
     {
         return Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+    }
+
+    bool CameraRayCast(out RaycastHit hit)
+    {
+        var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+
+        return Physics.Raycast(ray, out hit);
     }
 }
