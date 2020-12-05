@@ -22,8 +22,8 @@ public class VoxelChunk
 
     public struct Edge
     {
-        public int m_vertex_idx_a;
-        public int m_vertex_idx_b;
+        public System.UInt16 m_vertex_idx_a;
+        public System.UInt16 m_vertex_idx_b;
     }
 
     public VoxelChunk(
@@ -100,6 +100,8 @@ public class VoxelChunk
         public int m_triangle_idx;
         public System.UInt16[] m_triangles;
         public Vertex[] m_vertices;
+        public int m_edge_idx;
+        public Edge[] m_edges;
 
         public System.UInt16 LeftNear()
         {
@@ -200,31 +202,11 @@ public class VoxelChunk
 
         public void ExtrudeTopToBot(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b)
         {
-            var vert_a = m_vertices[vert_idx_a];
-            var vert_b = m_vertices[vert_idx_b];
-
-            var vert_c = vert_a;
-            vert_c.m_position.y = m_bot_y;           
-
-            var vert_d = vert_b;
-            vert_d.m_position.y = m_bot_y;
-
-            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
-            vert_c.m_normal = normal;
-            vert_d.m_normal = normal;
-
-            var vert_idx_c = m_vert_idx;
-            m_vertices[m_vert_idx++] = vert_c;
-
-            var vert_idx_d = m_vert_idx;
-            m_vertices[m_vert_idx++] = vert_d;            
-
-            m_triangles[m_triangle_idx++] = vert_idx_a;
-            m_triangles[m_triangle_idx++] = vert_idx_b;
-            m_triangles[m_triangle_idx++] = vert_idx_c;
-            m_triangles[m_triangle_idx++] = vert_idx_c;
-            m_triangles[m_triangle_idx++] = vert_idx_b;
-            m_triangles[m_triangle_idx++] = vert_idx_d;
+            m_edges[m_edge_idx++] = new Edge
+            {
+                m_vertex_idx_a = vert_idx_a,
+                m_vertex_idx_b = vert_idx_b
+            };
         }
     }
 
@@ -237,6 +219,7 @@ public class VoxelChunk
 
         System.UInt16 vert_idx = 0;
         int triangle_idx = 0;
+        int edge_idx = 0;
 
         bool has_occlusion_changed = false;
 
@@ -322,7 +305,9 @@ public class VoxelChunk
                     m_iso_level = m_iso_level,
                     m_vertices = vertex_scratch_buffer,
                     m_triangle_idx = triangle_idx,
-                    m_triangles = triangle_scratch_buffer
+                    m_triangles = triangle_scratch_buffer,
+                    m_edge_idx = edge_idx,
+                    m_edges = edge_scratch_space
                 };
 
 
@@ -537,10 +522,13 @@ public class VoxelChunk
                     marcher.Triangle(left_far, right_far, right_near);
                 }
 
+                edge_idx = marcher.m_edge_idx;
                 vert_idx = marcher.m_vert_idx;
                 triangle_idx = marcher.m_triangle_idx;
             }
         }
+
+        FinalizeEdges(vertex_scratch_buffer, triangle_scratch_buffer, edge_scratch_space, ref vert_idx, ref triangle_idx, ref edge_idx);
 
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
         mesh.SetVertexBufferParams(vert_idx, m_vertex_attribute_descriptors);
@@ -550,6 +538,42 @@ public class VoxelChunk
         mesh.RecalculateBounds();
 
         return has_occlusion_changed;
+    }
+
+    void FinalizeEdges(Vertex[] vertices, System.UInt16[] triangles, Edge[] edges, ref System.UInt16 vert_idx, ref int triangle_idx, ref int edge_count)
+    {
+        for (int i = 0; i < edge_count; ++i)
+        {
+            var edge = edges[i];
+            var vert_idx_a = edge.m_vertex_idx_a;
+            var vert_idx_b = edge.m_vertex_idx_b;
+
+            var vert_a = vertices[vert_idx_a];
+            var vert_b = vertices[vert_idx_b];
+
+            var vert_c = vert_a;
+            vert_c.m_position.y = m_bot_y;
+
+            var vert_d = vert_b;
+            vert_d.m_position.y = m_bot_y;
+
+            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
+            vert_c.m_normal = normal;
+            vert_d.m_normal = normal;
+
+            var vert_idx_c = vert_idx;
+            vertices[vert_idx++] = vert_c;
+
+            var vert_idx_d = vert_idx;
+            vertices[vert_idx++] = vert_d;
+
+            triangles[triangle_idx++] = vert_idx_a;
+            triangles[triangle_idx++] = vert_idx_b;
+            triangles[triangle_idx++] = vert_idx_c;
+            triangles[triangle_idx++] = vert_idx_c;
+            triangles[triangle_idx++] = vert_idx_b;
+            triangles[triangle_idx++] = vert_idx_d;
+        }
     }
 
     public void Render(float dt, Material material)
