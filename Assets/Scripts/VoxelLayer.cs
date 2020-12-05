@@ -4,6 +4,9 @@ using UnityEngine.Rendering;
 
 public class VoxelLayer
 {
+    const int SAMPLE_TYPE_FULL_SQUARE = 15;
+    const int SAMPLE_TYPE_EMTPY = 0;
+
     [StructLayout(LayoutKind.Sequential)]
     struct Vertex
     {
@@ -239,21 +242,6 @@ public class VoxelLayer
             {
                 int left_near_cell_idx = y * m_width_in_voxels + x;
 
-                var is_occluded = false;
-
-                if(m_layer_above_occlusion_grid[left_near_cell_idx])
-                {
-                    is_occluded = true;
-
-                    if (m_occlusion_grid[left_near_cell_idx] != is_occluded)
-                    {
-                        has_occlusion_changed = true;
-                        m_occlusion_grid[left_near_cell_idx] = is_occluded;
-                    }
-
-                    continue;
-                }
-
                 var left_near_density = m_density_grid[left_near_cell_idx];
                 var right_near_density = m_density_grid[left_near_cell_idx + 1];
                 var left_far_density = m_density_grid[left_near_cell_idx + m_width_in_voxels];
@@ -263,18 +251,35 @@ public class VoxelLayer
                 if (left_near_density >= m_iso_level) sample_type |= 1;
                 if (right_near_density >= m_iso_level) sample_type |= 2;
                 if (right_far_density >= m_iso_level) sample_type |= 4;
-                if (left_far_density >= m_iso_level) sample_type |= 8;                
+                if (left_far_density >= m_iso_level) sample_type |= 8;
 
-                if (sample_type == 0)
+
+                if (sample_type != SAMPLE_TYPE_FULL_SQUARE)
                 {
-                    if (m_occlusion_grid[left_near_cell_idx] != is_occluded)
+                    var is_occluding = false;
+                    if (m_occlusion_grid[left_near_cell_idx] != is_occluding)
                     {
                         has_occlusion_changed = true;
-                        m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                        m_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
 
-                    continue;
+                    if(sample_type == SAMPLE_TYPE_EMTPY)
+                    {
+                        continue;
+                    }
                 }
+                else
+                {
+                    var is_occluding = true;
+                    if (m_occlusion_grid[left_near_cell_idx] != is_occluding)
+                    {
+                        has_occlusion_changed = true;
+                        m_occlusion_grid[left_near_cell_idx] = is_occluding;
+                    }
+                }
+
+                bool is_occluded = m_layer_above_occlusion_grid[left_near_cell_idx];
+                if (is_occluded) continue;
 
                 var left_x = (float)x * m_voxel_size_in_meters;
                 var right_x = left_x + m_voxel_size_in_meters;
@@ -502,7 +507,7 @@ public class VoxelLayer
                     marcher.ExtrudeTopToBot(left_edge, near_edge);
 
                 }
-                else if (sample_type == 15) // Full Square
+                else if (sample_type == SAMPLE_TYPE_FULL_SQUARE)
                 {
                     var left_near = marcher.LeftNear();
                     var left_far = marcher.LeftFar();
@@ -511,14 +516,6 @@ public class VoxelLayer
 
                     marcher.Triangle(left_near, left_far, right_near);
                     marcher.Triangle(left_far, right_far, right_near);
-
-                    is_occluded = true;
-                }
-
-                if(m_occlusion_grid[left_near_cell_idx] != is_occluded)
-                {
-                    has_occlusion_changed = true;
-                    m_occlusion_grid[left_near_cell_idx] = is_occluded;
                 }
 
                 vert_idx = marcher.m_vert_idx;
@@ -558,8 +555,6 @@ public class VoxelLayer
         var cell_idx = y * m_width_in_voxels + x;
 
         m_density_grid[cell_idx] += amount;
-
-        Triangulate();
     }
 
     bool[] m_layer_above_occlusion_grid;

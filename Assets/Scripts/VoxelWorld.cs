@@ -37,6 +37,7 @@ public class VoxelWorld : MonoBehaviour
     struct DensityChange
     {
         public Vector3 m_position;
+        public int m_layer_idx;
         public float m_amount;
     }
 
@@ -144,6 +145,25 @@ public class VoxelWorld : MonoBehaviour
 
     void UpdateDensityChanges()
     {
+        bool is_occlusion_above_dirty = false;
+        for(int y = m_grid_height_in_voxels - 1; y >= 0; --y)
+        {
+            bool has_applied_density_change = false;
+            var layer = m_layers[y];
+            foreach(var density_change in m_density_changes)
+            {
+                if (density_change.m_layer_idx != y) continue;
+
+                layer.AddDensity(density_change.m_position, density_change.m_amount);
+                has_applied_density_change = true;
+            }
+
+            if(has_applied_density_change || is_occlusion_above_dirty)
+            {
+                is_occlusion_above_dirty = layer.Triangulate();
+            }
+        }
+
         foreach(var density_change in m_density_changes)
         {
             var pos = density_change.m_position;
@@ -153,14 +173,19 @@ public class VoxelWorld : MonoBehaviour
             if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
             m_layers[layer_idx].AddDensity(pos, amount);
+            m_layers[layer_idx].Triangulate();
         }
 
         m_density_changes.Clear();
+        
     }
 
     public void AddDensity(Vector3 pos, float amount)
     {
-        m_density_changes.Add(new DensityChange { m_position = pos, m_amount = amount });
+        var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * m_voxel_size_in_meters)) * (float)m_layers.Length);
+        if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
+
+        m_density_changes.Add(new DensityChange { m_position = pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
     public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters;  }
