@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering;
+using System.Collections.Generic;
 
 public class VoxelLayer
 {
@@ -54,12 +55,12 @@ public class VoxelLayer
         }
     }
 
-    public bool Triangulate(VoxelChunk.Vertex[] vertices_scratch_buffer, System.UInt16[] indices_screatch_buffer)
+    public bool Triangulate(VoxelChunk.Vertex[] vertices_scratch_buffer, System.UInt16[] indices_screatch_buffer, VoxelChunk.Edge[] edge_scratch_space, Dictionary<int, VoxelChunk.WeldingInfo> welding_info_scratch_space)
     {
         bool has_occlusion_changed = false;
         foreach(var chunk in m_voxel_chunks)
         {
-            var has_chunk_occlusion_changed = chunk.Triangulate(vertices_scratch_buffer, indices_screatch_buffer);
+            var has_chunk_occlusion_changed = chunk.Triangulate(vertices_scratch_buffer, indices_screatch_buffer, edge_scratch_space, welding_info_scratch_space);
             has_occlusion_changed = has_occlusion_changed || has_chunk_occlusion_changed;
         }
 

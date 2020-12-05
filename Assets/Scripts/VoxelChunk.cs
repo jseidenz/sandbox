@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering;
+using System.Collections.Generic;
 
 public class VoxelChunk
 {
@@ -12,6 +13,17 @@ public class VoxelChunk
     {
         public Vector3 m_position;
         public Vector3 m_normal;
+    }
+
+    public struct WeldingInfo
+    {
+
+    }
+
+    public struct Edge
+    {
+        public int m_vertex_idx_a;
+        public int m_vertex_idx_b;
     }
 
     public VoxelChunk(
@@ -56,9 +68,9 @@ public class VoxelChunk
         m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
-    public bool Triangulate(VoxelChunk.Vertex[] vertices_scratch_buffer, System.UInt16[] indices_screatch_buffer)
+    public bool Triangulate(VoxelChunk.Vertex[] vertices_scratch_buffer, System.UInt16[] indices_screatch_buffer, VoxelChunk.Edge[] edge_scratch_space, Dictionary<int, VoxelChunk.WeldingInfo> welding_info_scratch_space)
     {
-        bool has_occlusion_changed = MarchMesh(vertices_scratch_buffer, indices_screatch_buffer);
+        bool has_occlusion_changed = MarchMesh(vertices_scratch_buffer, indices_screatch_buffer, edge_scratch_space, welding_info_scratch_space);
 
         if (!m_collider.gameObject.activeSelf)
         {
@@ -217,7 +229,7 @@ public class VoxelChunk
     }
 
 
-    bool MarchMesh(Vertex[] vertex_scratch_buffer, System.UInt16[] triangle_scratch_buffer)
+    bool MarchMesh(Vertex[] vertex_scratch_buffer, System.UInt16[] triangle_scratch_buffer, Edge[] edge_scratch_space, Dictionary<int, WeldingInfo> welding_info_scratch_space)
     {
         var mesh = m_mesh;
         mesh.Clear();
