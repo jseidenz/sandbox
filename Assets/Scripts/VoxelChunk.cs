@@ -233,19 +233,31 @@ public class VoxelChunk
 
         bool has_occlusion_changed = false;
 
-        for (int y = m_density_grid_y; y < m_density_grid_y + m_chunk_dimension_in_voxels - 1; ++y)
+        for (int y = m_density_grid_y; y < m_density_grid_y + m_chunk_dimension_in_voxels; ++y)
         {
             var near_z = (float)y * m_voxel_size_in_meters;
             var far_z = near_z + m_voxel_size_in_meters;
 
-            for (int x = m_density_grid_x; x < m_density_grid_x + m_chunk_dimension_in_voxels - 1; ++x)
+            var top_density_idx_offset = m_layer_width_in_voxels;
+            if (y == m_layer_height_in_voxels - 1)
+            {
+                top_density_idx_offset = 0;
+            }
+
+            for (int x = m_density_grid_x; x < m_density_grid_x + m_chunk_dimension_in_voxels; ++x)
             {
                 int left_near_cell_idx = y * m_layer_width_in_voxels + x;
 
+                var right_density_idx_offset = 1;
+                if(x == m_layer_width_in_voxels - 1)
+                {
+                    right_density_idx_offset = 0;
+                }
+
                 var left_near_density = m_layer_density_grid[left_near_cell_idx];
-                var right_near_density = m_layer_density_grid[left_near_cell_idx + 1];
-                var left_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels];
-                var right_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels + 1];
+                var right_near_density = m_layer_density_grid[left_near_cell_idx + right_density_idx_offset];
+                var left_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset];
+                var right_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset + right_density_idx_offset];
 
                 int sample_type = 0;
                 if (left_near_density >= m_iso_level) sample_type |= 1;
