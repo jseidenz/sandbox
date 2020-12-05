@@ -46,10 +46,18 @@ MonoBehaviour:
   m_tuneables:
     m_layer_brightness_factor: 0.65
     m_layer_colors:
+    - m_color: {r: 0.22628158, g: 0.4245283, b: 0.352092, a: 1}
+      m_height: 16.1
+    - m_color: {r: 0.25947848, g: 0.46226418, b: 0.38926134, a: 1}
+      m_height: 16.2
+    - m_color: {r: 0.2736739, g: 0.4716981, b: 0.4000723, a: 1}
+      m_height: 17.4
+    - m_color: {r: 0.35257208, g: 0.5377358, b: 0.4716059, a: 1}
+      m_height: 18.7
     - m_color: {r: 0.33922213, g: 0.7264151, b: 0.58716875, a: 1}
-      m_height: 9.28
+      m_height: 19.4
     - m_color: {r: 0.2144482, g: 0.4433962, b: 0.20705765, a: 1}
-      m_height: 12.93
+      m_height: 21.2
     - m_color: {r: 0.15744035, g: 0.5471698, b: 0.45188293, a: 0}
       m_height: 76.4
   m_grid_height_in_voxels: 64
