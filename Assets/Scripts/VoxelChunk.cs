@@ -71,6 +71,7 @@ public class VoxelChunk
         public Vector3 m_normal;
         public float m_iso_level;
         public int m_triangle_idx;
+        public int m_grid_offset;
         public int[] m_triangles;
         public Vertex[] m_vertices;
 
@@ -288,6 +289,7 @@ public class VoxelChunk
                     m_iso_level = m_iso_level,
                     m_vertices = vertices,
                     m_triangle_idx = triangle_idx,
+                    m_grid_offset = m_grid_offset,
                     m_triangles = triangles
                 };
 
