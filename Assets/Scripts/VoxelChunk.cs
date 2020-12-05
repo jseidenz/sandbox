@@ -14,7 +14,19 @@ public class VoxelChunk
         public Vector3 m_normal;
     }
 
-    public VoxelChunk(int density_grid_x, int density_grid_y, int dimensions_in_voxels, int layer_width_in_voxels, int layer_height_in_voxels, float[] layer_density_grid, bool[] layer_occlusion_grid, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelChunk(
+        int density_grid_x, 
+        int density_grid_y, 
+        int dimensions_in_voxels, 
+        int layer_width_in_voxels, 
+        int layer_height_in_voxels, 
+        float[] layer_density_grid, 
+        bool[] layer_occlusion_grid, 
+        float voxel_size_in_meters, 
+        float iso_level, 
+        float bot_y, 
+        float top_y
+        )
     {
         m_density_grid_x = density_grid_x;
         m_density_grid_y = density_grid_y;
@@ -26,14 +38,14 @@ public class VoxelChunk
         m_iso_level = iso_level;
         m_voxel_size_in_meters = voxel_size_in_meters;
 
+        m_mesh = new Mesh();
+        m_mesh.name = "VoxelChunk";
+
         var collider_go = new GameObject("VoxelCollider");
         collider_go.gameObject.SetActive(false);
         m_collider = collider_go.AddComponent<MeshCollider>();
         m_collider.sharedMesh = m_mesh;
-        m_material = material;
 
-        m_mesh = new Mesh();
-        m_mesh.name = "VoxelLayer";
         m_bot_y = bot_y;
         m_top_y = top_y;
     }
@@ -205,7 +217,7 @@ public class VoxelChunk
     }
 
 
-    public bool MarchMesh()
+    bool MarchMesh()
     {
         var mesh = m_mesh;
         mesh.Clear();
@@ -521,10 +533,9 @@ public class VoxelChunk
         return has_occlusion_changed;
     }
 
-    public void Render(float dt, Color color)
+    public void Render(float dt, Material material)
     {
-        m_material.color = color;
-        Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0);
+        Graphics.DrawMesh(m_mesh, Matrix4x4.identity, material, 0);
     }
 
     bool[] m_layer_above_occlusion_grid;
@@ -534,7 +545,6 @@ public class VoxelChunk
     int m_layer_width_in_voxels;
     int m_layer_height_in_voxels;
     Mesh m_mesh;
-    Material m_material;
     MeshCollider m_collider;
     float m_iso_level;
     float m_bot_y;
