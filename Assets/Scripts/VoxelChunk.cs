@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class VoxelLayer
+public class VoxelChunk
 {
     const int SAMPLE_TYPE_FULL_SQUARE = 15;
     const int SAMPLE_TYPE_EMTPY = 0;
@@ -14,11 +14,8 @@ public class VoxelLayer
         public Vector3 m_normal;
     }
 
-    public VoxelLayer(int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelChunk(int width_in_voxels, int height_in_voxels, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
-        if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
-        if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
-
         m_density_grid = new float[width_in_voxels * height_in_voxels];
         m_occlusion_grid = new bool[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
@@ -35,10 +32,6 @@ public class VoxelLayer
         m_mesh.name = "VoxelLayer";
         m_bot_y = bot_y;
         m_top_y = top_y;
-
-        m_width_in_chunks = width_in_voxels / voxel_chunk_dimensions;
-        m_height_in_chunks = height_in_voxels / voxel_chunk_dimensions;
-        m_voxel_chunks = new VoxelChunk[m_width_in_chunks * m_height_in_chunks];
     }
 
     public void SetAboveAndBelowOcclusionGrids(bool[] layer_above_occlusion_grid, bool[] layer_below_occlusion_grid)
@@ -570,8 +563,6 @@ public class VoxelLayer
     bool[] m_occlusion_grid;
     int m_width_in_voxels;
     int m_height_in_voxels;
-    int m_width_in_chunks;
-    int m_height_in_chunks;
     Mesh m_mesh;
     Material m_material;
     MeshCollider m_collider;
@@ -579,7 +570,6 @@ public class VoxelLayer
     float m_bot_y;
     float m_top_y;
     float m_voxel_size_in_meters;
-    VoxelChunk[] m_voxel_chunks;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {

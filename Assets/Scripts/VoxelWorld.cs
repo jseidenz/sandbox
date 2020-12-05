@@ -22,12 +22,13 @@ public class VoxelWorld : MonoBehaviour
 
     public LiveTuneable m_tuneables;
 
-    [SerializeField] int m_grid_height_in_voxels;    
+    [SerializeField] int m_grid_height_in_voxels;
+    [SerializeField] int m_voxel_chunk_dimensions;
+    [SerializeField] int m_grid_width_in_voxels;
+    [SerializeField] int m_grid_depth_in_voxels;
     [SerializeField] Material m_material;
     [SerializeField] float m_voxel_size_in_meters;
 
-    int m_grid_width_in_voxels;
-    int m_grid_depth_in_voxels;
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
     List<DensityChange> m_density_changes = new List<DensityChange>();
@@ -44,9 +45,6 @@ public class VoxelWorld : MonoBehaviour
     void Awake()
     {
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
-
-        m_grid_depth_in_voxels = 100; // height_map_tex.height;
-        m_grid_width_in_voxels = 100; //height_map_tex.width;
 
         var pixels = height_map_tex.GetPixels();
         var height_map_width = height_map_tex.width;
@@ -78,7 +76,7 @@ public class VoxelWorld : MonoBehaviour
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters;
             float top_y = (float)y * m_voxel_size_in_meters;
 
-            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, material, iso_level, bot_y, top_y);
+            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y);
             m_layers[y] = layer;
         }
 
