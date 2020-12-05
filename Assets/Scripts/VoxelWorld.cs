@@ -59,7 +59,7 @@ public class VoxelWorld : MonoBehaviour
 
         float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
 
-        for (int y = 0; y < m_grid_height_in_voxels; ++y)
+        for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
             float layer_min_height = y * cell_height_in_color_space;
             float layer_max_height = (y + 1) * cell_height_in_color_space;

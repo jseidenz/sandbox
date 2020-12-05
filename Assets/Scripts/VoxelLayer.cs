@@ -14,6 +14,7 @@ public class VoxelLayer
     public VoxelLayer(int width_in_voxels, int height_in_voxels, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
     {
         m_density_grid = new float[width_in_voxels * height_in_voxels];
+        m_occlusion_grid = new bool[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
         m_iso_level = iso_level;
@@ -201,7 +202,6 @@ public class VoxelLayer
             m_triangles[m_triangle_idx++] = vert_idx_c;
             m_triangles[m_triangle_idx++] = vert_idx_b;
             m_triangles[m_triangle_idx++] = vert_idx_d;
-
         }
     }
 
@@ -222,6 +222,9 @@ public class VoxelLayer
 
         for (int y = 0; y < m_height_in_voxels - 1; ++y)
         {
+            var near_z = (float)y * m_voxel_size_in_meters;
+            var far_z = near_z + m_voxel_size_in_meters;
+
             for (int x = 0; x < m_width_in_voxels - 1; ++x)
             {
                 int left_near_cell_idx = y * m_width_in_voxels + x;
@@ -237,12 +240,16 @@ public class VoxelLayer
                 if (right_far_density >= m_iso_level) sample_type |= 4;
                 if (left_far_density >= m_iso_level) sample_type |= 8;
 
-                if (sample_type == 0) continue;
+                var is_occluded = false;
+
+                if (sample_type == 0)
+                {
+                    m_occlusion_grid[left_near_cell_idx] = is_occluded;
+                    continue;
+                }
 
                 var left_x = (float)x * m_voxel_size_in_meters;
                 var right_x = left_x + m_voxel_size_in_meters;
-                var near_z = (float)y * m_voxel_size_in_meters;
-                var far_z = near_z + m_voxel_size_in_meters;
 
                 var normal = Vector3.up;
 
@@ -476,7 +483,12 @@ public class VoxelLayer
 
                     marcher.Triangle(left_near, left_far, right_near);
                     marcher.Triangle(left_far, right_far, right_near);
+
+                    is_occluded = true;
                 }
+
+
+                m_occlusion_grid[left_near_cell_idx] = is_occluded;
 
                 vert_idx = marcher.m_vert_idx;
                 triangle_idx = marcher.m_triangle_idx;
@@ -514,6 +526,7 @@ public class VoxelLayer
 
 
     float[] m_density_grid;
+    bool[] m_occlusion_grid;
     int m_width_in_voxels;
     int m_height_in_voxels;
     Mesh m_mesh;
