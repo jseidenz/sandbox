@@ -18,6 +18,7 @@ public class VoxelWorld : MonoBehaviour
 
         public float m_layer_brightness_factor;
         public LayerColor[] m_layer_colors;
+        public float m_water_height;
     }
 
     public LiveTuneable m_tuneables;
@@ -29,6 +30,8 @@ public class VoxelWorld : MonoBehaviour
     [SerializeField] Material m_material;
     [SerializeField] float m_voxel_size_in_meters;
     [SerializeField] float m_ground_plane_size;
+    [SerializeField] Gradient m_height_gradient = new Gradient();
+    [SerializeField] GameObject m_water;
 
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
@@ -127,15 +130,21 @@ public class VoxelWorld : MonoBehaviour
         var ground_plane_material = GameObject.Instantiate(m_material);
         ground_plane_material.color = ApplyLayerBrightnessColor(0, m_tuneables.m_layer_colors[0].m_color);
 
-        m_ground_plane.GetComponent<MeshRenderer>().sharedMaterial = ground_plane_material;
+        var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
+        ground_plane_mesh_renderer.sharedMaterial = ground_plane_material;
+        ground_plane_mesh_renderer.receiveShadows = false;
         m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
 
         Instance = this;
+
+        m_water = GameObject.Instantiate(m_water);
     }
 
     private void LateUpdate()
     {
+        m_water.transform.position = new Vector3(0, m_tuneables.m_water_height, 0);
+
         UpdateDensityChanges();
 
         float dt = Time.deltaTime;

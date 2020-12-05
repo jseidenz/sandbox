@@ -58,6 +58,7 @@ MonoBehaviour:
       m_height: 21.2
     - m_color: {r: 0.15744035, g: 0.5471698, b: 0.45188293, a: 0}
       m_height: 76.4
+    m_water_height: 14.12
   m_grid_height_in_voxels: 64
   m_voxel_chunk_dimensions: 64
   m_grid_width_in_voxels: 512
@@ -65,3 +66,33 @@ MonoBehaviour:
   m_material: {fileID: 2100000, guid: a97ad6d1bb63f2542b01d7e96f039932, type: 2}
   m_voxel_size_in_meters: 0.75
   m_ground_plane_size: 1000
+  m_height_gradient:
+    serializedVersion: 2
+    key0: {r: 1, g: 1, b: 1, a: 1}
+    key1: {r: 1, g: 1, b: 1, a: 1}
+    key2: {r: 0, g: 0, b: 0, a: 0}
+    key3: {r: 0, g: 0, b: 0, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 65535
+    ctime2: 0
+    ctime3: 0
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 2
+    m_NumAlphaKeys: 2
+  m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}
