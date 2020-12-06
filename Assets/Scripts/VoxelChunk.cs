@@ -154,11 +154,9 @@ public class VoxelChunk
         public float m_iso_level;
         public int m_triangle_idx;
         public System.UInt16[] m_triangles;
-        public Vertex[] m_vertices;
         public int m_edge_idx;
         public Edge[] m_edges;
         public ushort m_chunk_relative_cell_idx;
-        public int m_cell_idx;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
         public VertexEntry[] m_vertex_entries;
 
@@ -352,13 +350,11 @@ public class VoxelChunk
                     m_left_far_density = left_far_density,
                     m_right_far_density = right_far_density,
                     m_iso_level = m_iso_level,
-                    m_vertices = scratch_buffer.m_vertices,
                     m_triangle_idx = triangle_idx,
                     m_triangles = scratch_buffer.m_triangles,
                     m_edge_idx = edge_idx,
                     m_edges = scratch_buffer.m_edges,
                     m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
-                    m_cell_idx = left_near_cell_idx,
                     m_vertex_id_to_vertex_idx = scratch_buffer.m_vertex_id_to_vertex_idx,
                     m_vertex_entries = scratch_buffer.m_vertex_entries
                 };
