@@ -23,7 +23,8 @@ public class DigTool : MonoBehaviour
         {
             if (CameraRayCast(out var hit))
             {
-                VoxelWorld.Instance.AddDensity(hit.point, -m_dig_rate * Time.deltaTime);
+                var bias = hit.normal * 0.05f;
+                VoxelWorld.Instance.AddDensity(hit.point + bias, -m_dig_rate * Time.deltaTime);
             }
         }
 
@@ -33,7 +34,8 @@ public class DigTool : MonoBehaviour
             {                
                 if (CameraRayCast(out var hit))
                 {
-                    m_locked_fill_height = hit.point.y + VoxelWorld.Instance.GetVoxelSizeInMeters();
+                    var bias = hit.normal.y * 0.05f;
+                    m_locked_fill_height = hit.point.y + bias;
                 }
             }
 

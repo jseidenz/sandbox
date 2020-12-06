@@ -104,7 +104,7 @@ public class VoxelLayer
 
         var cell_idx = y * m_width_in_voxels + x;
 
-        m_density_grid[cell_idx] += amount;
+        m_density_grid[cell_idx] = Mathf.Clamp01(m_density_grid[cell_idx] + amount);
 
         for(int i = -1; i <= 1; ++i)
         {
