@@ -685,9 +685,8 @@ public class VoxelChunk
             vert_d.m_position.y = m_bot_y;
 
             var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
-            var packed_normal = new Vector2(normal.x, normal.z);
-            vert_c.m_normal = packed_normal;
-            vert_d.m_normal = packed_normal;
+            vert_c.m_normal = normal;
+            vert_d.m_normal = normal;
 
             var vert_idx_c = vert_idx;
             vertices[vert_idx++] = vert_c;
