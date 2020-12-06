@@ -49,9 +49,11 @@ public class VoxelWorld : MonoBehaviour
     void Awake()
     {
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
-
         var pixels = height_map_tex.GetPixels();
         var height_map_width = height_map_tex.width;
+
+        Resources.UnloadAsset(height_map_tex);
+
         var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
         m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
 
