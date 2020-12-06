@@ -20,6 +20,7 @@ public class VoxelChunk
             scratch_buffer.m_edges = new Edge[System.UInt16.MaxValue];
             scratch_buffer.m_vertex_id_to_vertex_idx = new Dictionary<uint, ushort>();
             scratch_buffer.m_vertex_entries = new VertexEntry[System.UInt16.MaxValue];
+            scratch_buffer.m_vert_idx_to_normal_welding_info = new Dictionary<ushort, NormalWeldingInfo>();
 
             return scratch_buffer;
         }
@@ -30,19 +31,26 @@ public class VoxelChunk
         public Edge[] m_edges;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
         public VertexEntry[] m_vertex_entries;
+        public Dictionary<ushort, NormalWeldingInfo> m_vert_idx_to_normal_welding_info;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Vertex
     {
         public Vector3 m_position;
-        public Vector2 m_normal;
+        public Vector3 m_normal;
     }
 
     public struct Edge
     {
         public System.UInt16 m_vertex_idx_a;
         public System.UInt16 m_vertex_idx_b;
+    }
+
+    public struct NormalWeldingInfo
+    {
+        public Vector3 m_normal;
+        public int m_normal_count;
     }
 
     public struct VertexEntry
@@ -153,20 +161,21 @@ public class VoxelChunk
         public float m_right_far_density;
         public float m_iso_level;
         public int m_triangle_idx;
+        public int m_chunk_dimensions_in_voxels;
         public System.UInt16[] m_triangles;
-        public int m_edge_idx;
+        public int m_edge_idx;        
         public Edge[] m_edges;
         public ushort m_chunk_relative_cell_idx;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
         public VertexEntry[] m_vertex_entries;
 
-        public ushort CreateVertexEntry(VertexLocation location, Vector3 position)
+        public ushort CreateVertexEntry(VertexLocation location, Vector3 position, int chunk_relative_cell_idx)
         {
-            var shifted_cell_number = ((uint)m_chunk_relative_cell_idx) << 16;
+            var shifted_cell_number = ((uint)chunk_relative_cell_idx) << 16;
             var shifted_location = (uint)location;
             var vertex_id = shifted_cell_number | shifted_location;
 
-            if(!m_vertex_id_to_vertex_idx.TryGetValue(vertex_id, out var vertex_idx))
+            m_vertex_id_to_vertex_idx.TryGetValue(vertex_id, out var vertex_idx);
             {
                 vertex_idx = (ushort)m_vertex_id_to_vertex_idx.Count;
                 m_vertex_id_to_vertex_idx[vertex_id] = vertex_idx;
@@ -185,49 +194,57 @@ public class VoxelChunk
         public ushort LeftNear()
         {
             var pos = new Vector3(m_left_x, m_top_y, m_near_z);
-            return CreateVertexEntry(VertexLocation.LeftNearTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
+            return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort RightNear()
         {
             var pos = new Vector3(m_right_x, m_top_y, m_near_z);
-            return CreateVertexEntry(VertexLocation.RightNearTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
+            return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort LeftFar()
         {
             var pos = new Vector3(m_left_x, m_top_y, m_far_z);
-            return CreateVertexEntry(VertexLocation.LeftFarTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
+            return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort RightFar()
         {
             var pos = new Vector3(m_right_x, m_top_y, m_far_z);
-            return CreateVertexEntry(VertexLocation.RightFarTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels + 1;
+            return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort LeftEdge()
         {
             var pos = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
-            return CreateVertexEntry(VertexLocation.LeftTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
+            return CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort RightEdge()
         {
             var pos = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
-            return CreateVertexEntry(VertexLocation.RightTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
+            return CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort NearEdge()
         {
             var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z);
-            return CreateVertexEntry(VertexLocation.NearTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
+            return CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort FarEdge()
         {
             var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z);
-            return CreateVertexEntry(VertexLocation.FarTop, pos);
+            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
+            return CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx);
         }
 
         public float AverageDensity()
@@ -351,6 +368,7 @@ public class VoxelChunk
                     m_right_far_density = right_far_density,
                     m_iso_level = m_iso_level,
                     m_triangle_idx = triangle_idx,
+                    m_chunk_dimensions_in_voxels = m_chunk_dimension_in_voxels,
                     m_triangles = scratch_buffer.m_triangles,
                     m_edge_idx = edge_idx,
                     m_edges = scratch_buffer.m_edges,
@@ -576,7 +594,7 @@ public class VoxelChunk
             }
         }
 
-        var normal = new Vector2(1, 1);
+        var normal = Vector3.up;
 
 
         var vertex_entry_count = scratch_buffer.m_vertex_id_to_vertex_idx.Count;
@@ -594,7 +612,8 @@ public class VoxelChunk
 
         ushort vert_idx = (ushort)vertex_entry_count;
 
-        FinalizeEdges(scratch_buffer.m_vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, ref vert_idx, ref triangle_idx, ref edge_idx);
+        scratch_buffer.m_vert_idx_to_normal_welding_info.Clear();
+        FinalizeEdges(scratch_buffer.m_vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vert_idx_to_normal_welding_info, ref vert_idx, ref triangle_idx, ref edge_idx);
 
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
         mesh.SetVertexBufferParams(vert_idx, m_vertex_attribute_descriptors);
@@ -608,7 +627,15 @@ public class VoxelChunk
         return has_occlusion_changed;
     }
 
-    void FinalizeEdges(Vertex[] vertices, System.UInt16[] triangles, Edge[] edges, ref System.UInt16 vert_idx, ref int triangle_idx, ref int edge_count)
+    void FinalizeEdges(
+        Vertex[] vertices, 
+        ushort[] triangles, 
+        Edge[] edges,
+        Dictionary<ushort, NormalWeldingInfo> vertex_id_to_normal_welding_info,
+        ref ushort vert_idx, 
+        ref int triangle_idx, 
+        ref int edge_count
+        )
     {
         for (int i = 0; i < edge_count; ++i)
         {
@@ -643,7 +670,78 @@ public class VoxelChunk
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_d;
         }
+
+    /*
+    for(int i = 0; i < edge_count; ++i)
+    {
+        var edge = edges[i];
+
+        var vert_idx_a = edge.m_vertex_idx_a;
+        var vert_idx_b = edge.m_vertex_idx_b;
+
+        var vert_a = vertices[vert_idx_a];  
+        var vert_b = vertices[vert_idx_b];
+
+        var vert_c = vert_a;
+        vert_c.m_position.y = m_bot_y;
+
+        var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
+
+        vertex_id_to_normal_welding_info.TryGetValue(vert_idx_a, out var welding_info_a);
+        welding_info_a.m_normal += normal;
+        welding_info_a.m_normal_count++;
+        vertex_id_to_normal_welding_info[vert_idx_a] = welding_info_a;
+
+        vertex_id_to_normal_welding_info.TryGetValue(vert_idx_b, out var welding_info_b);
+        welding_info_b.m_normal += normal;
+        welding_info_b.m_normal_count++;
+        vertex_id_to_normal_welding_info[vert_idx_b] = welding_info_b;
     }
+
+    for (int i = 0; i < edge_count; ++i)
+    {
+        var edge = edges[i];
+        var vert_idx_a = edge.m_vertex_idx_a;
+        var vert_idx_b = edge.m_vertex_idx_b;
+
+        var vert_a = vertices[vert_idx_a];
+        var vert_b = vertices[vert_idx_b];
+
+        var vert_c = vert_a;
+        vert_c.m_position.y = m_bot_y;
+
+        var vert_d = vert_b;
+        vert_d.m_position.y = m_bot_y;
+
+        var left_welding_info = vertex_id_to_normal_welding_info[vert_idx_a];
+        var right_welding_info = vertex_id_to_normal_welding_info[vert_idx_b];
+
+        var left_normal = (left_welding_info.m_normal / (float)left_welding_info.m_normal_count).normalized;
+        var right_normal = (right_welding_info.m_normal / (float)right_welding_info.m_normal_count).normalized;
+
+        vert_a.m_normal = left_normal;
+        vert_b.m_normal = right_normal;
+        vert_c.m_normal = left_normal;
+        vert_d.m_normal = right_normal;
+
+        vertices[vert_idx_a] = vert_a;
+        vertices[vert_idx_b] = vert_b;
+
+        var vert_idx_c = vert_idx;
+        vertices[vert_idx++] = vert_c;
+
+        var vert_idx_d = vert_idx;
+        vertices[vert_idx++] = vert_d;
+
+        triangles[triangle_idx++] = vert_idx_a;
+        triangles[triangle_idx++] = vert_idx_b;
+        triangles[triangle_idx++] = vert_idx_c;
+        triangles[triangle_idx++] = vert_idx_c;
+        triangles[triangle_idx++] = vert_idx_b;
+        triangles[triangle_idx++] = vert_idx_d;
+    }
+    */
+}
 
     public void Render(float dt, Material material)
     {
@@ -673,6 +771,6 @@ public class VoxelChunk
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
         new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 2)
+        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
     };
 }
