@@ -11,10 +11,25 @@ public class VoxelChunk
 
     public struct ScratchBuffer
     {
-        public VoxelChunk.Vertex[] m_vertices;
+        public static ScratchBuffer CreateScratchBuffer()
+        {
+            var scratch_buffer = new ScratchBuffer();
+
+            scratch_buffer.m_vertices = new Vertex[System.UInt16.MaxValue];
+            scratch_buffer.m_triangles = new System.UInt16[System.UInt16.MaxValue * 24];
+            scratch_buffer.m_edges = new Edge[System.UInt16.MaxValue];
+            scratch_buffer.m_vertex_id_to_vertex_idx = new Dictionary<uint, ushort>();
+            scratch_buffer.m_vertex_entries = new VertexEntry[System.UInt16.MaxValue];
+
+            return scratch_buffer;
+        }
+
+
+        public Vertex[] m_vertices;
         public System.UInt16[] m_triangles;
-        public VoxelChunk.Edge[] m_edges;
+        public Edge[] m_edges;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
+        public VertexEntry[] m_vertex_entries;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -28,6 +43,13 @@ public class VoxelChunk
     {
         public System.UInt16 m_vertex_idx_a;
         public System.UInt16 m_vertex_idx_b;
+    }
+
+    public struct VertexEntry
+    {
+        public VertexLocation m_vertex_location;
+        public ushort m_vertex_idx;
+        public Vector3 m_position;
     }
 
     [System.Flags]
@@ -117,8 +139,6 @@ public class VoxelChunk
         return has_occlusion_changed;
     }
 
-
-
     struct MeshMarcher
     {
         public float m_left_x;
@@ -131,8 +151,6 @@ public class VoxelChunk
         public float m_right_near_density;
         public float m_left_far_density;
         public float m_right_far_density;
-        public System.UInt16 m_vert_idx;
-        public Vector2 m_normal;
         public float m_iso_level;
         public int m_triangle_idx;
         public System.UInt16[] m_triangles;
@@ -140,9 +158,11 @@ public class VoxelChunk
         public int m_edge_idx;
         public Edge[] m_edges;
         public ushort m_chunk_relative_cell_idx;
+        public int m_cell_idx;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
+        public VertexEntry[] m_vertex_entries;
 
-        public ushort CreateVertex(VertexLocation location)
+        public ushort CreateVertexEntry(VertexLocation location, Vector3 position)
         {
             var shifted_cell_number = ((uint)m_chunk_relative_cell_idx) << 16;
             var shifted_location = (uint)location;
@@ -152,6 +172,13 @@ public class VoxelChunk
             {
                 vertex_idx = (ushort)m_vertex_id_to_vertex_idx.Count;
                 m_vertex_id_to_vertex_idx[vertex_id] = vertex_idx;
+
+                m_vertex_entries[vertex_idx] = new VertexEntry
+                {
+                    m_vertex_location = location,
+                    m_vertex_idx = vertex_idx,
+                    m_position = position
+                };
             }
 
             return vertex_idx;
@@ -159,98 +186,50 @@ public class VoxelChunk
 
         public ushort LeftNear()
         {
-            CreateVertex(VertexLocation.LeftNearTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(m_left_x, m_top_y, m_near_z),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(m_left_x, m_top_y, m_near_z);
+            return CreateVertexEntry(VertexLocation.LeftNearTop, pos);
         }
 
         public ushort RightNear()
         {
-            CreateVertex(VertexLocation.RightNearTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(m_right_x, m_top_y, m_near_z),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(m_right_x, m_top_y, m_near_z);
+            return CreateVertexEntry(VertexLocation.RightNearTop, pos);
         }
 
         public ushort LeftFar()
         {
-            CreateVertex(VertexLocation.LeftFarTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(m_left_x, m_top_y, m_far_z),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(m_left_x, m_top_y, m_far_z);
+            return CreateVertexEntry(VertexLocation.LeftFarTop, pos);
         }
 
         public ushort RightFar()
         {
-            CreateVertex(VertexLocation.RightFarTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(m_right_x, m_top_y, m_far_z),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(m_right_x, m_top_y, m_far_z);
+            return CreateVertexEntry(VertexLocation.RightFarTop, pos);
         }
 
         public ushort LeftEdge()
         {
-            CreateVertex(VertexLocation.LeftTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density)),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
+            return CreateVertexEntry(VertexLocation.LeftTop, pos);
         }
 
         public ushort RightEdge()
         {
-            CreateVertex(VertexLocation.RightTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density)),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
+            return CreateVertexEntry(VertexLocation.RightTop, pos);
         }
 
         public ushort NearEdge()
         {
-            CreateVertex(VertexLocation.NearTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z);
+            return CreateVertexEntry(VertexLocation.NearTop, pos);
         }
 
         public ushort FarEdge()
         {
-            CreateVertex(VertexLocation.FarTop);
-
-            m_vertices[m_vert_idx] = new Vertex
-            {
-                m_position = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z),
-                m_normal = m_normal
-            };
-            return m_vert_idx++;
+            var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z);
+            return CreateVertexEntry(VertexLocation.FarTop, pos);
         }
 
         public float AverageDensity()
@@ -286,12 +265,12 @@ public class VoxelChunk
         var mesh = m_mesh;
         mesh.Clear();
 
-
-        System.UInt16 vert_idx = 0;
         int triangle_idx = 0;
         int edge_idx = 0;
 
         bool has_occlusion_changed = false;
+
+        scratch_buffer.m_vertex_id_to_vertex_idx.Clear();
 
         for (int y = m_density_grid_y; y < m_density_grid_y + m_chunk_dimension_in_voxels; ++y)
         {
@@ -325,7 +304,6 @@ public class VoxelChunk
                 if (right_far_density >= m_iso_level) sample_type |= 4;
                 if (left_far_density >= m_iso_level) sample_type |= 8;
 
-
                 if (sample_type != SAMPLE_TYPE_FULL_SQUARE)
                 {
                     var is_occluding = false;
@@ -351,20 +329,16 @@ public class VoxelChunk
                     
                     bool is_occluded = m_layer_above_occlusion_grid[left_near_cell_idx];
                     if (is_occluded) continue;
-                }                
-
-                var left_x = (float)x * m_voxel_size_in_meters;
-                var right_x = left_x + m_voxel_size_in_meters;
-
-                var normal = new Vector2(1, 1);
+                }             
 
 
                 int chunk_relative_x = x - m_density_grid_x;
                 int chunk_relative_y = y - m_density_grid_y;
                 int chunk_relative_cell_idx = chunk_relative_y * m_chunk_dimension_in_voxels + chunk_relative_x;
 
+                var left_x = (float)x * m_voxel_size_in_meters;
+                var right_x = left_x + m_voxel_size_in_meters;
 
-                scratch_buffer.m_vertex_id_to_vertex_idx.Clear();
                 var marcher = new MeshMarcher
                 {
                     m_left_x = left_x,
@@ -377,8 +351,6 @@ public class VoxelChunk
                     m_right_near_density = right_near_density,
                     m_left_far_density = left_far_density,
                     m_right_far_density = right_far_density,
-                    m_vert_idx = vert_idx,
-                    m_normal = normal,
                     m_iso_level = m_iso_level,
                     m_vertices = scratch_buffer.m_vertices,
                     m_triangle_idx = triangle_idx,
@@ -386,8 +358,10 @@ public class VoxelChunk
                     m_edge_idx = edge_idx,
                     m_edges = scratch_buffer.m_edges,
                     m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
-                    m_vertex_id_to_vertex_idx = scratch_buffer.m_vertex_id_to_vertex_idx
-                    };
+                    m_cell_idx = left_near_cell_idx,
+                    m_vertex_id_to_vertex_idx = scratch_buffer.m_vertex_id_to_vertex_idx,
+                    m_vertex_entries = scratch_buffer.m_vertex_entries
+                };
 
 
                 if(sample_type == 1)
@@ -602,10 +576,27 @@ public class VoxelChunk
                 }
 
                 edge_idx = marcher.m_edge_idx;
-                vert_idx = marcher.m_vert_idx;
                 triangle_idx = marcher.m_triangle_idx;
             }
         }
+
+        var normal = new Vector2(1, 1);
+
+
+        var vertex_entry_count = scratch_buffer.m_vertex_id_to_vertex_idx.Count;
+        for (int i = 0; i < vertex_entry_count; ++i)
+        {
+            var entry = scratch_buffer.m_vertex_entries[i];
+
+            scratch_buffer.m_vertices[entry.m_vertex_idx] = new Vertex
+            {
+                m_position = entry.m_position,
+                m_normal = normal
+            };
+        }
+
+
+        ushort vert_idx = (ushort)vertex_entry_count;
 
         FinalizeEdges(scratch_buffer.m_vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, ref vert_idx, ref triangle_idx, ref edge_idx);
 

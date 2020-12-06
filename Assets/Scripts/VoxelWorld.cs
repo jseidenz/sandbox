@@ -57,14 +57,7 @@ public class VoxelWorld : MonoBehaviour
         var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
         m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
 
-        m_voxel_chunk_scratch_buffer = new VoxelChunk.ScratchBuffer
-        {
-            m_vertices = new VoxelChunk.Vertex[System.UInt16.MaxValue],
-            m_triangles = new System.UInt16[System.UInt16.MaxValue * 24],
-            m_edges = new VoxelChunk.Edge[System.UInt16.MaxValue],
-            m_vertex_id_to_vertex_idx = new Dictionary<uint, ushort>()
-
-        };
+        m_voxel_chunk_scratch_buffer = VoxelChunk.ScratchBuffer.CreateScratchBuffer();
 
         for (int y = 0; y < m_grid_depth_in_voxels; ++y)
         {
