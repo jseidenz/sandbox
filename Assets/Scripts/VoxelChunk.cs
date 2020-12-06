@@ -166,6 +166,8 @@ public class VoxelChunk
         public int m_edge_idx;        
         public Edge[] m_edges;
         public ushort m_chunk_relative_cell_idx;
+        public int m_chunk_relative_x;
+        public int m_chunk_relative_y;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
         public VertexEntry[] m_vertex_entries;
 
@@ -201,22 +203,43 @@ public class VoxelChunk
         public ushort RightNear()
         {
             var pos = new Vector3(m_right_x, m_top_y, m_near_z);
-            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
-            return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
+            if(m_chunk_relative_cell_idx < m_chunk_dimensions_in_voxels - 2)
+            {
+                var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
+                return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
+            }
+            else
+            {
+                return CreateVertexEntry(VertexLocation.RightNearTop, pos, m_chunk_relative_cell_idx);
+            }
         }
 
         public ushort LeftFar()
         {
             var pos = new Vector3(m_left_x, m_top_y, m_far_z);
-            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
-            return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
+            if (m_chunk_relative_y < m_chunk_dimensions_in_voxels - 2)
+            {
+                var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
+                return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
+            }
+            else
+            {
+                return CreateVertexEntry(VertexLocation.LeftFarTop, pos, m_chunk_relative_cell_idx);
+            }
         }
 
         public ushort RightFar()
         {
             var pos = new Vector3(m_right_x, m_top_y, m_far_z);
-            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels + 1;
-            return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
+            if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
+            {
+                var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels + 1;
+                return CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
+            }
+            else
+            {
+                return CreateVertexEntry(VertexLocation.RightFarTop, pos, m_chunk_relative_cell_idx);
+            }
         }
 
         public ushort LeftEdge()
@@ -229,8 +252,15 @@ public class VoxelChunk
         public ushort RightEdge()
         {
             var pos = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
-            var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
-            return CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx);
+            if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
+            {
+                var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
+                return CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx);
+            }
+            else
+            {
+                return CreateVertexEntry(VertexLocation.RightTop, pos, m_chunk_relative_cell_idx);
+            }
         }
 
         public ushort NearEdge()
@@ -373,6 +403,8 @@ public class VoxelChunk
                     m_edge_idx = edge_idx,
                     m_edges = scratch_buffer.m_edges,
                     m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
+                    m_chunk_relative_x = chunk_relative_x,
+                    m_chunk_relative_y = chunk_relative_y,
                     m_vertex_id_to_vertex_idx = scratch_buffer.m_vertex_id_to_vertex_idx,
                     m_vertex_entries = scratch_buffer.m_vertex_entries
                 };
