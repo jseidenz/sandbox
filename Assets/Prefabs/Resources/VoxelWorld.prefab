@@ -82,7 +82,7 @@ MonoBehaviour:
   m_voxel_chunk_dimensions: 64
   m_grid_width_in_voxels: 512
   m_grid_depth_in_voxels: 512
-  m_material: {fileID: 2100000, guid: a97ad6d1bb63f2542b01d7e96f039932, type: 2}
+  m_material: {fileID: 2100000, guid: 110b478629f009f42a8742bd52347328, type: 2}
   m_voxel_size_in_meters: 0.75
   m_ground_plane_size: 1000
   m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}
