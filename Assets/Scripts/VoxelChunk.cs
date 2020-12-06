@@ -175,7 +175,7 @@ public class VoxelChunk
             var shifted_location = (uint)location;
             var vertex_id = shifted_cell_number | shifted_location;
 
-            m_vertex_id_to_vertex_idx.TryGetValue(vertex_id, out var vertex_idx);
+            if(!m_vertex_id_to_vertex_idx.TryGetValue(vertex_id, out var vertex_idx))
             {
                 vertex_idx = (ushort)m_vertex_id_to_vertex_idx.Count;
                 m_vertex_id_to_vertex_idx[vertex_id] = vertex_idx;
@@ -671,77 +671,81 @@ public class VoxelChunk
             triangles[triangle_idx++] = vert_idx_d;
         }
 
-    /*
-    for(int i = 0; i < edge_count; ++i)
-    {
-        var edge = edges[i];
+        /*
 
-        var vert_idx_a = edge.m_vertex_idx_a;
-        var vert_idx_b = edge.m_vertex_idx_b;
+        for (int i = 0; i < edge_count; ++i)
+        {
+            var edge = edges[i];
 
-        var vert_a = vertices[vert_idx_a];  
-        var vert_b = vertices[vert_idx_b];
+            var vert_idx_a = edge.m_vertex_idx_a;
+            var vert_idx_b = edge.m_vertex_idx_b;
 
-        var vert_c = vert_a;
-        vert_c.m_position.y = m_bot_y;
+            var vert_a = vertices[vert_idx_a];  
+            var vert_b = vertices[vert_idx_b];
 
-        var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
+            var vert_c = vert_a;
+            vert_c.m_position.y = m_bot_y;
 
-        vertex_id_to_normal_welding_info.TryGetValue(vert_idx_a, out var welding_info_a);
-        welding_info_a.m_normal += normal;
-        welding_info_a.m_normal_count++;
-        vertex_id_to_normal_welding_info[vert_idx_a] = welding_info_a;
+            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
 
-        vertex_id_to_normal_welding_info.TryGetValue(vert_idx_b, out var welding_info_b);
-        welding_info_b.m_normal += normal;
-        welding_info_b.m_normal_count++;
-        vertex_id_to_normal_welding_info[vert_idx_b] = welding_info_b;
+            vertex_id_to_normal_welding_info.TryGetValue(vert_idx_a, out var welding_info_a);
+            welding_info_a.m_normal += normal;
+            welding_info_a.m_normal_count++;
+            vertex_id_to_normal_welding_info[vert_idx_a] = welding_info_a;
+
+            vertex_id_to_normal_welding_info.TryGetValue(vert_idx_b, out var welding_info_b);
+            welding_info_b.m_normal += normal;
+            welding_info_b.m_normal_count++;
+            vertex_id_to_normal_welding_info[vert_idx_b] = welding_info_b;
+        }
+
+        for (int i = 0; i < edge_count; ++i)
+        {
+            var edge = edges[i];
+            var vert_idx_a = edge.m_vertex_idx_a;
+            var vert_idx_b = edge.m_vertex_idx_b;
+
+            var vert_a = vertices[vert_idx_a];
+            var vert_b = vertices[vert_idx_b];
+
+            var vert_c = vert_a;
+            vert_c.m_position.y = m_bot_y;
+
+            var vert_d = vert_b;
+            vert_d.m_position.y = m_bot_y;
+
+            var left_welding_info = vertex_id_to_normal_welding_info[vert_idx_a];
+            var right_welding_info = vertex_id_to_normal_welding_info[vert_idx_b];
+
+            var normal_bias = new Vector3(0, 1f, 0);
+
+            var left_normal = (normal_bias + (left_welding_info.m_normal / (float)left_welding_info.m_normal_count)).normalized;
+            var right_normal = (normal_bias + (right_welding_info.m_normal / (float)right_welding_info.m_normal_count)).normalized;
+
+            vert_a.m_normal = left_normal;
+            vert_b.m_normal = right_normal;
+            vert_c.m_normal = left_normal;
+            vert_d.m_normal = right_normal;
+
+            vertices[vert_idx_a] = vert_a;
+            vertices[vert_idx_b] = vert_b;
+
+            var vert_idx_c = vert_idx;
+            vertices[vert_idx++] = vert_c;
+
+            var vert_idx_d = vert_idx;
+            vertices[vert_idx++] = vert_d;
+
+            triangles[triangle_idx++] = vert_idx_a;
+            triangles[triangle_idx++] = vert_idx_b;
+            triangles[triangle_idx++] = vert_idx_c;
+            triangles[triangle_idx++] = vert_idx_c;
+            triangles[triangle_idx++] = vert_idx_b;
+            triangles[triangle_idx++] = vert_idx_d;
+        }
+
+        */
     }
-
-    for (int i = 0; i < edge_count; ++i)
-    {
-        var edge = edges[i];
-        var vert_idx_a = edge.m_vertex_idx_a;
-        var vert_idx_b = edge.m_vertex_idx_b;
-
-        var vert_a = vertices[vert_idx_a];
-        var vert_b = vertices[vert_idx_b];
-
-        var vert_c = vert_a;
-        vert_c.m_position.y = m_bot_y;
-
-        var vert_d = vert_b;
-        vert_d.m_position.y = m_bot_y;
-
-        var left_welding_info = vertex_id_to_normal_welding_info[vert_idx_a];
-        var right_welding_info = vertex_id_to_normal_welding_info[vert_idx_b];
-
-        var left_normal = (left_welding_info.m_normal / (float)left_welding_info.m_normal_count).normalized;
-        var right_normal = (right_welding_info.m_normal / (float)right_welding_info.m_normal_count).normalized;
-
-        vert_a.m_normal = left_normal;
-        vert_b.m_normal = right_normal;
-        vert_c.m_normal = left_normal;
-        vert_d.m_normal = right_normal;
-
-        vertices[vert_idx_a] = vert_a;
-        vertices[vert_idx_b] = vert_b;
-
-        var vert_idx_c = vert_idx;
-        vertices[vert_idx++] = vert_c;
-
-        var vert_idx_d = vert_idx;
-        vertices[vert_idx++] = vert_d;
-
-        triangles[triangle_idx++] = vert_idx_a;
-        triangles[triangle_idx++] = vert_idx_b;
-        triangles[triangle_idx++] = vert_idx_c;
-        triangles[triangle_idx++] = vert_idx_c;
-        triangles[triangle_idx++] = vert_idx_b;
-        triangles[triangle_idx++] = vert_idx_d;
-    }
-    */
-}
 
     public void Render(float dt, Material material)
     {
