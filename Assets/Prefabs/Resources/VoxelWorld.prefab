@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_tuneables:
-    m_water_height: 14.12
+    m_water_height: 11.18
     m_height_gradient:
       serializedVersion: 2
       key0: {r: 0, g: 0, b: 0, a: 1}
@@ -52,16 +52,16 @@ MonoBehaviour:
       key2: {r: 0.14208794, g: 0.2924528, b: 0.14208794, a: 1}
       key3: {r: 0.119259514, g: 0.3773585, b: 0.119259514, a: 0}
       key4: {r: 0.4454852, g: 0.32820818, b: 0.28162375, a: 0}
-      key5: {r: 0.47058824, g: 0.32442605, b: 0.29411766, a: 0}
-      key6: {r: 0.44716594, g: 0.32795495, b: 0.28246027, a: 0}
+      key5: {r: 0.44716594, g: 0.32795495, b: 0.28246027, a: 0}
+      key6: {r: 0.6226415, g: 0.4950513, b: 0.40236738, a: 0}
       key7: {r: 0.6226415, g: 0.4950513, b: 0.40236738, a: 0}
       ctime0: 0
-      ctime1: 27563
-      ctime2: 28334
-      ctime3: 34310
-      ctime4: 45875
-      ctime5: 55898
-      ctime6: 57632
+      ctime1: 32382
+      ctime2: 34695
+      ctime3: 39514
+      ctime4: 43176
+      ctime5: 63029
+      ctime6: 65535
       ctime7: 65535
       atime0: 0
       atime1: 65535
@@ -72,7 +72,7 @@ MonoBehaviour:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_NumColorKeys: 8
+      m_NumColorKeys: 7
       m_NumAlphaKeys: 2
     m_saturation_variation_rate: 200
     m_saturation_variation_amount: 0
@@ -83,6 +83,6 @@ MonoBehaviour:
   m_grid_width_in_voxels: 512
   m_grid_depth_in_voxels: 512
   m_material: {fileID: 2100000, guid: 110b478629f009f42a8742bd52347328, type: 2}
-  m_voxel_size_in_meters: 0.75
+  m_voxel_size_in_meters: 0.6
   m_ground_plane_size: 1000
   m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}
