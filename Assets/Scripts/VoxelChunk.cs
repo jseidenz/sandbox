@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using System.Collections.Generic;
+using UnityEngine.Profiling;
 
 public class VoxelChunk
 {
@@ -72,13 +73,18 @@ public class VoxelChunk
 
     public bool Triangulate(VoxelChunk.ScratchBuffer scratch_buffer)
     {
+        Profiler.BeginSample("March");
         bool has_occlusion_changed = MarchMesh(scratch_buffer);
+        Profiler.EndSample();
 
+
+        Profiler.BeginSample("UpdateCollision");
         m_collider.gameObject.SetActive(false);
         if (!m_is_empty)
         {
             m_collider.gameObject.SetActive(true);
         }
+        Profiler.EndSample();
 
         return has_occlusion_changed;
     }

@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using UnityEngine.Rendering;
 using System.Collections.Generic;
+using UnityEngine.Profiling;
 
 public class VoxelWorld : MonoBehaviour
 {
@@ -140,16 +141,20 @@ public class VoxelWorld : MonoBehaviour
     {
         m_water.transform.position = new Vector3(0, m_tuneables.m_water_height, 0);
 
+        Profiler.BeginSample("UpdateDensityChanged");
         UpdateDensityChanges();
+        Profiler.EndSample();
 
         float dt = Time.deltaTime;
 
+        Profiler.BeginSample("Render");
         for (int y = 0; y < m_layers.Length; ++y)
         {
             var color = GetColorForLayer(y);
 
             m_layers[y].Render(dt, color);
         }
+        Profiler.EndSample();
     }
 
     public Color GetColorForLayer(int layer_idx)
@@ -180,17 +185,21 @@ public class VoxelWorld : MonoBehaviour
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
             var layer = m_layers[y];
+            Profiler.BeginSample("AddDensity");
             foreach(var density_change in m_density_changes)
             {
                 if (density_change.m_layer_idx != y) continue;
 
                 layer.AddDensity(density_change.m_position, density_change.m_amount, m_dirty_chunk_indices);
             }
+            Profiler.EndSample();
 
+            Profiler.BeginSample("Triangulate");
             if(m_dirty_chunk_indices.Count != 0)
             {
                 layer.Triangulate(m_voxel_chunk_scratch_buffer, m_dirty_chunk_indices, m_dirty_chunk_occlusion_indices);
             }
+            Profiler.EndSample();
 
             var temp = m_dirty_chunk_indices;
             m_dirty_chunk_indices = m_dirty_chunk_occlusion_indices;
