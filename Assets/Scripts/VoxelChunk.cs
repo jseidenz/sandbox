@@ -14,6 +14,7 @@ public class VoxelChunk
         public VoxelChunk.Vertex[] m_vertices;
         public System.UInt16[] m_triangles;
         public VoxelChunk.Edge[] m_edges;
+        public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -28,6 +29,24 @@ public class VoxelChunk
         public System.UInt16 m_vertex_idx_a;
         public System.UInt16 m_vertex_idx_b;
     }
+
+    [System.Flags]
+    public enum VertexLocation : ushort
+    {
+        Left = 1,
+        Right = 2,
+        Near = 4,
+        Far = 8,
+        Bottom = 16,
+        Top = 32,
+    }
+
+    public uint CreateVertexId(ushort cell_number, VertexLocation location)
+    {
+        var shifted_cell_number = ((uint)cell_number) << 16;
+        var shifted_location = (uint)location;
+        return shifted_cell_number | shifted_location;
+    }    
 
     public VoxelChunk(
         int density_grid_x, 
@@ -111,6 +130,7 @@ public class VoxelChunk
         public Vertex[] m_vertices;
         public int m_edge_idx;
         public Edge[] m_edges;
+        public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
 
         public System.UInt16 LeftNear()
         {
@@ -316,8 +336,9 @@ public class VoxelChunk
                     m_triangle_idx = triangle_idx,
                     m_triangles = scratch_buffer.m_triangles,
                     m_edge_idx = edge_idx,
-                    m_edges = scratch_buffer.m_edges
-                };
+                    m_edges = scratch_buffer.m_edges,
+                    m_vertex_id_to_vertex_idx = scratch_buffer.m_vertex_id_to_vertex_idx
+                    };
 
 
                 if(sample_type == 1)

@@ -62,6 +62,8 @@ public class VoxelWorld : MonoBehaviour
             m_vertices = new VoxelChunk.Vertex[System.UInt16.MaxValue],
             m_triangles = new System.UInt16[System.UInt16.MaxValue * 24],
             m_edges = new VoxelChunk.Edge[System.UInt16.MaxValue],
+            m_vertex_id_to_vertex_idx = new Dictionary<uint, ushort>()
+
         };
 
         for (int y = 0; y < m_grid_depth_in_voxels; ++y)
