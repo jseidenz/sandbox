@@ -207,12 +207,15 @@ public class VoxelWorld : MonoBehaviour
         
     }
 
-    public void AddDensity(Vector3 pos, float amount)
+    public void AddDensity(Vector3 world_pos, float amount)
     {
-        var layer_idx = (int)((pos.y / (m_grid_height_in_voxels * m_voxel_size_in_meters)) * (float)m_layers.Length);
+        float bias = 0.01f;
+        world_pos += new Vector3(bias, bias, bias);
+
+        var layer_idx = (int)(world_pos.y / m_voxel_size_in_meters);
         if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
-        m_density_changes.Add(new DensityChange { m_position = pos, m_layer_idx = layer_idx, m_amount = amount });
+        m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
     public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters;  }
