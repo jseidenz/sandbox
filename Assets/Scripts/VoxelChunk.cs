@@ -37,16 +37,25 @@ public class VoxelChunk
         Right = 2,
         Near = 4,
         Far = 8,
-        Bottom = 16,
+        Bot = 16,
         Top = 32,
+        LeftNearTop = Left | Near | Top,
+        RightNearTop = Right | Near | Top,
+        LeftFarTop = Left | Far | Top,
+        RightFarTop = Right | Far | Top,
+        LeftTop = Left | Top,
+        RightTop = Right | Top,
+        NearTop = Near | Top,
+        FarTop = Far | Top,
+        LeftNearBot = Left | Near | Bot,
+        RightNearBot = Right | Near | Bot,
+        LeftFarBot = Left | Far | Bot,
+        RightFarBot = Right | Far | Bot,
+        LeftBot = Left | Bot,
+        RightBot = Right | Bot,
+        NearBot = Near | Bot,
+        FarBot = Far | Bot,
     }
-
-    public uint CreateVertexId(ushort cell_number, VertexLocation location)
-    {
-        var shifted_cell_number = ((uint)cell_number) << 16;
-        var shifted_location = (uint)location;
-        return shifted_cell_number | shifted_location;
-    }    
 
     public VoxelChunk(
         int density_grid_x, 
@@ -133,8 +142,25 @@ public class VoxelChunk
         public ushort m_chunk_relative_cell_idx;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
 
-        public System.UInt16 LeftNear()
+        public ushort CreateVertex(VertexLocation location)
         {
+            var shifted_cell_number = ((uint)m_chunk_relative_cell_idx) << 16;
+            var shifted_location = (uint)location;
+            var vertex_id = shifted_cell_number | shifted_location;
+
+            if(!m_vertex_id_to_vertex_idx.TryGetValue(vertex_id, out var vertex_idx))
+            {
+                vertex_idx = (ushort)m_vertex_id_to_vertex_idx.Count;
+                m_vertex_id_to_vertex_idx[vertex_id] = vertex_idx;
+            }
+
+            return vertex_idx;
+        }
+
+        public ushort LeftNear()
+        {
+            CreateVertex(VertexLocation.LeftNearTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(m_left_x, m_top_y, m_near_z),
@@ -143,8 +169,10 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public System.UInt16 RightNear()
+        public ushort RightNear()
         {
+            CreateVertex(VertexLocation.RightNearTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(m_right_x, m_top_y, m_near_z),
@@ -153,8 +181,10 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public System.UInt16 LeftFar()
+        public ushort LeftFar()
         {
+            CreateVertex(VertexLocation.LeftFarTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(m_left_x, m_top_y, m_far_z),
@@ -163,8 +193,10 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public System.UInt16 RightFar()
+        public ushort RightFar()
         {
+            CreateVertex(VertexLocation.RightFarTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(m_right_x, m_top_y, m_far_z),
@@ -173,8 +205,10 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public System.UInt16 LeftEdge()
+        public ushort LeftEdge()
         {
+            CreateVertex(VertexLocation.LeftTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density)),
@@ -183,8 +217,10 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public System.UInt16 RightEdge()
+        public ushort RightEdge()
         {
+            CreateVertex(VertexLocation.RightTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density)),
@@ -193,8 +229,10 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public System.UInt16 NearEdge()
+        public ushort NearEdge()
         {
+            CreateVertex(VertexLocation.NearTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z),
@@ -203,8 +241,10 @@ public class VoxelChunk
             return m_vert_idx++;
         }
 
-        public System.UInt16 FarEdge()
+        public ushort FarEdge()
         {
+            CreateVertex(VertexLocation.FarTop);
+
             m_vertices[m_vert_idx] = new Vertex
             {
                 m_position = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z),
