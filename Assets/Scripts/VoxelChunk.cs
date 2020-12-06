@@ -321,8 +321,10 @@ public class VoxelChunk
 
                 int chunk_relative_x = x - m_density_grid_x;
                 int chunk_relative_y = y - m_density_grid_y;
-                int chunk_relative_cell_idx = y * m_chunk_dimension_in_voxels + x;
+                int chunk_relative_cell_idx = chunk_relative_y * m_chunk_dimension_in_voxels + chunk_relative_x;
 
+
+                scratch_buffer.m_vertex_id_to_vertex_idx.Clear();
                 var marcher = new MeshMarcher
                 {
                     m_left_x = left_x,
