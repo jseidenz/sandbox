@@ -130,6 +130,7 @@ public class VoxelChunk
         public Vertex[] m_vertices;
         public int m_edge_idx;
         public Edge[] m_edges;
+        public ushort m_chunk_relative_cell_idx;
         public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx;
 
         public System.UInt16 LeftNear()
@@ -317,6 +318,11 @@ public class VoxelChunk
 
                 var normal = new Vector2(1, 1);
 
+
+                int chunk_relative_x = x - m_density_grid_x;
+                int chunk_relative_y = y - m_density_grid_y;
+                int chunk_relative_cell_idx = y * m_chunk_dimension_in_voxels + x;
+
                 var marcher = new MeshMarcher
                 {
                     m_left_x = left_x,
@@ -337,6 +343,7 @@ public class VoxelChunk
                     m_triangles = scratch_buffer.m_triangles,
                     m_edge_idx = edge_idx,
                     m_edges = scratch_buffer.m_edges,
+                    m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
                     m_vertex_id_to_vertex_idx = scratch_buffer.m_vertex_id_to_vertex_idx
                     };
 
