@@ -21,7 +21,7 @@ public class VoxelChunk
     public struct Vertex
     {
         public Vector3 m_position;
-        public Vector3 m_normal;
+        public Vector2 m_normal;
     }
 
     public struct Edge
@@ -123,7 +123,7 @@ public class VoxelChunk
         public float m_left_far_density;
         public float m_right_far_density;
         public System.UInt16 m_vert_idx;
-        public Vector3 m_normal;
+        public Vector2 m_normal;
         public float m_iso_level;
         public int m_triangle_idx;
         public System.UInt16[] m_triangles;
@@ -315,7 +315,7 @@ public class VoxelChunk
                 var left_x = (float)x * m_voxel_size_in_meters;
                 var right_x = left_x + m_voxel_size_in_meters;
 
-                var normal = Vector3.up;
+                var normal = new Vector2(1, 1);
 
                 var marcher = new MeshMarcher
                 {
@@ -590,8 +590,9 @@ public class VoxelChunk
             vert_d.m_position.y = m_bot_y;
 
             var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
-            vert_c.m_normal = normal;
-            vert_d.m_normal = normal;
+            var packed_normal = new Vector2(normal.x, normal.z);
+            vert_c.m_normal = packed_normal;
+            vert_d.m_normal = packed_normal;
 
             var vert_idx_c = vert_idx;
             vertices[vert_idx++] = vert_c;
@@ -636,6 +637,6 @@ public class VoxelChunk
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
         new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
+        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 2)
     };
 }
