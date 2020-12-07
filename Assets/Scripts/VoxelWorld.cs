@@ -23,7 +23,6 @@ public class VoxelWorld : MonoBehaviour
     [SerializeField] int m_voxel_chunk_dimensions;
 
     [SerializeField] Material m_material;
-    [SerializeField] float m_voxel_size_in_meters;
     [SerializeField] float m_ground_plane_size;
     [SerializeField] GameObject m_water;
 
@@ -31,6 +30,7 @@ public class VoxelWorld : MonoBehaviour
     int m_grid_height_in_voxels;
     int m_grid_width_in_voxels;
     int m_grid_depth_in_voxels;
+    float m_voxel_size_in_meters;
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
     List<DensityChange> m_density_changes = new List<DensityChange>();
@@ -46,8 +46,9 @@ public class VoxelWorld : MonoBehaviour
         public float m_amount;
     }
 
-    public void Init(int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels)
+    public void Init(int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters)
     {
+        m_voxel_size_in_meters = voxel_size_in_meters;
         m_grid_width_in_voxels = grid_width_in_voxels;
         m_grid_height_in_voxels = grid_height_in_voxels;
         m_grid_depth_in_voxels = grid_depth_in_voxels;
@@ -195,28 +196,8 @@ public class VoxelWorld : MonoBehaviour
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
-    public void ApplyHeightMap(float[] dentities, float cell_height_in_color_space)
+    public void ApplyHeightMap(float[] densities, float cell_height_in_color_space)
     {
-        var height_map_tex = Resources.Load<Texture2D>("heightmap");
-        var pixels = height_map_tex.GetPixels();
-        var height_map_width = height_map_tex.width;
-
-        Resources.UnloadAsset(height_map_tex);
-
-        var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
-
-        for (int y = 0; y < m_grid_depth_in_voxels; ++y)
-        {
-            for (int x = 0; x < m_grid_width_in_voxels; ++x)
-            {
-                var density_idx = y * m_grid_width_in_voxels + x;
-                var pixel_idx = y * height_map_width + x;
-                var density = pixels[pixel_idx].r;
-
-                densities[density_idx] = density;
-            }
-        }
-
         for (int y = m_layers.Length - 1; y >= 0; --y)
         {
             float layer_min_height = y * cell_height_in_color_space;

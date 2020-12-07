@@ -1,9 +1,14 @@
 ﻿using UnityEngine;
 
-public class LiquidSimulation : MonoBehaviour 
+public class LiquidSimulation
 {
-    public void Init()
+    public LiquidSimulation()
     {
-        
+
+    }
+
+    public void AddDensity(Vector3 position, float amount)
+    {
+
     }
 }

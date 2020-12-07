@@ -5,13 +5,16 @@ using UnityEngine.UI;
 public class Game : MonoBehaviour 
 {
     [SerializeField] VoxelWorld m_voxel_world;
-    [SerializeField] LiquidSimulation m_liquid_simulation;
     [SerializeField] VoxelWorld m_liquid_mesher;
     [SerializeField] GameObject m_player_avatar;
     [SerializeField] Image m_initial_black;
     [SerializeField] int m_grid_width_in_voxels;
     [SerializeField] int m_grid_depth_in_voxels;
     [SerializeField] int m_grid_height_in_voxels;
+    [SerializeField] float m_voxel_size_in_meters;
+
+    LiquidSimulation m_liquid_simulation;
+    SolidSimulation m_solid_simulation;
 
     public static Game Instance;
 
@@ -19,7 +22,8 @@ public class Game : MonoBehaviour
     {
         m_voxel_world = await CreateVoxelWorld();
         m_liquid_mesher = await CreateLiquidMesher();
-        m_liquid_simulation = await CreateLiquidSimulation();
+        m_liquid_simulation = new LiquidSimulation();
+        m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters);
 
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
@@ -36,7 +40,7 @@ public class Game : MonoBehaviour
     {
         var voxel_world = GameObject.Instantiate(m_voxel_world);
         voxel_world.m_tuneables = m_voxel_world.m_tuneables;
-        voxel_world.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels);
+        voxel_world.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters);
 
 
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
@@ -70,15 +74,9 @@ public class Game : MonoBehaviour
     async Task<VoxelWorld> CreateLiquidMesher()
     {
         var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
-        liquid_mesher.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels);
+        liquid_mesher.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters);
         liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
         return liquid_mesher;
-    }
-
-    async Task<LiquidSimulation> CreateLiquidSimulation()
-    {
-        var liquid_simulation = GameObject.Instantiate(m_liquid_simulation);
-        return liquid_simulation;
     }
 
     async Task<GameObject> CreateAvatar()
@@ -89,5 +87,10 @@ public class Game : MonoBehaviour
     public VoxelWorld GetVoxelWorld()
     {
         return m_voxel_world;
+    }
+
+    public LiquidSimulation GetLiquidSimulation()
+    {
+        return m_liquid_simulation;
     }
 }
