@@ -131,11 +131,17 @@ public class Game : MonoBehaviour
     {
         m_dirty_chunk_ids.Clear();
         m_solid_simulation.Update(m_dirty_chunk_ids);
-        m_solid_mesher.Triangulate(m_dirty_chunk_ids);
+        if (m_dirty_chunk_ids.Count > 0)
+        {
+            m_solid_mesher.Triangulate(m_dirty_chunk_ids);
+        }
 
         m_dirty_chunk_ids.Clear();
         m_liquid_simulation.Update(m_dirty_chunk_ids);
-        m_liquid_mesher.Triangulate(m_dirty_chunk_ids);
+        if (m_dirty_chunk_ids.Count > 0)
+        {
+            m_liquid_mesher.Triangulate(m_dirty_chunk_ids);
+        }
     }
 
     void CreateGroundPlane()
