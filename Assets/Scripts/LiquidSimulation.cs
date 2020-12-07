@@ -20,6 +20,27 @@ public class LiquidSimulation
         public float m_amount;
     }
 
+    public int CreateChunkIdFromChunkCoordinates(int x, int y, int z)
+    {
+        return x | (y >> 8) | z >> 16; 
+    }
+
+    public void GetChunkCoordinatesFromChunkId(int chunk_id, out int chunk_x, out int chunk_y, out int chunk_z)
+    {
+        chunk_x = chunk_id & 0x000000FF;
+        chunk_y = (chunk_id << 8) & 0x000000FF;
+        chunk_z = (chunk_id << 16) & 0x000000FF;
+    }
+
+    struct ChunkRegion
+    {
+        public Vector3Int m_chunk_id;
+        public int m_min_x;
+        public int m_min_y;
+        public int m_max_x;
+        public int m_max_y;
+    }
+
     public LiquidSimulation(Vector3Int dimensions_in_cells, float cell_size_in_meters, int chunk_dimensions_in_cells, float[][] solid_layers)
     {
         m_solid_layers = solid_layers;
