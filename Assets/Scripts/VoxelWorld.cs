@@ -56,11 +56,11 @@ public class VoxelWorld : MonoBehaviour
 
         var camera = Camera.main;
 
+        const float iso_level = 0.99f;
+
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         { 
             var material = GameObject.Instantiate(m_material);
-
-            float iso_level = y / (float)m_grid_height_in_voxels;
 
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters;
             float top_y = (float)y * m_voxel_size_in_meters;

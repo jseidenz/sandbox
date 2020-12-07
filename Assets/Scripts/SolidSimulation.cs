@@ -83,17 +83,26 @@ public class SolidSimulation
 
     public void ApplyHeightMap(float[] densities)
     {
-        for (int y = 0; y < m_layers.Length; ++y)
-        {
-            var layer = m_layers[y];
+        float layer_height_in_density_space = 1f / (float)m_layers.Length;
 
-            for(int z = 0; z < m_dimensions_in_cells.z; ++z)
+        for (int layer_idx = 0; layer_idx < m_layers.Length; ++layer_idx)
+        {
+            var layer = m_layers[layer_idx];
+
+            float iso_level = layer_idx / (float)m_dimensions_in_cells.y;
+
+            for (int z = 0; z < m_dimensions_in_cells.z; ++z)
             {
                 for(int x = 0; x < m_dimensions_in_cells.x; ++x)
                 {
                     var cell_idx = z * m_dimensions_in_cells.x + x;
 
-                    layer[cell_idx] = densities[cell_idx];
+                    float input_density = densities[cell_idx];
+                    float deltaed_density = input_density - iso_level;
+                    float normalized_density = deltaed_density / layer_height_in_density_space;
+                    float clamped_density = Mathf.Clamp01(normalized_density);
+
+                    layer[cell_idx] = clamped_density;
                 }
             }
         }
