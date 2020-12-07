@@ -129,7 +129,8 @@ public class VoxelChunk
         float voxel_size_in_meters, 
         float iso_level, 
         float bot_y, 
-        float top_y
+        float top_y, 
+        bool generate_collision
         )
     {
         m_density_grid_x = density_grid_x;
@@ -141,14 +142,18 @@ public class VoxelChunk
         m_layer_height_in_voxels = layer_height_in_voxels;
         m_iso_level = iso_level;
         m_voxel_size_in_meters = voxel_size_in_meters;
+        m_generate_collision = generate_collision;
 
         m_mesh = new Mesh();
         m_mesh.name = "VoxelChunk";
 
-        var collider_go = new GameObject("VoxelCollider");
-        collider_go.gameObject.SetActive(false);
-        m_collider = collider_go.AddComponent<MeshCollider>();
-        m_collider.sharedMesh = m_mesh;
+        if (m_generate_collision)
+        {
+            var collider_go = new GameObject("VoxelCollider");
+            collider_go.gameObject.SetActive(false);
+            m_collider = collider_go.AddComponent<MeshCollider>();
+            m_collider.sharedMesh = m_mesh;
+        }
 
         m_bot_y = bot_y;
         m_top_y = top_y;
@@ -167,13 +172,16 @@ public class VoxelChunk
         Profiler.EndSample();
 
 
-        Profiler.BeginSample("UpdateCollision");
-        m_collider.gameObject.SetActive(false);
-        if (!m_is_empty)
+        if (m_generate_collision)
         {
-            m_collider.gameObject.SetActive(true);
+            Profiler.BeginSample("UpdateCollision");
+            m_collider.gameObject.SetActive(false);
+            if (!m_is_empty)
+            {
+                m_collider.gameObject.SetActive(true);
+            }
+            Profiler.EndSample();
         }
-        Profiler.EndSample();
 
         return has_occlusion_changed;
     }
@@ -735,6 +743,7 @@ public class VoxelChunk
     int m_density_grid_y;
     int m_chunk_dimension_in_voxels;
     bool m_is_empty;
+    bool m_generate_collision;
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
