@@ -25,7 +25,7 @@ public class VoxelWorld : MonoBehaviour
     int m_grid_height_in_voxels;
     int m_grid_width_in_voxels;
     int m_grid_depth_in_voxels;
-    float m_voxel_size_in_meters;
+    Vector3 m_voxel_size_in_meters;
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
@@ -39,7 +39,7 @@ public class VoxelWorld : MonoBehaviour
         public float m_amount;
     }
 
-    public void Init(float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters, int voxel_chunk_dimesnions, float water_height, bool generate_collision)
+    public void Init(float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, Vector3 voxel_size_in_meters, int voxel_chunk_dimesnions, float water_height, bool generate_collision)
     {
         m_water_height = water_height;
         m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
@@ -62,8 +62,8 @@ public class VoxelWorld : MonoBehaviour
         { 
             var material = GameObject.Instantiate(m_material);
 
-            float bot_y = (float)(y - 1) * m_voxel_size_in_meters;
-            float top_y = (float)y * m_voxel_size_in_meters;
+            float bot_y = (float)(y - 1) * m_voxel_size_in_meters.y;
+            float top_y = (float)y * m_voxel_size_in_meters.y;
 
             var layer = new VoxelLayer(density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y, generate_collision);
             m_layers[y] = layer;
@@ -112,7 +112,7 @@ public class VoxelWorld : MonoBehaviour
 
     public Color GetColorForLayer(int layer_idx)
     {
-        float layer_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters;
+        float layer_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters.y;
         float layer_height_over_world_height = layer_idx / layer_height_in_meters;
 
         var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
@@ -169,6 +169,4 @@ public class VoxelWorld : MonoBehaviour
 
     public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }
     public int GetGridWidthInVoxels() { return m_grid_depth_in_voxels; }
-
-    public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters;  }
 }

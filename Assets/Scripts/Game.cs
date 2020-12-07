@@ -12,7 +12,7 @@ public class Game : MonoBehaviour
     [SerializeField] int m_grid_width_in_voxels;
     [SerializeField] int m_grid_depth_in_voxels;
     [SerializeField] int m_grid_height_in_voxels;
-    [SerializeField] float m_voxel_size_in_meters;
+    [SerializeField] Vector3 m_voxel_size_in_meters;
     [SerializeField] int m_voxel_chunk_dimensions;
     [SerializeField] float m_ground_plane_size;
     [SerializeField] float m_water_height;
@@ -27,7 +27,7 @@ public class Game : MonoBehaviour
     public static Game Instance;
 
     void Awake()
-    {
+    {        
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
         var solid_layers = m_solid_simulation.GetLayers();
         m_solid_mesher = CreateSolidMesher(solid_layers);
@@ -153,5 +153,5 @@ public class Game : MonoBehaviour
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
     }
 
-    public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
+    public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
 }

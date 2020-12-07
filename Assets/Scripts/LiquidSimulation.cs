@@ -41,7 +41,7 @@ public class LiquidSimulation
         public int m_max_y;
     }
 
-    public LiquidSimulation(Vector3Int dimensions_in_cells, float cell_size_in_meters, int chunk_dimensions_in_cells, float[][] solid_layers)
+    public LiquidSimulation(Vector3Int dimensions_in_cells, Vector3 cell_size_in_meters, int chunk_dimensions_in_cells, float[][] solid_layers)
     {
         m_solid_layers = solid_layers;
         m_cell_size_in_meters = cell_size_in_meters;
@@ -70,7 +70,7 @@ public class LiquidSimulation
 
     public void AddDensity(Vector3 world_pos, float amount)
     {
-        var layer_idx = (int)(world_pos.y / m_cell_size_in_meters);
+        var layer_idx = (int)(world_pos.y / m_cell_size_in_meters.y);
         if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
@@ -302,10 +302,10 @@ public class LiquidSimulation
 
                     var pos = density_change.m_position;
 
-                    var x = (int)(pos.x / (float)m_cell_size_in_meters);
+                    var x = (int)(pos.x / (float)m_cell_size_in_meters.x);
                     if (x < 0 || x >= m_dimensions_in_cells.x) return;
 
-                    var z = (int)(pos.z / (float)m_cell_size_in_meters);
+                    var z = (int)(pos.z / (float)m_cell_size_in_meters.z);
                     if (z < 0 || z >= m_dimensions_in_cells.z) return;
 
                     var cell_idx = z * m_dimensions_in_cells.x + x;
@@ -378,7 +378,7 @@ public class LiquidSimulation
     float[][] m_solid_layers;
     Vector3Int[] m_min_dirty_cell_per_layer;
     Vector3Int[] m_max_dirty_cell_per_layer;
-    float m_cell_size_in_meters;
+    Vector3 m_cell_size_in_meters;
 
     Vector3Int m_dimensions_in_cells;
     int m_chunk_dimensions_in_cells;

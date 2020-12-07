@@ -126,7 +126,7 @@ public class VoxelChunk
         int layer_height_in_voxels, 
         float[] layer_density_grid, 
         bool[] layer_occlusion_grid, 
-        float voxel_size_in_meters, 
+        Vector3 voxel_size_in_meters, 
         float iso_level, 
         float bot_y, 
         float top_y, 
@@ -336,8 +336,8 @@ public class VoxelChunk
 
         for (int y = m_density_grid_y; y < m_density_grid_y + m_chunk_dimension_in_voxels; ++y)
         {
-            var near_z = (float)y * m_voxel_size_in_meters;
-            var far_z = near_z + m_voxel_size_in_meters;
+            var near_z = (float)y * m_voxel_size_in_meters.z;
+            var far_z = near_z + m_voxel_size_in_meters.z;
 
             var top_density_idx_offset = m_layer_width_in_voxels;
             if (y == m_layer_height_in_voxels - 1)
@@ -398,8 +398,8 @@ public class VoxelChunk
                 int chunk_relative_y = y - m_density_grid_y;
                 int chunk_relative_cell_idx = chunk_relative_y * m_chunk_dimension_in_voxels + chunk_relative_x;
 
-                var left_x = (float)x * m_voxel_size_in_meters;
-                var right_x = left_x + m_voxel_size_in_meters;
+                var left_x = (float)x * m_voxel_size_in_meters.x;
+                var right_x = left_x + m_voxel_size_in_meters.x;
 
                 var marcher = new MeshMarcher
                 {
@@ -738,7 +738,7 @@ public class VoxelChunk
     float m_iso_level;
     float m_bot_y;
     float m_top_y;
-    float m_voxel_size_in_meters;
+    Vector3 m_voxel_size_in_meters;
     int m_density_grid_x;
     int m_density_grid_y;
     int m_chunk_dimension_in_voxels;

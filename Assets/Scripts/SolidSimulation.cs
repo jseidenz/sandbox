@@ -11,7 +11,7 @@ public class SolidSimulation
         public float m_amount;
     }
 
-    public SolidSimulation(Vector3Int dimensions_in_cells, float cell_size_in_meters, int chunk_dimensions_in_cells)
+    public SolidSimulation(Vector3Int dimensions_in_cells, Vector3 cell_size_in_meters, int chunk_dimensions_in_cells)
     {
         m_cell_size_in_meters = cell_size_in_meters;
         m_dimensions_in_cells = dimensions_in_cells;
@@ -28,7 +28,7 @@ public class SolidSimulation
 
     public void AddDensity(Vector3 world_pos, float amount)
     {
-        var layer_idx = (int)(world_pos.y / m_cell_size_in_meters);
+        var layer_idx = (int)(world_pos.y / m_cell_size_in_meters.y);
         if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
@@ -47,10 +47,10 @@ public class SolidSimulation
 
                 var pos = density_change.m_position;
 
-                var x = (int)(pos.x / (float)m_cell_size_in_meters);
+                var x = (int)(pos.x / (float)m_cell_size_in_meters.x);
                 if (x < 0 || x >= m_dimensions_in_cells.x) return;
 
-                var z = (int)(pos.z / (float)m_cell_size_in_meters);
+                var z = (int)(pos.z / (float)m_cell_size_in_meters.z);
                 if (z < 0 || z >= m_dimensions_in_cells.z) return;
 
                 var cell_idx = z * m_dimensions_in_cells.x + x;
@@ -112,7 +112,7 @@ public class SolidSimulation
     public float[][] GetLayers() { return m_layers; }
 
     float[][] m_layers;
-    float m_cell_size_in_meters;
+    Vector3 m_cell_size_in_meters;
 
     Vector3Int m_dimensions_in_cells;
     int m_chunk_dimensions_in_cells;

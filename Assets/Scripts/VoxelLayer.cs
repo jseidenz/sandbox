@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class VoxelLayer
 {
-    public VoxelLayer(float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, bool generate_collision)
+    public VoxelLayer(float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, Vector3 voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, bool generate_collision)
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
         if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
@@ -100,10 +100,10 @@ public class VoxelLayer
         {
             for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
             {
-                var world_left = chunk_x * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
-                var world_right = world_left + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
-                var world_near = chunk_y * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
-                var world_far = world_near + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                var world_left = chunk_x * m_voxel_chunk_dimensions * m_voxel_size_in_meters.x;
+                var world_right = world_left + m_voxel_chunk_dimensions * m_voxel_size_in_meters.x;
+                var world_near = chunk_y * m_voxel_chunk_dimensions * m_voxel_size_in_meters.z;
+                var world_far = world_near + m_voxel_chunk_dimensions * m_voxel_size_in_meters.z;
 
                 var pt_a = new Vector3(world_left, m_bot_y, world_near);
                 var pt_b = new Vector3(world_right, m_top_y, world_far);
@@ -137,10 +137,10 @@ public class VoxelLayer
 
     public void AddDensity(Vector3 pos, float amount, HashSet<int> dirty_chunk_indices)
     {
-        var x = (int)(pos.x / m_voxel_size_in_meters);
+        var x = (int)(pos.x / m_voxel_size_in_meters.x);
         if (x < 0 || x > m_width_in_voxels) return;
 
-        var y = (int)(pos.z / m_voxel_size_in_meters);
+        var y = (int)(pos.z / m_voxel_size_in_meters.z);
         if (y < 0 || y > m_height_in_voxels) return;
 
         var cell_idx = y * m_width_in_voxels + x;
@@ -192,7 +192,7 @@ public class VoxelLayer
     int m_height_in_chunks;
     CullingGroup m_culling_group;
     Material m_material;
-    float m_voxel_size_in_meters;
+    Vector3 m_voxel_size_in_meters;
     float m_one_over_voxel_chunk_dimensions;
     int m_voxel_chunk_dimensions;
     VoxelChunk[] m_voxel_chunks;
