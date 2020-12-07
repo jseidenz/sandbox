@@ -14,6 +14,7 @@ public class SolidSimulation
     public SolidSimulation(Vector3Int dimensions_in_cells, float cell_size_in_meters, int chunk_dimensions_in_cells)
     {
         m_cell_size_in_meters = cell_size_in_meters;
+        m_dimensions_in_cells = dimensions_in_cells;
         m_layers = new float[dimensions_in_cells.y][];
 
         for(int i = 0; i < dimensions_in_cells.y; ++i)
@@ -35,6 +36,8 @@ public class SolidSimulation
 
     public void Update(HashSet<Vector3Int> dirty_chunk_ids)
     {
+        if (m_density_changes.Count <= 0) return;
+
         for(int y = 0; y < m_dimensions_in_cells.y; ++y)
         {
             var layer = m_layers[y];
@@ -58,17 +61,17 @@ public class SolidSimulation
                 {
                     layer[cell_idx] = new_density;
 
-                    for (int i = -1; i <= 1; ++i)
+                    for (int j = -1; j <= 1; ++j)
                     {
-                        for (int j = -1; j <= 1; ++j)
+                        for (int i = -1; i <= 1; ++i)
                         {
                             var offset_x = Math.Min(Math.Max(x + i, 0), m_dimensions_in_cells.x - 1);
                             var offset_z = Math.Min(Math.Max(z + j, 0), m_dimensions_in_cells.z - 1);
 
                             var chunk_grid_x = (int)(offset_x * m_one_over_chunk_dimensions_in_cells);
-                            var chunk_grid_y = (int)(offset_z * m_one_over_chunk_dimensions_in_cells);
+                            var chunk_grid_z = (int)(offset_z * m_one_over_chunk_dimensions_in_cells);
 
-                            dirty_chunk_ids.Add(new Vector3Int(offset_x, y, offset_z));
+                            dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, y, chunk_grid_z));
                         }
                     }
                 }
@@ -95,6 +98,8 @@ public class SolidSimulation
             }
         }
     }
+
+    public float[][] GetLayers() { return m_layers; }
 
     float[][] m_layers;
     float m_cell_size_in_meters;

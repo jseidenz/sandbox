@@ -23,7 +23,9 @@ public class Game : MonoBehaviour
     {
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
 
-        m_voxel_world = await CreateVoxelWorld();
+        var layers = m_solid_simulation.GetLayers();
+
+        m_voxel_world = await CreateVoxelWorld(layers);
         m_liquid_simulation = new LiquidSimulation();
         
 
@@ -38,11 +40,11 @@ public class Game : MonoBehaviour
         ScreenFader.StartScreenFade(m_initial_black.gameObject, false, 5f, 0.25f, () => m_initial_black.gameObject.SetActive(false));
     }
 
-    async Task<VoxelWorld> CreateVoxelWorld()
+    async Task<VoxelWorld> CreateVoxelWorld(float[][] layers)
     {
         var voxel_world = GameObject.Instantiate(m_voxel_world);
         voxel_world.m_tuneables = m_voxel_world.m_tuneables;
-        voxel_world.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions);
+        voxel_world.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions);
 
 
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
@@ -64,9 +66,7 @@ public class Game : MonoBehaviour
                 densities[density_idx] = density;
             }
         }
-
-
-        voxel_world.ApplyHeightMap(densities);        
+        
         m_solid_simulation.ApplyHeightMap(densities);
         voxel_world.TriangulateAll();
 
@@ -88,10 +88,16 @@ public class Game : MonoBehaviour
         return m_liquid_simulation;
     }
 
+    public SolidSimulation GetSolidSimulation()
+    {
+        return m_solid_simulation;
+    }
+
     void Update()
     {
         m_dirty_chunk_ids.Clear();
-        m_solid_simulation.Update(m_dirty_chunk_ids);    
+        m_solid_simulation.Update(m_dirty_chunk_ids);
+        m_voxel_world.Triangulate(m_dirty_chunk_ids);
     }
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();

@@ -31,9 +31,7 @@ public class VoxelWorld : MonoBehaviour
     float m_voxel_size_in_meters;
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
-    List<DensityChange> m_density_changes = new List<DensityChange>();
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
-    HashSet<int> m_dirty_chunk_indices = new HashSet<int>();
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
     GameObject m_ground_plane;
 
@@ -44,7 +42,7 @@ public class VoxelWorld : MonoBehaviour
         public float m_amount;
     }
 
-    public void Init(int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters, int voxel_chunk_dimesnions)
+    public void Init(float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters, int voxel_chunk_dimesnions)
     {
         m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
         m_voxel_size_in_meters = voxel_size_in_meters;
@@ -69,7 +67,7 @@ public class VoxelWorld : MonoBehaviour
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters;
             float top_y = (float)y * m_voxel_size_in_meters;
 
-            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y, camera);
+            var layer = new VoxelLayer(density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y, camera);
             m_layers[y] = layer;
         }
 
@@ -118,10 +116,6 @@ public class VoxelWorld : MonoBehaviour
     {
         m_water.transform.position = new Vector3(0, m_tuneables.m_water_height, 0);
 
-        Profiler.BeginSample("UpdateDensityChanged");
-        UpdateDensityChanges();
-        Profiler.EndSample();
-
         float dt = Time.deltaTime;
 
         Profiler.BeginSample("Render");
@@ -152,58 +146,20 @@ public class VoxelWorld : MonoBehaviour
         return color;
     }
 
-    void UpdateDensityChanges()
+    public void Triangulate(HashSet<Vector3Int> dirty_chunk_ids)
     {
-        if (m_density_changes.Count == 0) return;
+        if (dirty_chunk_ids.Count == 0) return;
 
-        m_dirty_chunk_indices.Clear();
         m_dirty_chunk_occlusion_indices.Clear();
 
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
             var layer = m_layers[y];
-            Profiler.BeginSample("AddDensity");
-            foreach(var density_change in m_density_changes)
-            {
-                if (density_change.m_layer_idx != y) continue;
-
-                layer.AddDensity(density_change.m_position, density_change.m_amount, m_dirty_chunk_indices);
-            }
-            Profiler.EndSample();
 
             Profiler.BeginSample("Triangulate");
-            if(m_dirty_chunk_indices.Count != 0)
-            {
-                layer.Triangulate(m_voxel_chunk_scratch_buffer, m_dirty_chunk_indices, m_dirty_chunk_occlusion_indices);
-            }
+            layer.Triangulate(m_voxel_chunk_scratch_buffer, dirty_chunk_ids);
             Profiler.EndSample();
-
-            var temp = m_dirty_chunk_indices;
-            m_dirty_chunk_indices = m_dirty_chunk_occlusion_indices;
-            m_dirty_chunk_occlusion_indices = temp;
-            m_dirty_chunk_occlusion_indices.Clear();
-        }
-        m_density_changes.Clear();
-        
-    }
-
-    public void AddDensity(Vector3 world_pos, float amount)
-    {
-        var layer_idx = (int)(world_pos.y / m_voxel_size_in_meters);
-        if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
-
-        m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
-    }
-
-    public void ApplyHeightMap(float[] densities)
-    {
-        for (int y = m_layers.Length - 1; y >= 0; --y)
-        {
-            var layer = m_layers[y];
-
-            layer.ApplyHeightmap(densities);
-            
-        }
+        }        
     }
 
     public void TriangulateAll()

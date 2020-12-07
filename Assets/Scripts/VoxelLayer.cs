@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 public class VoxelLayer
 {
-    public VoxelLayer(int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, Camera camera)
+    public VoxelLayer(float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, Camera camera)
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
         if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
 
-        m_density_grid = new float[width_in_voxels * height_in_voxels];
+        m_density_grid = density_grid;
         m_occlusion_grid = new bool[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
@@ -19,6 +19,7 @@ public class VoxelLayer
         m_one_over_voxel_chunk_dimensions = 1f / (float)voxel_chunk_dimensions;
         m_bot_y = bot_y;
         m_top_y = top_y;
+        m_layer_idx = layer_idx;
 
         m_material = material;
 
@@ -64,16 +65,26 @@ public class VoxelLayer
         }
     }
 
-    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<int> dirty_chunk_indices, HashSet<int> dirty_chunk_occlusion_indices)
+    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
     {
-        foreach(var chunk_idx in dirty_chunk_indices)
+        m_scratch_dirty_chunk_ids.Clear();
+        foreach (var chunk_id in dirty_chunk_ids)
         {
+            if (chunk_id.y != m_layer_idx) continue;
+
+            var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
+
             var chunk = m_voxel_chunks[chunk_idx];
             bool occlusion_dirtied = chunk.Triangulate(scratch_buffer);
-            if(occlusion_dirtied)
+            if (occlusion_dirtied && m_layer_idx > 0)
             {
-                dirty_chunk_occlusion_indices.Add(chunk_idx);
+                m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, 0));
             }
+        }
+
+        foreach (var chunk_id in m_scratch_dirty_chunk_ids)
+        {
+            dirty_chunk_ids.Add(chunk_id);
         }
     }
 
@@ -187,5 +198,7 @@ public class VoxelLayer
     VoxelChunk[] m_voxel_chunks;
     float m_bot_y;
     float m_top_y;
+    int m_layer_idx;
     HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
+    HashSet<Vector3Int> m_scratch_dirty_chunk_ids = new HashSet<Vector3Int>();
 }
