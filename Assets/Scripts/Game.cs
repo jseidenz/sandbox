@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class Game : MonoBehaviour 
 {
     [SerializeField] VoxelWorld m_voxel_world;
+    [SerializeField] LiquidSimulation m_liquid_simulation;
+    [SerializeField] VoxelWorld m_liquid_mesher;
     [SerializeField] GameObject m_player_avatar;
     [SerializeField] Image m_initial_black;
     [SerializeField] int m_grid_width_in_voxels;
@@ -16,6 +18,9 @@ public class Game : MonoBehaviour
     async void Awake()
     {
         m_voxel_world = await CreateVoxelWorld();
+        m_liquid_mesher = await CreateLiquidMesher();
+        m_liquid_simulation = await CreateLiquidSimulation();
+
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
 
@@ -59,6 +64,21 @@ public class Game : MonoBehaviour
         voxel_world.ApplyHeightMap(densities, cell_height_in_color_space);
 
         return voxel_world;
+    }
+
+
+    async Task<VoxelWorld> CreateLiquidMesher()
+    {
+        var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
+        liquid_mesher.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels);
+        liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
+        return liquid_mesher;
+    }
+
+    async Task<LiquidSimulation> CreateLiquidSimulation()
+    {
+        var liquid_simulation = GameObject.Instantiate(m_liquid_simulation);
+        return liquid_simulation;
     }
 
     async Task<GameObject> CreateAvatar()

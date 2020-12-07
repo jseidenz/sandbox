@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &6796537255132227347
+--- !u!1 &8719725277344050950
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2735025177753204339}
-  - component: {fileID: 4905298800713076011}
+  - component: {fileID: 7225977169084572380}
+  - component: {fileID: -8045444794389482983}
   m_Layer: 0
-  m_Name: Game
+  m_Name: LiquidSimulation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2735025177753204339
+--- !u!4 &7225977169084572380
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6796537255132227347}
+  m_GameObject: {fileID: 8719725277344050950}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -31,27 +31,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4905298800713076011
+--- !u!114 &-8045444794389482983
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6796537255132227347}
+  m_GameObject: {fileID: 8719725277344050950}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7a5e37ee79533d4281bdaef708f6547, type: 3}
+  m_Script: {fileID: 11500000, guid: a318773b5e928ba44a858db4a19141e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_voxel_world: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
-    type: 3}
-  m_liquid_simulation: {fileID: -8045444794389482983, guid: aae1f92fff2decf4fb11b89650304460,
-    type: 3}
-  m_liquid_mesher: {fileID: -4783240192274886246, guid: 5e8f2702d31139347b60b7ad28998432,
-    type: 3}
-  m_player_avatar: {fileID: 5372770372708608955, guid: 6adbf587ccf463c40a51f92b37d5c887,
-    type: 3}
-  m_initial_black: {fileID: 0}
-  m_grid_width_in_voxels: 384
-  m_grid_depth_in_voxels: 384
-  m_grid_height_in_voxels: 64

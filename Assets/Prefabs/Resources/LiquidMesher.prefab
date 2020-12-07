@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8719725277344050950
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7225977169084572380}
+  - component: {fileID: -4783240192274886246}
+  m_Layer: 0
+  m_Name: VoxelWorld
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7225977169084572380
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8719725277344050950}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-4783240192274886246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8719725277344050950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 458b27d057e6277478e85e7d242fe1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_tuneables:
+    m_water_height: 11.18
+    m_height_gradient:
+      serializedVersion: 2
+      key0: {r: 0, g: 0, b: 0, a: 1}
+      key1: {r: 0.471, g: 0.4594653, b: 0.3614204, a: 1}
+      key2: {r: 0.14208794, g: 0.2924528, b: 0.14208794, a: 1}
+      key3: {r: 0.119259514, g: 0.3773585, b: 0.119259514, a: 0}
+      key4: {r: 0.4454852, g: 0.32820818, b: 0.28162375, a: 0}
+      key5: {r: 0.44716594, g: 0.32795495, b: 0.28246027, a: 0}
+      key6: {r: 0.6226415, g: 0.4950513, b: 0.40236738, a: 0}
+      key7: {r: 0.6226415, g: 0.4950513, b: 0.40236738, a: 0}
+      ctime0: 0
+      ctime1: 32382
+      ctime2: 34695
+      ctime3: 39514
+      ctime4: 43176
+      ctime5: 63029
+      ctime6: 65535
+      ctime7: 65535
+      atime0: 0
+      atime1: 65535
+      atime2: 65535
+      atime3: 0
+      atime4: 0
+      atime5: 0
+      atime6: 0
+      atime7: 0
+      m_Mode: 0
+      m_NumColorKeys: 7
+      m_NumAlphaKeys: 2
+    m_saturation_variation_rate: 200
+    m_saturation_variation_amount: 0
+    m_hue_variation_rate: 181.1
+    m_hue_variaton_amount: 0.05
+  m_grid_height_in_voxels: 64
+  m_voxel_chunk_dimensions: 64
+  m_grid_width_in_voxels: 384
+  m_grid_depth_in_voxels: 384
+  m_material: {fileID: 2100000, guid: 110b478629f009f42a8742bd52347328, type: 2}
+  m_voxel_size_in_meters: 0.6
+  m_ground_plane_size: 1000
+  m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}

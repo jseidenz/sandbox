@@ -5418,6 +5418,18 @@ PrefabInstance:
       propertyPath: m_grid_height_in_voxels
       value: 64
       objectReference: {fileID: 0}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_liquid_mesher
+      value: 
+      objectReference: {fileID: -4783240192274886246, guid: 5e8f2702d31139347b60b7ad28998432,
+        type: 3}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_liquid_simulation
+      value: 
+      objectReference: {fileID: -8045444794389482983, guid: aae1f92fff2decf4fb11b89650304460,
+        type: 3}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name
