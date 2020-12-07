@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Threading.Tasks;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class Game : MonoBehaviour 
 {
@@ -94,4 +95,12 @@ public class Game : MonoBehaviour
     {
         return m_liquid_simulation;
     }
+
+    void Update()
+    {
+        m_dirty_chunk_ids.Clear();
+        m_solid_simulation.Update(m_dirty_chunk_ids);    
+    }
+
+    HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
 }

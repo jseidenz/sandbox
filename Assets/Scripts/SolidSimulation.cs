@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class SolidSimulation
 {
@@ -19,6 +20,9 @@ public class SolidSimulation
         {
             m_layers[i] = new float[dimensions_in_cells.x * dimensions_in_cells.z];
         }
+
+        m_chunk_dimensions_in_cells = chunk_dimensions_in_cells;
+        m_one_over_chunk_dimensions_in_cells = 1f / chunk_dimensions_in_cells;
     }
 
     public void AddDensity(Vector3 world_pos, float amount)
@@ -29,16 +33,49 @@ public class SolidSimulation
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
-    public void Update(HashSet<Vector3Int> dirty_chunk_indices)
+    public void Update(HashSet<Vector3Int> dirty_chunk_ids)
     {
         for(int y = 0; y < m_dimensions_in_cells.y; ++y)
         {
             var layer = m_layers[y];
             foreach(var density_change in m_density_changes)
             {
+                if (density_change.m_layer_idx != y) continue;
 
+                var pos = density_change.m_position;
+
+                var x = (int)(pos.x / (float)m_cell_size_in_meters);
+                if (x < 0 || x >= m_dimensions_in_cells.x) return;
+
+                var z = (int)(pos.z / (float)m_cell_size_in_meters);
+                if (z < 0 || z >= m_dimensions_in_cells.z) return;
+
+                var cell_idx = z * m_dimensions_in_cells.x + x;
+
+                var previous_density = layer[cell_idx];
+                var new_density = Mathf.Clamp01(previous_density + density_change.m_amount);
+                if(new_density != previous_density)
+                {
+                    layer[cell_idx] = new_density;
+
+                    for (int i = -1; i <= 1; ++i)
+                    {
+                        for (int j = -1; j <= 1; ++j)
+                        {
+                            var offset_x = Math.Min(Math.Max(x + i, 0), m_dimensions_in_cells.x - 1);
+                            var offset_z = Math.Min(Math.Max(z + j, 0), m_dimensions_in_cells.z - 1);
+
+                            var chunk_grid_x = (int)(offset_x * m_one_over_chunk_dimensions_in_cells);
+                            var chunk_grid_y = (int)(offset_z * m_one_over_chunk_dimensions_in_cells);
+
+                            dirty_chunk_ids.Add(new Vector3Int(offset_x, y, offset_z));
+                        }
+                    }
+                }
             }
         }
+
+        m_density_changes.Clear();
     }
 
     float[][] m_layers;
@@ -46,5 +83,6 @@ public class SolidSimulation
 
     Vector3Int m_dimensions_in_cells;
     int m_chunk_dimensions_in_cells;
+    float m_one_over_chunk_dimensions_in_cells;
     List<DensityChange> m_density_changes = new List<DensityChange>();
 }

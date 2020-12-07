@@ -41,9 +41,6 @@ public class VoxelLayer
         {
             chunk.SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
         }
-
-        m_layer_above_occlusion_grid = layer_above_occlusion_grid;
-        m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
     public void ApplyHeightmap(float[] densities, float min_height, float max_height)
@@ -176,8 +173,6 @@ public class VoxelLayer
         m_culling_group = null;
     }
 
-    bool[] m_layer_above_occlusion_grid;
-    bool[] m_layer_below_occlusion_grid;
     float[] m_density_grid;
     bool[] m_occlusion_grid;
     int m_width_in_voxels;
@@ -193,10 +188,4 @@ public class VoxelLayer
     float m_bot_y;
     float m_top_y;
     HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
-
-    VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
-    {
-        new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
-    };
 }
