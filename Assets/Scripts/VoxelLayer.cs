@@ -43,7 +43,7 @@ public class VoxelLayer
         }
     }
 
-    public void ApplyHeightmap(float[] densities, float min_height, float max_height)
+    public void ApplyHeightmap(float[] densities)
     {
         for (int y = 0; y < m_height_in_voxels; ++y)
         {

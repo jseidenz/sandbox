@@ -80,7 +80,7 @@ public class SolidSimulation
 
     public void ApplyHeightMap(float[] densities)
     {
-        for (int y = 0; y <= m_layers.Length; ++y)
+        for (int y = 0; y < m_layers.Length; ++y)
         {
             var layer = m_layers[y];
 

@@ -22,10 +22,12 @@ public class Game : MonoBehaviour
 
     async void Awake()
     {
+        m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
+
         m_voxel_world = await CreateVoxelWorld();
         m_liquid_mesher = await CreateLiquidMesher();
         m_liquid_simulation = new LiquidSimulation();
-        m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
+        
 
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
@@ -66,8 +68,9 @@ public class Game : MonoBehaviour
         }
 
 
-        float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
-        voxel_world.ApplyHeightMap(densities, cell_height_in_color_space);
+        voxel_world.ApplyHeightMap(densities);        
+        m_solid_simulation.ApplyHeightMap(densities);
+        voxel_world.TriangulateAll();
 
         return voxel_world;
     }

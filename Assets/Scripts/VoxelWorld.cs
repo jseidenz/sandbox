@@ -195,18 +195,23 @@ public class VoxelWorld : MonoBehaviour
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
-    public void ApplyHeightMap(float[] densities, float cell_height_in_color_space)
+    public void ApplyHeightMap(float[] densities)
     {
         for (int y = m_layers.Length - 1; y >= 0; --y)
         {
-            float layer_min_height = y * cell_height_in_color_space;
-            float layer_max_height = (y + 1) * cell_height_in_color_space;
-
             var layer = m_layers[y];
 
-            layer.ApplyHeightmap(densities, layer_min_height, layer_max_height);
-            layer.Triangulate(m_voxel_chunk_scratch_buffer);
+            layer.ApplyHeightmap(densities);
+            
         }
+    }
+
+    public void TriangulateAll()
+    {
+        foreach(var layer in m_layers)
+        {
+            layer.Triangulate(m_voxel_chunk_scratch_buffer);
+        }        
     }
 
     void OnDestroy()
