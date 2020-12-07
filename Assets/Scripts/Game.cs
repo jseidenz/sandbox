@@ -152,4 +152,6 @@ public class Game : MonoBehaviour
         m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
     }
+
+    public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
 }

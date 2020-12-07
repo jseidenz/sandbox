@@ -56,7 +56,7 @@ public class VoxelWorld : MonoBehaviour
 
         var camera = Camera.main;
 
-        const float iso_level = 0.99f;
+        const float iso_level = 0.5f;
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         { 
@@ -152,9 +152,9 @@ public class VoxelWorld : MonoBehaviour
     public void TriangulateAll()
     {
         Profiler.BeginSample("TriangulateAll");
-        foreach(var layer in m_layers)
+        for(int y = m_layers.Length - 1; y >= 0; --y)
         {
-            layer.Triangulate(m_voxel_chunk_scratch_buffer);
+            m_layers[y].Triangulate(m_voxel_chunk_scratch_buffer);
         }
         Profiler.EndSample();
     }
