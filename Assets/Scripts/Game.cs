@@ -17,6 +17,8 @@ public class Game : MonoBehaviour
     [SerializeField] float m_ground_plane_size;
     [SerializeField] float m_water_height;
     [SerializeField] GameObject m_water;
+    [SerializeField] float m_solid_iso_level;
+    [SerializeField] float m_liquid_iso_level;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -61,7 +63,7 @@ public class Game : MonoBehaviour
     {
         var solid_mesher = GameObject.Instantiate(m_solid_mesher);
         solid_mesher.m_tuneables = m_solid_mesher.m_tuneables;
-        solid_mesher.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true);
+        solid_mesher.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level);
 
 
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
@@ -96,6 +98,8 @@ public class Game : MonoBehaviour
         m_solid_simulation.ApplyHeightMap(densities);
         solid_mesher.TriangulateAll();
 
+        //solid_mesher.enabled = false;
+
         return solid_mesher;
     }
 
@@ -103,7 +107,7 @@ public class Game : MonoBehaviour
     {
         var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
         liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
-        liquid_mesher.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false);
+        liquid_mesher.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level);
 
         return liquid_mesher;
     }

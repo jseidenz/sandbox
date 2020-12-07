@@ -39,7 +39,7 @@ public class VoxelWorld : MonoBehaviour
         public float m_amount;
     }
 
-    public void Init(float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, Vector3 voxel_size_in_meters, int voxel_chunk_dimesnions, float water_height, bool generate_collision)
+    public void Init(float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, Vector3 voxel_size_in_meters, int voxel_chunk_dimesnions, float water_height, bool generate_collision, float iso_level)
     {
         m_water_height = water_height;
         m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
@@ -54,9 +54,6 @@ public class VoxelWorld : MonoBehaviour
 
         m_layers = new VoxelLayer[m_grid_height_in_voxels];
 
-        var camera = Camera.main;
-
-        const float iso_level = 0.95f;
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         { 
