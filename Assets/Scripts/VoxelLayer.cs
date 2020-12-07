@@ -80,44 +80,40 @@ public class VoxelLayer
         }
     }
 
-
-    public void Render(float dt, Color color)
+    public void BindCamera(Camera camera)
     {
-        if (m_culling_group == null)
+        m_culling_group = new CullingGroup();
+        m_culling_group.targetCamera = camera;
+        m_culling_group.onStateChanged += OnCullingGroupStateChanged;
+
+        var bounding_spheres = new BoundingSphere[m_voxel_chunks.Length];
+        int bounding_sphere_idx = 0;
+        for (int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
         {
-            var camera = Camera.main;
-            if (camera != null)
+            for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
             {
-                m_culling_group = new CullingGroup();
-                m_culling_group.targetCamera = camera;
-                m_culling_group.onStateChanged += OnCullingGroupStateChanged;
+                var world_left = chunk_x * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                var world_right = world_left + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                var world_near = chunk_y * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                var world_far = world_near + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
 
-                var bounding_spheres = new BoundingSphere[m_voxel_chunks.Length];
-                int bounding_sphere_idx = 0;
-                for (int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
-                {
-                    for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
-                    {
-                        var world_left = chunk_x * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
-                        var world_right = world_left + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
-                        var world_near = chunk_y * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
-                        var world_far = world_near + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                var pt_a = new Vector3(world_left, m_bot_y, world_near);
+                var pt_b = new Vector3(world_right, m_top_y, world_far);
 
-                        var pt_a = new Vector3(world_left, m_bot_y, world_near);
-                        var pt_b = new Vector3(world_right, m_top_y, world_far);
+                var radius_vector = (pt_b - pt_a) * 0.5f;
+                var center = pt_a + radius_vector;
 
-                        var radius_vector = (pt_b - pt_a) * 0.5f;
-                        var center = pt_a + radius_vector;
-
-                        bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(center, radius_vector.magnitude);
-                    }
-                }
-
-                m_culling_group.SetBoundingSpheres(bounding_spheres);
-                m_culling_group.SetBoundingSphereCount(bounding_spheres.Length);
+                bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(center, radius_vector.magnitude);
             }
         }
 
+        m_culling_group.SetBoundingSpheres(bounding_spheres);
+        m_culling_group.SetBoundingSphereCount(bounding_spheres.Length);
+    }
+
+
+    public void Render(float dt, Color color)
+    {
         m_material.color = color;
 
         foreach(var chunk in m_visible_voxel_chunks)

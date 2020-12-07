@@ -136,6 +136,14 @@ public class VoxelWorld : MonoBehaviour
         m_water = GameObject.Instantiate(m_water);
     }
 
+    public void BindCamera(Camera camera)
+    {
+        foreach(var layer in m_layers)
+        {
+            layer.BindCamera(camera);
+        }
+    }
+
     private void LateUpdate()
     {
         m_water.transform.position = new Vector3(0, m_tuneables.m_water_height, 0);
