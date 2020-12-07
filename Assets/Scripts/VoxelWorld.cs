@@ -37,8 +37,6 @@ public class VoxelWorld : MonoBehaviour
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
     GameObject m_ground_plane;
 
-    public static VoxelWorld Instance;
-
     struct DensityChange
     {
         public Vector3 m_position;
@@ -130,8 +128,6 @@ public class VoxelWorld : MonoBehaviour
         ground_plane_mesh_renderer.receiveShadows = false;
         m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
-
-        Instance = this;
 
         m_water = GameObject.Instantiate(m_water);
     }

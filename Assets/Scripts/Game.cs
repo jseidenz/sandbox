@@ -8,12 +8,15 @@ public class Game : MonoBehaviour
     [SerializeField] GameObject m_player_avatar;
     [SerializeField] Image m_initial_black;
 
+    public static Game Instance;
+
     async void Awake()
     {
         m_voxel_world = await CreateVoxelWorld();
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
 
+        Instance = this;
     }
 
     void Start()
@@ -31,5 +34,10 @@ public class Game : MonoBehaviour
     async Task<GameObject> CreateAvatar()
     {
         return GameObject.Instantiate(m_player_avatar);
+    }
+
+    public VoxelWorld GetVoxelWorld()
+    {
+        return m_voxel_world;
     }
 }

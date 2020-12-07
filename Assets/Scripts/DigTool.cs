@@ -44,7 +44,8 @@ public class DigTool : MonoBehaviour
             {
                 var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
-                VoxelWorld.Instance.AddDensity(hit_point, amount * Time.deltaTime);
+
+                Game.Instance.GetVoxelWorld().AddDensity(hit_point, amount * Time.deltaTime);
             }
         }
     }
