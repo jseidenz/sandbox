@@ -19,19 +19,17 @@ public class DigTool : MonoBehaviour
             }
         }
 
-        if (Input.GetKey(KeyCode.Mouse0))
-        {
-            if (CameraRayCast(out var hit))
-            {
-                var bias = hit.normal * 0.05f;
-                VoxelWorld.Instance.AddDensity(hit.point + bias, -m_dig_rate * Time.deltaTime);
-            }
-        }
 
-        if (Input.GetKey(KeyCode.Mouse1))
+        UpdateDigControl(KeyCode.Mouse0, -m_dig_rate);
+        UpdateDigControl(KeyCode.Mouse1, m_fill_rate);
+    }
+
+    void UpdateDigControl(KeyCode key_code, float amount)
+    {
+        if (Input.GetKey(key_code))
         {
-            if (Input.GetKeyDown(KeyCode.Mouse1))
-            {                
+            if (Input.GetKeyDown(key_code))
+            {
                 if (CameraRayCast(out var hit))
                 {
                     var bias = hit.normal.y * 0.05f;
@@ -46,7 +44,7 @@ public class DigTool : MonoBehaviour
             {
                 var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
-                VoxelWorld.Instance.AddDensity(hit_point, m_fill_rate * Time.deltaTime);
+                VoxelWorld.Instance.AddDensity(hit_point, amount * Time.deltaTime);
             }
         }
     }
