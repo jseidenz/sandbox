@@ -5,6 +5,7 @@ public class DigTool : MonoBehaviour
 {
     [SerializeField] float m_fill_rate;
     [SerializeField] float m_dig_rate;
+    [SerializeField] float m_dig_distance;
 
     float m_locked_fill_height;
     
@@ -59,6 +60,6 @@ public class DigTool : MonoBehaviour
     {
         var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
-        return Physics.Raycast(ray, out hit);
+        return Physics.Raycast(ray, out hit, m_dig_distance);
     }
 }

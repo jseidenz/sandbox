@@ -341,3 +341,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_fill_rate: 0.5
   m_dig_rate: 0.5
+  m_dig_distance: 5
