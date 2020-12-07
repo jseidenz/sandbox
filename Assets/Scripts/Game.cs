@@ -5,7 +5,8 @@ using System.Collections.Generic;
 
 public class Game : MonoBehaviour 
 {
-    [SerializeField] VoxelWorld m_voxel_world;
+    [SerializeField] VoxelWorld m_solid_mesher;
+    [SerializeField] VoxelWorld m_liquid_mesher;
     [SerializeField] GameObject m_player_avatar;
     [SerializeField] Image m_initial_black;
     [SerializeField] int m_grid_width_in_voxels;
@@ -25,21 +26,23 @@ public class Game : MonoBehaviour
 
     public static Game Instance;
 
-    async void Awake()
+    void Awake()
     {
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
+        var solid_layers = m_solid_simulation.GetLayers();
+        m_solid_mesher = CreateSolidMesher(solid_layers);
 
-        var layers = m_solid_simulation.GetLayers();
-
-        m_voxel_world = await CreateVoxelWorld(layers);
-        m_liquid_simulation = new LiquidSimulation();
+        m_liquid_simulation = new LiquidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
+        m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers());
         
 
-        m_player_avatar = await CreateAvatar();
-        m_voxel_world.BindCamera(Camera.main);
+        m_player_avatar = CreateAvatar();
+
+        var camera = Camera.main;
+        m_solid_mesher.BindCamera(camera);
+        m_liquid_mesher.BindCamera(camera);
 
         CreateGroundPlane();
-
 
         m_water = GameObject.Instantiate(m_water);
 
@@ -53,11 +56,11 @@ public class Game : MonoBehaviour
         ScreenFader.StartScreenFade(m_initial_black.gameObject, false, 5f, 0.25f, () => m_initial_black.gameObject.SetActive(false));
     }
 
-    async Task<VoxelWorld> CreateVoxelWorld(float[][] layers)
+    VoxelWorld CreateSolidMesher(float[][] layers)
     {
-        var voxel_world = GameObject.Instantiate(m_voxel_world);
-        voxel_world.m_tuneables = m_voxel_world.m_tuneables;
-        voxel_world.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height);
+        var solid_mesher = GameObject.Instantiate(m_solid_mesher);
+        solid_mesher.m_tuneables = m_solid_mesher.m_tuneables;
+        solid_mesher.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height);
 
 
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
@@ -81,19 +84,28 @@ public class Game : MonoBehaviour
         }
         
         m_solid_simulation.ApplyHeightMap(densities);
-        voxel_world.TriangulateAll();
+        solid_mesher.TriangulateAll();
 
-        return voxel_world;
+        return solid_mesher;
     }
 
-    async Task<GameObject> CreateAvatar()
+    VoxelWorld CreateLiquidMesher(float[][] layers)
+    {
+        var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
+        liquid_mesher.m_tuneables = m_solid_mesher.m_tuneables;
+        liquid_mesher.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height);
+
+        return liquid_mesher;
+    }
+
+    GameObject CreateAvatar()
     {
         return GameObject.Instantiate(m_player_avatar);
     }
 
     public VoxelWorld GetVoxelWorld()
     {
-        return m_voxel_world;
+        return m_solid_mesher;
     }
 
     public LiquidSimulation GetLiquidSimulation()
@@ -110,7 +122,7 @@ public class Game : MonoBehaviour
     {
         m_dirty_chunk_ids.Clear();
         m_solid_simulation.Update(m_dirty_chunk_ids);
-        m_voxel_world.Triangulate(m_dirty_chunk_ids);
+        m_solid_mesher.Triangulate(m_dirty_chunk_ids);
     }
 
     void CreateGroundPlane()
@@ -118,8 +130,8 @@ public class Game : MonoBehaviour
         m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
         m_ground_plane.name = "GroundPlane";
 
-        var ground_plane_material = GameObject.Instantiate(m_voxel_world.GetMaterial());
-        ground_plane_material.color = m_voxel_world.GetColorForLayer(0);
+        var ground_plane_material = GameObject.Instantiate(m_solid_mesher.GetMaterial());
+        ground_plane_material.color = m_solid_mesher.GetColorForLayer(0);
 
         var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
         ground_plane_mesh_renderer.sharedMaterial = ground_plane_material;
