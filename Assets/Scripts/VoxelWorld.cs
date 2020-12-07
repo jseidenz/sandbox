@@ -21,7 +21,6 @@ public class VoxelWorld : MonoBehaviour
     public LiveTuneable m_tuneables;
 
     [SerializeField] Material m_material;
-    [SerializeField] float m_ground_plane_size;
     [SerializeField] GameObject m_water;
 
     int m_voxel_chunk_dimensions;
@@ -33,7 +32,6 @@ public class VoxelWorld : MonoBehaviour
     bool[] m_empty_occlusion_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
-    GameObject m_ground_plane;
 
     struct DensityChange
     {
@@ -88,18 +86,6 @@ public class VoxelWorld : MonoBehaviour
 
             m_layers[y].SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
         }
-
-        m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
-        m_ground_plane.name = "GroundPlane";
-
-        var ground_plane_material = GameObject.Instantiate(m_material);
-        ground_plane_material.color = GetColorForLayer(0);
-
-        var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
-        ground_plane_mesh_renderer.sharedMaterial = ground_plane_material;
-        ground_plane_mesh_renderer.receiveShadows = false;
-        m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
-        m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
 
         m_water = GameObject.Instantiate(m_water);
     }
@@ -160,6 +146,11 @@ public class VoxelWorld : MonoBehaviour
             layer.Triangulate(m_voxel_chunk_scratch_buffer, dirty_chunk_ids);
             Profiler.EndSample();
         }        
+    }
+
+    public Material GetMaterial()
+    {
+        return m_material;
     }
 
     public void TriangulateAll()

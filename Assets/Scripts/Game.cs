@@ -13,9 +13,13 @@ public class Game : MonoBehaviour
     [SerializeField] int m_grid_height_in_voxels;
     [SerializeField] float m_voxel_size_in_meters;
     [SerializeField] int m_voxel_chunk_dimensions;
+    [SerializeField] float m_ground_plane_size;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
+
+    HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
+    GameObject m_ground_plane;
 
     public static Game Instance;
 
@@ -31,6 +35,8 @@ public class Game : MonoBehaviour
 
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
+
+        CreateGroundPlane();
 
         Instance = this;
     }
@@ -100,5 +106,18 @@ public class Game : MonoBehaviour
         m_voxel_world.Triangulate(m_dirty_chunk_ids);
     }
 
-    HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
+    void CreateGroundPlane()
+    {
+        m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        m_ground_plane.name = "GroundPlane";
+
+        var ground_plane_material = GameObject.Instantiate(m_voxel_world.GetMaterial());
+        ground_plane_material.color = m_voxel_world.GetColorForLayer(0);
+
+        var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
+        ground_plane_mesh_renderer.sharedMaterial = ground_plane_material;
+        ground_plane_mesh_renderer.receiveShadows = false;
+        m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
+        m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
+    }
 }
