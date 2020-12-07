@@ -5403,11 +5403,6 @@ PrefabInstance:
       propertyPath: m_initial_black
       value: 
       objectReference: {fileID: 1298528234}
-    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
-        type: 3}
-      propertyPath: m_ground_plane_size
-      value: 1000
-      objectReference: {fileID: 0}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name

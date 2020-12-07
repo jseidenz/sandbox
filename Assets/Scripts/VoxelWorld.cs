@@ -9,7 +9,6 @@ public class VoxelWorld : MonoBehaviour
     [System.Serializable]
     public class LiveTuneable
     {
-        public float m_water_height;
         public Gradient m_height_gradient = new Gradient();
 
         public float m_saturation_variation_rate;
@@ -21,7 +20,6 @@ public class VoxelWorld : MonoBehaviour
     public LiveTuneable m_tuneables;
 
     [SerializeField] Material m_material;
-    [SerializeField] GameObject m_water;
 
     int m_voxel_chunk_dimensions;
     int m_grid_height_in_voxels;
@@ -32,6 +30,7 @@ public class VoxelWorld : MonoBehaviour
     bool[] m_empty_occlusion_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
+    float m_water_height;
 
     struct DensityChange
     {
@@ -40,7 +39,7 @@ public class VoxelWorld : MonoBehaviour
         public float m_amount;
     }
 
-    public void Init(float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters, int voxel_chunk_dimesnions)
+    public void Init(float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters, int voxel_chunk_dimesnions, float water_height)
     {
         m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
         m_voxel_size_in_meters = voxel_size_in_meters;
@@ -86,8 +85,6 @@ public class VoxelWorld : MonoBehaviour
 
             m_layers[y].SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
         }
-
-        m_water = GameObject.Instantiate(m_water);
     }
 
     public void BindCamera(Camera camera)
@@ -100,8 +97,6 @@ public class VoxelWorld : MonoBehaviour
 
     private void LateUpdate()
     {
-        m_water.transform.position = new Vector3(0, m_tuneables.m_water_height, 0);
-
         float dt = Time.deltaTime;
 
         Profiler.BeginSample("Render");
@@ -120,7 +115,7 @@ public class VoxelWorld : MonoBehaviour
         float layer_height_over_world_height = layer_idx / layer_height_in_meters;
 
         var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
-        if(layer_height_in_meters > m_tuneables.m_water_height)
+        if(layer_height_in_meters > m_water_height)
         {
             Color.RGBToHSV(color, out var hue, out var saturation, out var value);
 

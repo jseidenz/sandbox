@@ -45,8 +45,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_voxel_world: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
     type: 3}
-  m_liquid_mesher: {fileID: -4783240192274886246, guid: 5e8f2702d31139347b60b7ad28998432,
-    type: 3}
   m_player_avatar: {fileID: 5372770372708608955, guid: 6adbf587ccf463c40a51f92b37d5c887,
     type: 3}
   m_initial_black: {fileID: 0}
@@ -55,3 +53,6 @@ MonoBehaviour:
   m_grid_height_in_voxels: 64
   m_voxel_size_in_meters: 0.6
   m_voxel_chunk_dimensions: 64
+  m_ground_plane_size: 1000
+  m_water_height: 11.18
+  m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}

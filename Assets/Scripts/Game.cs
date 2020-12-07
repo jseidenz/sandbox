@@ -14,6 +14,8 @@ public class Game : MonoBehaviour
     [SerializeField] float m_voxel_size_in_meters;
     [SerializeField] int m_voxel_chunk_dimensions;
     [SerializeField] float m_ground_plane_size;
+    [SerializeField] float m_water_height;
+    [SerializeField] GameObject m_water;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -38,6 +40,11 @@ public class Game : MonoBehaviour
 
         CreateGroundPlane();
 
+
+        m_water = GameObject.Instantiate(m_water);
+
+        m_water.transform.position = new Vector3(0, m_water_height, 0);
+
         Instance = this;
     }
 
@@ -50,7 +57,7 @@ public class Game : MonoBehaviour
     {
         var voxel_world = GameObject.Instantiate(m_voxel_world);
         voxel_world.m_tuneables = m_voxel_world.m_tuneables;
-        voxel_world.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions);
+        voxel_world.Init(layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height);
 
 
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
