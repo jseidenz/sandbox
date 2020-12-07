@@ -75,6 +75,8 @@ public class VoxelWorld : MonoBehaviour
 
         float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
 
+        var camera = Camera.main;
+
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         { 
             var material = GameObject.Instantiate(m_material);
@@ -84,7 +86,7 @@ public class VoxelWorld : MonoBehaviour
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters;
             float top_y = (float)y * m_voxel_size_in_meters;
 
-            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y);
+            var layer = new VoxelLayer(m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y, camera);
             m_layers[y] = layer;
         }
 

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class VoxelLayer
 {
-    public VoxelLayer(int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y)
+    public VoxelLayer(int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, float voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, Camera camera)
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
         if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
@@ -103,6 +103,8 @@ public class VoxelLayer
         if (y < 0 || y > m_height_in_voxels) return;
 
         var cell_idx = y * m_width_in_voxels + x;
+
+        Debug.Log($"x={x}, y={y}, cell_idx={cell_idx}, existing_density={m_density_grid[cell_idx]}");
 
         m_density_grid[cell_idx] = Mathf.Clamp01(m_density_grid[cell_idx] + amount);
 
