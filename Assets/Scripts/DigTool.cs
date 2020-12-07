@@ -25,7 +25,7 @@ public class DigTool : MonoBehaviour
 
 
         UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
-        UpdateLiquidControl(KeyCode.E, m_liquid_remove_rate);
+        UpdateLiquidControl(KeyCode.E, -m_liquid_remove_rate);
 
 
         UpdateDigControl(KeyCode.Mouse0, -m_dig_rate);
