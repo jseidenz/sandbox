@@ -15,6 +15,7 @@ public class Game : MonoBehaviour
         m_voxel_world = await CreateVoxelWorld();
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
+        m_voxel_world.ApplyHeightMap();
 
         Instance = this;
     }

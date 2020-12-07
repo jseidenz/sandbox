@@ -46,32 +46,11 @@ public class VoxelWorld : MonoBehaviour
 
     void Awake()
     {
-        var height_map_tex = Resources.Load<Texture2D>("heightmap");
-        var pixels = height_map_tex.GetPixels();
-        var height_map_width = height_map_tex.width;
-
-        Resources.UnloadAsset(height_map_tex);
-
-        var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
         m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
 
         m_voxel_chunk_scratch_buffer = VoxelChunk.ScratchBuffer.CreateScratchBuffer();
 
-        for (int y = 0; y < m_grid_depth_in_voxels; ++y)
-        {
-            for(int x = 0; x < m_grid_width_in_voxels; ++x)
-            {
-                var density_idx = y * m_grid_width_in_voxels + x;
-                var pixel_idx = y * height_map_width + x;
-                var density = pixels[pixel_idx].r;
-
-                densities[density_idx] = density;
-            }
-        }
-
         m_layers = new VoxelLayer[m_grid_height_in_voxels];
-
-        float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
 
         var camera = Camera.main;
 
@@ -104,17 +83,6 @@ public class VoxelWorld : MonoBehaviour
             }
 
             m_layers[y].SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
-        }
-
-        for(int y = m_layers.Length - 1; y >= 0; --y)
-        {
-            float layer_min_height = y * cell_height_in_color_space;
-            float layer_max_height = (y + 1) * cell_height_in_color_space;
-
-            var layer = m_layers[y];
-
-            layer.ApplyHeightmap(densities, layer_min_height, layer_max_height);
-            layer.Triangulate(m_voxel_chunk_scratch_buffer);
         }
 
         m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -219,6 +187,41 @@ public class VoxelWorld : MonoBehaviour
         if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
+    }
+
+    public void ApplyHeightMap()
+    {
+        var height_map_tex = Resources.Load<Texture2D>("heightmap");
+        var pixels = height_map_tex.GetPixels();
+        var height_map_width = height_map_tex.width;
+
+        Resources.UnloadAsset(height_map_tex);
+
+        var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
+
+        for (int y = 0; y < m_grid_depth_in_voxels; ++y)
+        {
+            for (int x = 0; x < m_grid_width_in_voxels; ++x)
+            {
+                var density_idx = y * m_grid_width_in_voxels + x;
+                var pixel_idx = y * height_map_width + x;
+                var density = pixels[pixel_idx].r;
+
+                densities[density_idx] = density;
+            }
+        }
+
+        float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
+        for (int y = m_layers.Length - 1; y >= 0; --y)
+        {
+            float layer_min_height = y * cell_height_in_color_space;
+            float layer_max_height = (y + 1) * cell_height_in_color_space;
+
+            var layer = m_layers[y];
+
+            layer.ApplyHeightmap(densities, layer_min_height, layer_max_height);
+            layer.Triangulate(m_voxel_chunk_scratch_buffer);
+        }
     }
 
     public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters;  }
