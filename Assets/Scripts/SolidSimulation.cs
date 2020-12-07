@@ -38,12 +38,12 @@ public class SolidSimulation
     {
         if (m_density_changes.Count <= 0) return;
 
-        for(int y = 0; y < m_dimensions_in_cells.y; ++y)
+        for(int layer_idx = 0; layer_idx < m_dimensions_in_cells.y; ++layer_idx)
         {
-            var layer = m_layers[y];
+            var layer = m_layers[layer_idx];
             foreach(var density_change in m_density_changes)
             {
-                if (density_change.m_layer_idx != y) continue;
+                if (density_change.m_layer_idx != layer_idx) continue;
 
                 var pos = density_change.m_position;
 
@@ -71,7 +71,7 @@ public class SolidSimulation
                             var chunk_grid_x = (int)(offset_x * m_one_over_chunk_dimensions_in_cells);
                             var chunk_grid_z = (int)(offset_z * m_one_over_chunk_dimensions_in_cells);
 
-                            dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, y, chunk_grid_z));
+                            dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
                         }
                     }
                 }

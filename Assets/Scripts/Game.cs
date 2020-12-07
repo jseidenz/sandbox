@@ -82,8 +82,13 @@ public class Game : MonoBehaviour
                 densities[density_idx] = density;
             }
         }
-        
-        m_solid_simulation.ApplyHeightMap(densities);
+
+        var bottom_layer = layers[20];
+        for(int i = 0; i < bottom_layer.Length; ++i)
+        {
+            bottom_layer[i] = 1;
+        }
+        //m_solid_simulation.ApplyHeightMap(densities);
         solid_mesher.TriangulateAll();
 
         return solid_mesher;
