@@ -151,10 +151,12 @@ public class VoxelWorld : MonoBehaviour
 
     public void TriangulateAll()
     {
+        Profiler.BeginSample("TriangulateAll");
         foreach(var layer in m_layers)
         {
             layer.Triangulate(m_voxel_chunk_scratch_buffer);
-        }        
+        }
+        Profiler.EndSample();
     }
 
     void OnDestroy()
