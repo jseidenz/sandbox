@@ -57,6 +57,15 @@ public class LiquidSimulation
 
         m_chunk_dimensions_in_cells = chunk_dimensions_in_cells;
         m_one_over_chunk_dimensions_in_cells = 1f / chunk_dimensions_in_cells;
+
+        m_min_dirty_cell_per_layer = new Vector3Int[m_layers.Length];
+        m_max_dirty_cell_per_layer = new Vector3Int[m_layers.Length];
+
+        for(int i = 0; i < m_layers.Length; ++i)
+        {
+            m_min_dirty_cell_per_layer[i] = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+            m_max_dirty_cell_per_layer[i] = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+        }
     }
 
     public void AddDensity(Vector3 world_pos, float amount)
@@ -102,11 +111,18 @@ public class LiquidSimulation
 
             var delta_layer = m_delta_layers[layer_idx];
             var lower_delta_layer = m_delta_layers[layer_idx - 1];
-            var upper_delta_layer = m_delta_layers[layer_idx + 1];            
+            var upper_delta_layer = m_delta_layers[layer_idx + 1];
 
-            for(int z = 1; z < m_dimensions_in_cells.z - 1; ++z)
+            var min_dirty_idx = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+            var max_dirty_idx = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+            var min_lower_dirty_idx = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+            var max_lower_dirty_idx = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+            var min_upper_dirty_idx = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+            var max_upper_dirty_idx = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+
+            for (int z = m_min_dirty_cell_per_layer[layer_idx].z; z < m_max_dirty_cell_per_layer[layer_idx].z; ++z)
             {
-                for(int x = 1; x < m_dimensions_in_cells.x - 1; ++x)
+                for (int x = m_min_dirty_cell_per_layer[layer_idx].x; x < m_max_dirty_cell_per_layer[layer_idx].x; ++x)
                 {
                     var cell_idx = z * m_dimensions_in_cells.x + x;
 
@@ -142,7 +158,13 @@ public class LiquidSimulation
                             delta_layer[cell_idx] -= flow;
                             lower_delta_layer[cell_idx] += flow;
 
-                            if(remaining_liquid < MIN_VALUE)
+                            min_dirty_idx = Vector3Int.Min(min_dirty_idx, new Vector3Int(x, layer_idx, z));
+                            max_dirty_idx = Vector3Int.Max(max_dirty_idx, new Vector3Int(x, layer_idx, z));
+                            min_lower_dirty_idx = Vector3Int.Min(min_lower_dirty_idx, new Vector3Int(x, layer_idx - 1, z));
+                            max_lower_dirty_idx = Vector3Int.Max(max_lower_dirty_idx, new Vector3Int(x, layer_idx - 1, z));
+
+
+                            if (remaining_liquid < MIN_VALUE)
                             {
                                 delta_layer[cell_idx] -= remaining_liquid;
                                 continue;
@@ -151,22 +173,22 @@ public class LiquidSimulation
                     }
 
 
-                    if(FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx - 1, layer, delta_layer, solid_layer))
+                    if(FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx - 1, layer, delta_layer, solid_layer, x, layer_idx, z, x - 1, z, ref min_dirty_idx, ref max_dirty_idx))
                     {
                         continue;
                     }
 
-                    if (FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx + 1, layer, delta_layer, solid_layer))
+                    if (FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx + 1, layer, delta_layer, solid_layer, x, layer_idx, z, x + 1, z, ref min_dirty_idx, ref max_dirty_idx))
                     {
                         continue;
                     }
 
-                    if (FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx - m_dimensions_in_cells.x, layer, delta_layer, solid_layer))
+                    if (FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx - m_dimensions_in_cells.x, layer, delta_layer, solid_layer, x, layer_idx, z, x, z - 1, ref min_dirty_idx, ref max_dirty_idx))
                     {
                         continue;
                     }
 
-                    if (FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx + m_dimensions_in_cells.x, layer, delta_layer, solid_layer))
+                    if (FlowAndTryToFinish(ref remaining_liquid, cell_idx, cell_idx + m_dimensions_in_cells.x, layer, delta_layer, solid_layer, x, layer_idx, z, x - 1, z + 1, ref min_dirty_idx, ref max_dirty_idx))
                     {
                         continue;
                     }
@@ -189,32 +211,49 @@ public class LiquidSimulation
                             remaining_liquid -= flow;
                             delta_layer[cell_idx] -= flow;
                             upper_delta_layer[cell_idx] += flow;
+
+                            min_dirty_idx = Vector3Int.Min(min_dirty_idx, new Vector3Int(x, layer_idx, z));
+                            max_dirty_idx = Vector3Int.Max(max_dirty_idx, new Vector3Int(x, layer_idx, z));
+                            min_lower_dirty_idx = Vector3Int.Min(min_lower_dirty_idx, new Vector3Int(x, layer_idx + 1, z));
+                            max_lower_dirty_idx = Vector3Int.Max(max_lower_dirty_idx, new Vector3Int(x, layer_idx + 1, z));
                         }
                     }
-
                 }
             }
+
+            m_min_dirty_cell_per_layer[layer_idx] = Vector3Int.Min(min_dirty_idx, m_min_dirty_cell_per_layer[layer_idx]);
+            m_max_dirty_cell_per_layer[layer_idx] = Vector3Int.Max(max_dirty_idx, m_max_dirty_cell_per_layer[layer_idx]);
+            m_min_dirty_cell_per_layer[layer_idx - 1] = Vector3Int.Min(min_lower_dirty_idx, m_min_dirty_cell_per_layer[layer_idx - 1]);
+            m_max_dirty_cell_per_layer[layer_idx - 1] = Vector3Int.Max(max_lower_dirty_idx, m_max_dirty_cell_per_layer[layer_idx - 1]);
+            m_min_dirty_cell_per_layer[layer_idx + 1] = Vector3Int.Min(min_upper_dirty_idx, m_min_dirty_cell_per_layer[layer_idx + 1]);
+            m_max_dirty_cell_per_layer[layer_idx + 1] = Vector3Int.Max(max_upper_dirty_idx, m_max_dirty_cell_per_layer[layer_idx + 1]);
         }
 
-        for (int y = 0; y < m_delta_layers.Length; ++y)
+        for (int layer_idx = 0; layer_idx < m_delta_layers.Length; ++layer_idx)
         {
-            var layer = m_layers[y];
-            var delta_layer = m_delta_layers[y];
-            for(int i = 0; i < delta_layer.Length; ++i)
-            {
-                var liquid = layer[i] + delta_layer[i];
-                if(liquid < MIN_VALUE)
-                {
-                    liquid = 0;
-                }
+            var layer = m_layers[layer_idx];
+            var delta_layer = m_delta_layers[layer_idx];
 
-                layer[i] = liquid;
-                delta_layer[i] = 0;
+            for (int z = m_min_dirty_cell_per_layer[layer_idx].z; z < m_max_dirty_cell_per_layer[layer_idx].z; ++z)
+            {
+                for (int x = m_min_dirty_cell_per_layer[layer_idx].x; x < m_max_dirty_cell_per_layer[layer_idx].x; ++x)
+                {
+                    var cell_idx = z * m_dimensions_in_cells.z + x;
+
+                    var liquid = layer[cell_idx] + delta_layer[cell_idx];
+                    if (liquid < MIN_VALUE)
+                    {
+                        liquid = 0;
+                    }
+
+                    layer[cell_idx] = liquid;
+                    delta_layer[cell_idx] = 0;
+                }
             }
         }
     }
 
-    public bool FlowAndTryToFinish(ref float remaining_liquid, int cell_idx, int target_cell_idx, float[] layer, float[] delta_layer, float[] solid_layer)
+    public bool FlowAndTryToFinish(ref float remaining_liquid, int cell_idx, int target_cell_idx, float[] layer, float[] delta_layer, float[] solid_layer, int x, int layer_idx, int z, int target_x, int target_z, ref Vector3Int min_dirty_idx, ref Vector3Int max_dirty_idx)
     {
         bool is_target_solid = solid_layer[target_cell_idx] > 0;
         if (!is_target_solid)
@@ -234,6 +273,11 @@ public class LiquidSimulation
                 remaining_liquid -= flow;
                 delta_layer[cell_idx] -= flow;
                 delta_layer[target_cell_idx] += flow;
+
+                min_dirty_idx = Vector3Int.Min(min_dirty_idx, new Vector3Int(x, layer_idx, z));
+                max_dirty_idx = Vector3Int.Max(max_dirty_idx, new Vector3Int(x, layer_idx, z));
+                min_dirty_idx = Vector3Int.Min(min_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
+                max_dirty_idx = Vector3Int.Max(max_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
 
                 if (remaining_liquid < MIN_VALUE)
                 {
@@ -291,7 +335,7 @@ public class LiquidSimulation
         while (m_simulation_timer >= SIMULATION_TICK_RATE)
         {
             Profiler.BeginSample("UpdateSimulation");
-            //UpdateSimulation();
+            UpdateSimulation();
             Profiler.EndSample();
             m_simulation_timer -= SIMULATION_TICK_RATE;
         }
@@ -322,6 +366,8 @@ public class LiquidSimulation
     float[][] m_layers;
     float[][] m_delta_layers;
     float[][] m_solid_layers;
+    Vector3Int[] m_min_dirty_cell_per_layer;
+    Vector3Int[] m_max_dirty_cell_per_layer;
     float m_cell_size_in_meters;
 
     Vector3Int m_dimensions_in_cells;
