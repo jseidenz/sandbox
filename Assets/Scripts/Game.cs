@@ -12,6 +12,11 @@ public class Game : MonoBehaviour
 
     async void Awake()
     {
+        var world_manager = WorldManager.Initialize();
+
+        world_manager.AddWorld(new SandboxWorld());
+
+
         m_voxel_world = await CreateVoxelWorld();
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
