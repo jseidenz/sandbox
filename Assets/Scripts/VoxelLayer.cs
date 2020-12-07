@@ -170,7 +170,7 @@ public class VoxelLayer
         }
     }
 
-    void OnDestroy()
+    internal void OnDestroy()
     {
         m_culling_group.Dispose();
         m_culling_group = null;

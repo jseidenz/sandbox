@@ -5403,6 +5403,21 @@ PrefabInstance:
       propertyPath: m_initial_black
       value: 
       objectReference: {fileID: 1298528234}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_grid_width_in_voxels
+      value: 384
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_grid_depth_in_voxels
+      value: 384
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_grid_height_in_voxels
+      value: 64
+      objectReference: {fileID: 0}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name

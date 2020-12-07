@@ -20,15 +20,17 @@ public class VoxelWorld : MonoBehaviour
 
     public LiveTuneable m_tuneables;
 
-    [SerializeField] int m_grid_height_in_voxels;
     [SerializeField] int m_voxel_chunk_dimensions;
-    [SerializeField] int m_grid_width_in_voxels;
-    [SerializeField] int m_grid_depth_in_voxels;
+
     [SerializeField] Material m_material;
     [SerializeField] float m_voxel_size_in_meters;
     [SerializeField] float m_ground_plane_size;
     [SerializeField] GameObject m_water;
 
+
+    int m_grid_height_in_voxels;
+    int m_grid_width_in_voxels;
+    int m_grid_depth_in_voxels;
     VoxelLayer[] m_layers;
     bool[] m_empty_occlusion_grid;
     List<DensityChange> m_density_changes = new List<DensityChange>();
@@ -44,8 +46,12 @@ public class VoxelWorld : MonoBehaviour
         public float m_amount;
     }
 
-    void Awake()
+    public void Init(int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels)
     {
+        m_grid_width_in_voxels = grid_width_in_voxels;
+        m_grid_height_in_voxels = grid_height_in_voxels;
+        m_grid_depth_in_voxels = grid_depth_in_voxels;
+
         m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
 
         m_voxel_chunk_scratch_buffer = VoxelChunk.ScratchBuffer.CreateScratchBuffer();
@@ -189,7 +195,7 @@ public class VoxelWorld : MonoBehaviour
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
-    public void ApplyHeightMap()
+    public void ApplyHeightMap(float[] dentities, float cell_height_in_color_space)
     {
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
         var pixels = height_map_tex.GetPixels();
@@ -211,7 +217,6 @@ public class VoxelWorld : MonoBehaviour
             }
         }
 
-        float cell_height_in_color_space = 1f / m_grid_height_in_voxels;
         for (int y = m_layers.Length - 1; y >= 0; --y)
         {
             float layer_min_height = y * cell_height_in_color_space;
@@ -223,6 +228,17 @@ public class VoxelWorld : MonoBehaviour
             layer.Triangulate(m_voxel_chunk_scratch_buffer);
         }
     }
+
+    void OnDestroy()
+    {
+        foreach(var layer in m_layers)
+        {
+            layer.OnDestroy();
+        }
+    }
+
+    public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }
+    public int GetGridWidthInVoxels() { return m_grid_depth_in_voxels; }
 
     public float GetVoxelSizeInMeters() { return m_voxel_size_in_meters;  }
 }

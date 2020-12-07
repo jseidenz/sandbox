@@ -47,3 +47,4 @@ MonoBehaviour:
     type: 3}
   m_player_avatar: {fileID: 5372770372708608955, guid: 6adbf587ccf463c40a51f92b37d5c887,
     type: 3}
+  m_initial_black: {fileID: 0}
