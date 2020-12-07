@@ -12,6 +12,7 @@ public class Game : MonoBehaviour
     [SerializeField] int m_grid_depth_in_voxels;
     [SerializeField] int m_grid_height_in_voxels;
     [SerializeField] float m_voxel_size_in_meters;
+    [SerializeField] int m_voxel_chunk_dimensions;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -23,7 +24,7 @@ public class Game : MonoBehaviour
         m_voxel_world = await CreateVoxelWorld();
         m_liquid_mesher = await CreateLiquidMesher();
         m_liquid_simulation = new LiquidSimulation();
-        m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters);
+        m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
 
         m_player_avatar = await CreateAvatar();
         m_voxel_world.BindCamera(Camera.main);
@@ -40,7 +41,7 @@ public class Game : MonoBehaviour
     {
         var voxel_world = GameObject.Instantiate(m_voxel_world);
         voxel_world.m_tuneables = m_voxel_world.m_tuneables;
-        voxel_world.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters);
+        voxel_world.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions);
 
 
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
@@ -74,7 +75,7 @@ public class Game : MonoBehaviour
     async Task<VoxelWorld> CreateLiquidMesher()
     {
         var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
-        liquid_mesher.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters);
+        liquid_mesher.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions);
         liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
         return liquid_mesher;
     }

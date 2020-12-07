@@ -20,13 +20,11 @@ public class VoxelWorld : MonoBehaviour
 
     public LiveTuneable m_tuneables;
 
-    [SerializeField] int m_voxel_chunk_dimensions;
-
     [SerializeField] Material m_material;
     [SerializeField] float m_ground_plane_size;
     [SerializeField] GameObject m_water;
 
-
+    int m_voxel_chunk_dimensions;
     int m_grid_height_in_voxels;
     int m_grid_width_in_voxels;
     int m_grid_depth_in_voxels;
@@ -46,8 +44,9 @@ public class VoxelWorld : MonoBehaviour
         public float m_amount;
     }
 
-    public void Init(int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters)
+    public void Init(int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, float voxel_size_in_meters, int voxel_chunk_dimesnions)
     {
+        m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
         m_voxel_size_in_meters = voxel_size_in_meters;
         m_grid_width_in_voxels = grid_width_in_voxels;
         m_grid_height_in_voxels = grid_height_in_voxels;
