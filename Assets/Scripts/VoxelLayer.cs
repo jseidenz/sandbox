@@ -17,6 +17,8 @@ public class VoxelLayer
         m_voxel_size_in_meters = voxel_size_in_meters;
         m_voxel_chunk_dimensions = voxel_chunk_dimensions;
         m_one_over_voxel_chunk_dimensions = 1f / (float)voxel_chunk_dimensions;
+        m_bot_y = bot_y;
+        m_top_y = top_y;
 
         m_material = material;
 
@@ -81,9 +83,44 @@ public class VoxelLayer
 
     public void Render(float dt, Color color)
     {
+        if (m_culling_group == null)
+        {
+            var camera = Camera.main;
+            if (camera != null)
+            {
+                m_culling_group = new CullingGroup();
+                m_culling_group.targetCamera = camera;
+                m_culling_group.onStateChanged += OnCullingGroupStateChanged;
+
+                var bounding_spheres = new BoundingSphere[m_voxel_chunks.Length];
+                int bounding_sphere_idx = 0;
+                for (int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
+                {
+                    for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
+                    {
+                        var world_left = chunk_x * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                        var world_right = world_left + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                        var world_near = chunk_y * m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+                        var world_far = world_near + m_voxel_chunk_dimensions * m_voxel_size_in_meters;
+
+                        var pt_a = new Vector3(world_left, m_bot_y, world_near);
+                        var pt_b = new Vector3(world_right, m_top_y, world_far);
+
+                        var radius_vector = (pt_b - pt_a) * 0.5f;
+                        var center = pt_a + radius_vector;
+
+                        bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(center, radius_vector.magnitude);
+                    }
+                }
+
+                m_culling_group.SetBoundingSpheres(bounding_spheres);
+                m_culling_group.SetBoundingSphereCount(bounding_spheres.Length);
+            }
+        }
+
         m_material.color = color;
 
-        foreach(var chunk in m_voxel_chunks)
+        foreach(var chunk in m_visible_voxel_chunks)
         {
             chunk.Render(dt, m_material);
         }
@@ -103,8 +140,6 @@ public class VoxelLayer
         if (y < 0 || y > m_height_in_voxels) return;
 
         var cell_idx = y * m_width_in_voxels + x;
-
-        Debug.Log($"x={x}, y={y}, cell_idx={cell_idx}, existing_density={m_density_grid[cell_idx]}");
 
         m_density_grid[cell_idx] = Mathf.Clamp01(m_density_grid[cell_idx] + amount);
 
@@ -127,6 +162,23 @@ public class VoxelLayer
 
         return chunk_grid_y * m_width_in_chunks + chunk_grid_x;
     }
+    void OnCullingGroupStateChanged(CullingGroupEvent evt)
+    {
+        if(evt.hasBecomeVisible)
+        {
+            m_visible_voxel_chunks.Add(m_voxel_chunks[evt.index]);
+        }
+        else
+        {
+            m_visible_voxel_chunks.Remove(m_voxel_chunks[evt.index]);
+        }
+    }
+
+    void OnDestroy()
+    {
+        m_culling_group.Dispose();
+        m_culling_group = null;
+    }
 
     bool[] m_layer_above_occlusion_grid;
     bool[] m_layer_below_occlusion_grid;
@@ -136,11 +188,15 @@ public class VoxelLayer
     int m_height_in_voxels;
     int m_width_in_chunks;
     int m_height_in_chunks;
+    CullingGroup m_culling_group;
     Material m_material;
     float m_voxel_size_in_meters;
     float m_one_over_voxel_chunk_dimensions;
     int m_voxel_chunk_dimensions;
     VoxelChunk[] m_voxel_chunks;
+    float m_bot_y;
+    float m_top_y;
+    HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
