@@ -56,7 +56,7 @@ public class VoxelWorld : MonoBehaviour
 
         var camera = Camera.main;
 
-        const float iso_level = 0.5f;
+        const float iso_level = 0.95f;
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         { 

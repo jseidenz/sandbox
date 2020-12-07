@@ -45,33 +45,65 @@ public class SolidSimulation
             {
                 if (density_change.m_layer_idx != layer_idx) continue;
 
-                var pos = density_change.m_position;
-
-                var x = (int)(pos.x / (float)m_cell_size_in_meters.x);
-                if (x < 0 || x >= m_dimensions_in_cells.x) return;
-
-                var z = (int)(pos.z / (float)m_cell_size_in_meters.z);
-                if (z < 0 || z >= m_dimensions_in_cells.z) return;
-
-                var cell_idx = z * m_dimensions_in_cells.x + x;
-
-                var previous_density = layer[cell_idx];
-                var new_density = Mathf.Clamp01(previous_density + density_change.m_amount);
-                if(new_density != previous_density)
+                int radius = 0;
+                if (density_change.m_amount > 0)
                 {
-                    layer[cell_idx] = new_density;
+                    radius = 1;
+                }
 
-                    for (int j = -1; j <= 1; ++j)
+                for (int range_offset_z = -radius; range_offset_z <= radius; ++range_offset_z)
+                {
+                    for (int range_offset_x = -radius; range_offset_x <= radius; ++range_offset_x)
                     {
-                        for (int i = -1; i <= 1; ++i)
+                        float amount_multiplier = 1f;
+                        bool is_center = range_offset_x == 0 && range_offset_z == 0;
+                        if (!is_center)
                         {
-                            var offset_x = Math.Min(Math.Max(x + i, 0), m_dimensions_in_cells.x - 1);
-                            var offset_z = Math.Min(Math.Max(z + j, 0), m_dimensions_in_cells.z - 1);
+                            amount_multiplier = 0.5f;
+                        }
 
-                            var chunk_grid_x = (int)(offset_x * m_one_over_chunk_dimensions_in_cells);
-                            var chunk_grid_z = (int)(offset_z * m_one_over_chunk_dimensions_in_cells);
+                        var pos = density_change.m_position;
 
-                            dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
+                        var x = (int)(pos.x / (float)m_cell_size_in_meters.x) + range_offset_x;
+                        if (x < 0 || x >= m_dimensions_in_cells.x) return;
+
+                        var z = (int)(pos.z / (float)m_cell_size_in_meters.z) + range_offset_z;
+                        if (z < 0 || z >= m_dimensions_in_cells.z) return;
+
+                        var cell_idx = z * m_dimensions_in_cells.x + x;
+
+                        var previous_density = layer[cell_idx];
+
+                        float amount = density_change.m_amount * amount_multiplier;
+                        if(amount > 0)
+                        {
+                            if(is_center)
+                            {
+                                amount = 1f;
+                            }
+                            else
+                            {
+                                amount = 0.5f;
+                            }
+                        }
+                        var new_density = Mathf.Clamp01(previous_density + amount);
+                        if (new_density != previous_density)
+                        {
+                            layer[cell_idx] = new_density;
+
+                            for (int j = -1; j <= 1; ++j)
+                            {
+                                for (int i = -1; i <= 1; ++i)
+                                {
+                                    var offset_x = Math.Min(Math.Max(x + i, 0), m_dimensions_in_cells.x - 1);
+                                    var offset_z = Math.Min(Math.Max(z + j, 0), m_dimensions_in_cells.z - 1);
+
+                                    var chunk_grid_x = (int)(offset_x * m_one_over_chunk_dimensions_in_cells);
+                                    var chunk_grid_z = (int)(offset_z * m_one_over_chunk_dimensions_in_cells);
+
+                                    dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
+                                }
+                            }
                         }
                     }
                 }
