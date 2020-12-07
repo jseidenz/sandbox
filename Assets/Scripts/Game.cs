@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public class Game : MonoBehaviour 
 {
     [SerializeField] VoxelWorld m_voxel_world;
-    [SerializeField] VoxelWorld m_liquid_mesher;
     [SerializeField] GameObject m_player_avatar;
     [SerializeField] Image m_initial_black;
     [SerializeField] int m_grid_width_in_voxels;
@@ -25,7 +24,6 @@ public class Game : MonoBehaviour
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
 
         m_voxel_world = await CreateVoxelWorld();
-        m_liquid_mesher = await CreateLiquidMesher();
         m_liquid_simulation = new LiquidSimulation();
         
 
@@ -73,15 +71,6 @@ public class Game : MonoBehaviour
         voxel_world.TriangulateAll();
 
         return voxel_world;
-    }
-
-
-    async Task<VoxelWorld> CreateLiquidMesher()
-    {
-        var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
-        liquid_mesher.Init(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions);
-        liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
-        return liquid_mesher;
     }
 
     async Task<GameObject> CreateAvatar()
