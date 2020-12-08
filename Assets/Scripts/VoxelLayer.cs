@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class VoxelLayer
 {
-    public VoxelLayer(string name, float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, Vector3 voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, bool generate_collision)
+    public VoxelLayer(string name, float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, Vector3 voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, bool generate_collision, float density_height_weight)
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
         if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
@@ -31,7 +31,7 @@ public class VoxelLayer
         {
             for(int x = 0; x < m_width_in_chunks; ++x)
             {
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_occlusion_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision);
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_occlusion_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight);
             }
         }
     }

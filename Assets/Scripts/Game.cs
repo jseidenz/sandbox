@@ -63,7 +63,7 @@ public class Game : MonoBehaviour
     {
         var solid_mesher = GameObject.Instantiate(m_solid_mesher);
         solid_mesher.m_tuneables = m_solid_mesher.m_tuneables;
-        solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level);
+        solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level, 0f);
 
 
         var height_map_tex = Resources.Load<Texture2D>("heightmap");
@@ -87,10 +87,13 @@ public class Game : MonoBehaviour
         }
 
         // Make just a solid floor.
-        var bottom_layer = layers[20];
-        for(int i = 0; i < bottom_layer.Length; ++i)
+        for (int layer_idx = 20; layer_idx < 22; ++layer_idx)
         {
-            bottom_layer[i] = 1;
+            var layer = layers[layer_idx];
+            for (int i = 0; i < layer.Length; ++i)
+            {
+                layer[i] = 1;
+            }
         }
 
         //m_solid_simulation.ApplyHeightMap(densities);
@@ -105,7 +108,7 @@ public class Game : MonoBehaviour
     {
         var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
         liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
-        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level);
+        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level, 1f);
 
         return liquid_mesher;
     }
