@@ -125,7 +125,7 @@ public class VoxelLayer
     }
 
 
-    public void Render(float dt, Color color)
+    public void Render(float dt, Material material, Color color)
     {
         if(m_color != color)
         {

@@ -31,6 +31,7 @@ public class VoxelWorld : MonoBehaviour
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
     float m_water_height;
+    LayeredBrush m_brush;
 
     struct DensityChange
     {
@@ -49,10 +50,9 @@ public class VoxelWorld : MonoBehaviour
         m_grid_depth_in_voxels = grid_depth_in_voxels;
 
         m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
-
         m_voxel_chunk_scratch_buffer = VoxelChunk.ScratchBuffer.CreateScratchBuffer();
-
         m_layers = new VoxelLayer[m_grid_height_in_voxels];
+        m_brush = brush;
 
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
@@ -95,12 +95,17 @@ public class VoxelWorld : MonoBehaviour
     {
         float dt = Time.deltaTime;
 
+#if UNITY_EDITOR
+        m_brush.RefreshLookupTable();
+#endif
+
         Profiler.BeginSample("Render");
         for (int y = 0; y < m_layers.Length; ++y)
         {
+            var material = m_brush.GetMaterialForLayer(y);
             var color = GetColorForLayer(y);
 
-            m_layers[y].Render(dt, color);
+            m_layers[y].Render(dt, material, color);
         }
         Profiler.EndSample();
     }
