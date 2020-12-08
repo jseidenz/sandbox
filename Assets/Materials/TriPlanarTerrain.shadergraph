@@ -10,13 +10,13 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"773a1699-1a3e-4b4f-b63f-44fdb9e5d123\"\n    },\n    \"m_Name\": \"_Metallic\",\n    \"m_DefaultReferenceName\": \"Vector1_F9235FB9\",\n    \"m_OverrideReferenceName\": \"_Metallic\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"773a1699-1a3e-4b4f-b63f-44fdb9e5d123\"\n    },\n    \"m_Name\": \"_Metallic\",\n    \"m_DefaultReferenceName\": \"Vector1_F9235FB9\",\n    \"m_OverrideReferenceName\": \"_Metallic\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"db54582e-5aef-4c11-8ff0-c2577d5a16a2\"\n    },\n    \"m_Name\": \"_Smoothness\",\n    \"m_DefaultReferenceName\": \"Vector1_436A8490\",\n    \"m_OverrideReferenceName\": \"_Smoothness\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"db54582e-5aef-4c11-8ff0-c2577d5a16a2\"\n    },\n    \"m_Name\": \"_Smoothness\",\n    \"m_DefaultReferenceName\": \"Vector1_436A8490\",\n    \"m_OverrideReferenceName\": \"_Smoothness\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
@@ -40,13 +40,25 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"0b27285a-c7cb-4318-ba14-e75c6777020c\"\n    },\n    \"m_Name\": \"_ColorBlend\",\n    \"m_DefaultReferenceName\": \"Vector1_753C34AF\",\n    \"m_OverrideReferenceName\": \"_ColorBlend\",\n    \"m_GeneratePropertyBlock\": false,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"4186832d-3630-4ce5-b93b-446bf07c0378\"\n    },\n    \"m_Name\": \"_NoiseOpacity\",\n    \"m_DefaultReferenceName\": \"Vector1_1294FFBB\",\n    \"m_OverrideReferenceName\": \"_NoiseOpacity\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.019999999552965165,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
         },
         {
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"4186832d-3630-4ce5-b93b-446bf07c0378\"\n    },\n    \"m_Name\": \"_NoiseOpacity\",\n    \"m_DefaultReferenceName\": \"Vector1_1294FFBB\",\n    \"m_OverrideReferenceName\": \"_NoiseOpacity\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.019999999552965165,\n    \"m_FloatType\": 0,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"832dbcd5-2aa1-4996-a34a-87ecceeb5857\"\n    },\n    \"m_Name\": \"_HueVariationAmount\",\n    \"m_DefaultReferenceName\": \"Vector1_B0953C9B\",\n    \"m_OverrideReferenceName\": \"_HueVariationAmount\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+        },
+        {
+            "typeInfo": {
+                "fullName": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty"
+            },
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"9bef6933-6847-483e-b143-07cd20c2eb66\"\n    },\n    \"m_Name\": \"_SaturationVariationAmount\",\n    \"m_DefaultReferenceName\": \"Vector1_E0FE3078\",\n    \"m_OverrideReferenceName\": \"_SaturationVariationAmount\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": 0.0,\n    \"m_FloatType\": 1,\n    \"m_RangeValues\": {\n        \"x\": 0.0,\n        \"y\": 1.0\n    }\n}"
+        },
+        {
+            "typeInfo": {
+                "fullName": "UnityEditor.ShaderGraph.Internal.ColorShaderProperty"
+            },
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"e28aea0e-bfaf-4eec-a898-42d7883a92c2\"\n    },\n    \"m_Name\": \"_ComputedColor\",\n    \"m_DefaultReferenceName\": \"Color_12D8F678\",\n    \"m_OverrideReferenceName\": \"_ComputedColor\",\n    \"m_GeneratePropertyBlock\": false,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"r\": 0.0,\n        \"g\": 0.0,\n        \"b\": 0.0,\n        \"a\": 0.0\n    },\n    \"m_ColorMode\": 0\n}"
         }
     ],
     "m_SerializedKeywords": [],

@@ -6,7 +6,13 @@ using UnityEngine.Profiling;
 public class LayeredBrush
 {
     static int LAYER_IDX_ID = Shader.PropertyToID("_LayerIdx");
+    static int HUE_VARIATION_AMOUNT_ID = Shader.PropertyToID("_HueVariationAmount");
+    static int SATURATION_VARIATION_AMOUNT_ID = Shader.PropertyToID("_SaturationVariationAmount");
     static int COLOR_BLEND_ID = Shader.PropertyToID("_ColorBlend");
+    static int COMPUTED_COLOR_ID = Shader.PropertyToID("_ComputedColor");
+
+    static float[] HUE_VARIATION_PATTERN = new float[] { 0, -0.3f, 0.1f, 0.5f, -0.15f };
+    static float[] SATURATION_VARIATION_PATTERN = new float[] { 0, -0.5f, 0.1f, -0.3f, -0.4f };
 
     public LayeredBrush(Material[] materials)
     {
@@ -16,7 +22,6 @@ public class LayeredBrush
             m_material_entries[i] = new MaterialEntry
             {
                 m_material = materials[i],
-                m_layer_idx = materials[i].GetInt(LAYER_IDX_ID)
             };
         };
 
@@ -30,13 +35,25 @@ public class LayeredBrush
         for(int i = 0; i < m_material_entries.Length; ++i)
         {
             var entry = m_material_entries[i];
-            var new_layer_idx = entry.m_material.GetInt(LAYER_IDX_ID);
+            var material = entry.m_material;
+
+            var new_layer_idx = material.GetInt(LAYER_IDX_ID);
+            var new_hue_variation_amount = material.GetFloat(HUE_VARIATION_AMOUNT_ID);
+            var new_saturation_variation_amount = material.GetFloat(SATURATION_VARIATION_AMOUNT_ID);
+
             max_layer_idx = Math.Max(max_layer_idx, new_layer_idx);
 
-            if (entry.m_layer_idx == new_layer_idx) continue;
+            bool is_layer_idx_dirty = entry.m_layer_idx != new_layer_idx;
+            bool is_hue_variation_amount_dirty = new_hue_variation_amount != entry.m_hue_variation_amount;
+            bool is_saturation_variation_amount_dirty = new_saturation_variation_amount != entry.m_saturation_variation_amount;
+            bool are_parameters_dirty = is_layer_idx_dirty || is_hue_variation_amount_dirty || is_saturation_variation_amount_dirty;
+
+            if (!are_parameters_dirty) continue;
 
             is_dirty = true;
             entry.m_layer_idx = new_layer_idx;
+            entry.m_hue_variation_amount = new_hue_variation_amount;
+            entry.m_saturation_variation_amount = new_saturation_variation_amount;
             m_material_entries[i] = entry;
         }
 
@@ -83,6 +100,8 @@ public class LayeredBrush
     {
         public Material m_material;
         public int m_layer_idx;
+        public float m_hue_variation_amount;
+        public float m_saturation_variation_amount;
     }
 
     struct MaterialLayer
