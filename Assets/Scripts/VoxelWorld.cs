@@ -57,8 +57,6 @@ public class VoxelWorld : MonoBehaviour
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         { 
-            var material = GameObject.Instantiate(m_material);
-
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters.y;
             float top_y = (float)y * m_voxel_size_in_meters.y;
 
