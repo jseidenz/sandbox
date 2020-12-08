@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public class VoxelLayer
 {
+    static int COLOR_ID = Shader.PropertyToID("_Color");
+
     public VoxelLayer(string name, float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, Vector3 voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, bool generate_collision, float density_height_weight, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
@@ -123,7 +125,11 @@ public class VoxelLayer
 
     public void Render(float dt, Color color)
     {
-        m_material.color = color;
+        if(m_color != color)
+        {
+            m_property_block.SetColor(COLOR_ID, color);
+            m_color = color;
+        }        
 
         foreach(var chunk in m_visible_voxel_chunks)
         {
@@ -185,6 +191,7 @@ public class VoxelLayer
         m_culling_group = null;
     }
 
+    Color m_color;
     float[] m_density_grid;
     bool[] m_occlusion_grid;
     int m_width_in_voxels;
