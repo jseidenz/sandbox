@@ -54,7 +54,7 @@ public class DigTool : MonoBehaviour
 
     void UpdateLiquidControl(KeyCode key_code, float amount)
     {
-        if (Input.GetKeyDown(key_code))
+        if (Input.GetKey(key_code))
         {
             if (Input.GetKeyDown(key_code))
             {

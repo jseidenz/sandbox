@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: LiquidTuning
   m_EditorClassIdentifier: Assembly-CSharp::LiquidTuning
+  m_min_density_to_allow_flow: 0.05

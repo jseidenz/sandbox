@@ -5403,6 +5403,12 @@ PrefabInstance:
       propertyPath: m_initial_black
       value: 
       objectReference: {fileID: 1298528234}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_liquid_tuning
+      value: 
+      objectReference: {fileID: 11400000, guid: 08a2964fa1f5a87429670b7f39c999f0,
+        type: 2}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name
