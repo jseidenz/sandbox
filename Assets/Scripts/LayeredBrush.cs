@@ -15,7 +15,8 @@ public class LayeredBrush
             m_material_entries[i] = new MaterialEntry
             {
                 m_material = materials[i],
-                m_layer_idx = materials[i].GetInt(LAYER_IDX_ID)
+                m_layer_idx = materials[i].GetInt(LAYER_IDX_ID),
+                m_property_block = new MaterialPropertyBlock()
             };
         };
 
@@ -42,14 +43,18 @@ public class LayeredBrush
         if (is_dirty)
         {
             Array.Sort(m_material_entries, (x, y) => x.m_layer_idx - y.m_layer_idx);
-            m_layer_idx_to_material = new Material[max_layer_idx + 1];
+            m_layer_idx_to_material = new MaterialLayer[max_layer_idx + 1];
 
             int layer_idx = 0;
             foreach(var material_entry in m_material_entries)
             {
                 for(; layer_idx <= material_entry.m_layer_idx; ++layer_idx)
                 {
-                    m_layer_idx_to_material[layer_idx] = material_entry.m_material;
+                    m_layer_idx_to_material[layer_idx] = new MaterialLayer
+                    {
+                        m_material = material_entry.m_material,
+                        m_property_block = material_entry.m_property_block
+                    };
                 }
             }
         }
@@ -65,15 +70,22 @@ public class LayeredBrush
     {
         layer_idx = Math.Max(layer_idx, 0);
         layer_idx = Math.Min(layer_idx, m_layer_idx_to_material.Length - 1);
-        return m_layer_idx_to_material[layer_idx];
+        return m_layer_idx_to_material[layer_idx].m_material;
     }
 
     struct MaterialEntry
     {
         public Material m_material;
         public int m_layer_idx;
+        public MaterialPropertyBlock m_property_block;
     }
 
-    Material[] m_layer_idx_to_material;
+    struct MaterialLayer
+    {
+        public Material m_material;
+        public MaterialPropertyBlock m_property_block;
+    }
+
+    MaterialLayer[] m_layer_idx_to_material;
     MaterialEntry[] m_material_entries;
 }
