@@ -34,7 +34,8 @@ public class VoxelLayer
         {
             for(int x = 0; x < m_width_in_chunks; ++x)
             {
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_occlusion_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight);
+                var bounds = GetChunkBounds(x, y);
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_occlusion_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds);
             }
         }
     }
@@ -91,6 +92,24 @@ public class VoxelLayer
         }
     }
 
+    public Bounds GetChunkBounds(int chunk_x, int chunk_y)
+    {
+        var world_left = chunk_x * m_voxel_chunk_dimensions * m_voxel_size_in_meters.x;
+        var world_right = world_left + m_voxel_chunk_dimensions * m_voxel_size_in_meters.x;
+        var world_near = chunk_y * m_voxel_chunk_dimensions * m_voxel_size_in_meters.z;
+        var world_far = world_near + m_voxel_chunk_dimensions * m_voxel_size_in_meters.z;
+
+        var pt_a = new Vector3(world_left, m_bot_y, world_near);
+        var pt_b = new Vector3(world_right, m_top_y, world_far);
+
+        var diameter_vector = pt_b - pt_a;
+        var radius_vector = diameter_vector * 0.5f;
+        var center = pt_a + radius_vector;
+
+        var bounds = new Bounds(center, diameter_vector);
+        return bounds;
+    }
+
     public void BindCamera(Camera camera)
     {
         m_culling_group = new CullingGroup();
@@ -105,18 +124,10 @@ public class VoxelLayer
         {
             for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
             {
-                var world_left = chunk_x * m_voxel_chunk_dimensions * m_voxel_size_in_meters.x;
-                var world_right = world_left + m_voxel_chunk_dimensions * m_voxel_size_in_meters.x;
-                var world_near = chunk_y * m_voxel_chunk_dimensions * m_voxel_size_in_meters.z;
-                var world_far = world_near + m_voxel_chunk_dimensions * m_voxel_size_in_meters.z;
+                var bounds = GetChunkBounds(chunk_x, chunk_y);
 
-                var pt_a = new Vector3(world_left, m_bot_y, world_near);
-                var pt_b = new Vector3(world_right, m_top_y, world_far);
-
-                var radius_vector = (pt_b - pt_a) * 0.5f * SHADOW_SIZE_MULTIPLIER;
-                var center = pt_a + radius_vector;
-
-                bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(center, radius_vector.magnitude);
+                var bounds_radius = bounds.size.magnitude * 0.5f;
+                bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(bounds.center, bounds_radius * SHADOW_SIZE_MULTIPLIER);
             }
         }
 

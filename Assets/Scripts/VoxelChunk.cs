@@ -132,7 +132,8 @@ public class VoxelChunk
         float bot_y, 
         float top_y, 
         bool generate_collision,
-        float density_height_weight
+        float density_height_weight,
+        Bounds bounds
         )
     {
         m_density_height_weight = density_height_weight;
@@ -148,7 +149,9 @@ public class VoxelChunk
         m_generate_collision = generate_collision;
 
         m_mesh = new Mesh();
+        m_mesh.MarkDynamic();
         m_mesh.name = "VoxelChunk";
+        m_mesh.bounds = bounds;
 
         if (m_generate_collision)
         {
@@ -687,9 +690,8 @@ public class VoxelChunk
         m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
         m_mesh.SetVertexBufferParams(vert_idx, vertex_attribute_descriptors);
 
-        mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_idx);
+        mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_idx, 0, m_mesh_update_flags);
         mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_idx, 0, false);
-        mesh.RecalculateBounds();
 
         m_is_empty = triangle_idx == 0;
 
@@ -767,4 +769,9 @@ public class VoxelChunk
     int m_chunk_dimension_in_voxels;
     bool m_is_empty;
     bool m_generate_collision;
+    MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
+#if !UNITY_EDITOR
+        | MeshUpdateFlags.DontValidateIndices
+#endif
+        ;
 }
