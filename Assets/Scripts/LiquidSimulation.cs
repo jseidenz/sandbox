@@ -328,7 +328,7 @@ public class LiquidSimulation
         while (m_simulation_timer >= SIMULATION_TICK_RATE)
         {
             Profiler.BeginSample("UpdateSimulation");
-            UpdateSimulation();
+            //UpdateSimulation();
             Profiler.EndSample();
             m_simulation_timer -= SIMULATION_TICK_RATE;
         }

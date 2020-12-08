@@ -119,6 +119,7 @@ public class VoxelChunk
     }
 
     public VoxelChunk(
+        string name,
         int density_grid_x, 
         int density_grid_y, 
         int dimensions_in_voxels, 
@@ -149,7 +150,7 @@ public class VoxelChunk
 
         if (m_generate_collision)
         {
-            var collider_go = new GameObject("VoxelCollider");
+            var collider_go = new GameObject($"{name}VoxelCollider");
             collider_go.gameObject.SetActive(false);
             m_collider = collider_go.AddComponent<MeshCollider>();
             m_collider.sharedMesh = m_mesh;
@@ -359,6 +360,12 @@ public class VoxelChunk
                 var right_near_density = m_layer_density_grid[left_near_cell_idx + right_density_idx_offset];
                 var left_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset];
                 var right_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset + right_density_idx_offset];
+
+                if (left_near_density > 0 || left_far_density > 0 || right_near_density > 0 || left_far_density > 0)
+                {
+                    int bp = 0;
+                    ++bp;
+                }
 
                 int sample_type = 0;
                 if (left_near_density >= m_iso_level) sample_type |= 1;

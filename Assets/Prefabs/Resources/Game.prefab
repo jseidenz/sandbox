@@ -53,8 +53,10 @@ MonoBehaviour:
   m_grid_width_in_voxels: 384
   m_grid_depth_in_voxels: 384
   m_grid_height_in_voxels: 64
-  m_voxel_size_in_meters: 0.6
+  m_voxel_size_in_meters: {x: 0.6, y: 0.6, z: 0.6}
   m_voxel_chunk_dimensions: 64
   m_ground_plane_size: 1000
   m_water_height: 11.18
   m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}
+  m_solid_iso_level: 0.95
+  m_liquid_iso_level: 0.01
