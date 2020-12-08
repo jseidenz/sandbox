@@ -20,6 +20,7 @@ public class Game : MonoBehaviour
     [SerializeField] float m_solid_iso_level;
     [SerializeField] float m_liquid_iso_level;
     [SerializeField] LiquidTuning m_liquid_tuning;
+    [SerializeField] bool m_use_height_map;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -65,39 +66,44 @@ public class Game : MonoBehaviour
         var solid_mesher = GameObject.Instantiate(m_solid_mesher);
         solid_mesher.m_tuneables = m_solid_mesher.m_tuneables;
         solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level, 0f);
-
-
-        var height_map_tex = Resources.Load<Texture2D>("heightmap");
-        var pixels = height_map_tex.GetPixels();
-        var height_map_width = height_map_tex.width;
-
-        Resources.UnloadAsset(height_map_tex);
-
-        var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
-
-        for (int y = 0; y < m_grid_depth_in_voxels; ++y)
+ 
+        if(m_use_height_map)
         {
-            for (int x = 0; x < m_grid_width_in_voxels; ++x)
-            {
-                var density_idx = y * m_grid_width_in_voxels + x;
-                var pixel_idx = y * height_map_width + x;
-                var density = pixels[pixel_idx].r;
+            var height_map_tex = Resources.Load<Texture2D>("heightmap");
+            var pixels = height_map_tex.GetPixels();
+            var height_map_width = height_map_tex.width;
 
-                densities[density_idx] = density;
+            Resources.UnloadAsset(height_map_tex);
+
+            var densities = new float[m_grid_width_in_voxels * m_grid_depth_in_voxels];
+
+            for (int y = 0; y < m_grid_depth_in_voxels; ++y)
+            {
+                for (int x = 0; x < m_grid_width_in_voxels; ++x)
+                {
+                    var density_idx = y * m_grid_width_in_voxels + x;
+                    var pixel_idx = y * height_map_width + x;
+                    var density = pixels[pixel_idx].r;
+
+                    densities[density_idx] = density;
+                }
+            }
+
+            m_solid_simulation.ApplyHeightMap(densities);
+        }
+        else
+        {
+            // Make just a solid floor.
+            for (int layer_idx = 20; layer_idx < 22; ++layer_idx)
+            {
+                var layer = layers[layer_idx];
+                for (int i = 0; i < layer.Length; ++i)
+                {
+                    layer[i] = 1;
+                }
             }
         }
-
-        // Make just a solid floor.
-        for (int layer_idx = 20; layer_idx < 22; ++layer_idx)
-        {
-            var layer = layers[layer_idx];
-            for (int i = 0; i < layer.Length; ++i)
-            {
-                layer[i] = 1;
-            }
-        }
-
-        //m_solid_simulation.ApplyHeightMap(densities);
+        
         solid_mesher.TriangulateAll();
 
         //solid_mesher.enabled = false;

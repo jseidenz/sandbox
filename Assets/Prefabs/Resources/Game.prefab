@@ -60,3 +60,5 @@ MonoBehaviour:
   m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}
   m_solid_iso_level: 0.95
   m_liquid_iso_level: 0.01
+  m_liquid_tuning: {fileID: 11400000, guid: 08a2964fa1f5a87429670b7f39c999f0, type: 2}
+  m_use_height_map: 1
