@@ -381,7 +381,8 @@ public class LiquidSimulation
                 UpdateSimulation(false);
             }
             Profiler.EndSample();
-            m_simulation_timer -= SIMULATION_TICK_RATE;
+            m_simulation_timer = 0;
+            //m_simulation_timer -= SIMULATION_TICK_RATE;
         }
 
         for(int layer_idx = 0; layer_idx < m_layers.Length; ++layer_idx)
