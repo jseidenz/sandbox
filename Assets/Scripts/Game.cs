@@ -19,8 +19,9 @@ public class Game : MonoBehaviour
     [SerializeField] GameObject m_water;
     [SerializeField] float m_solid_iso_level;
     [SerializeField] float m_liquid_iso_level;
-    [SerializeField] LiquidTuning m_liquid_tuning;
     [SerializeField] bool m_use_height_map;
+    [SerializeField] bool m_liquid_sim_enabled_on_startup;
+    [SerializeField] public float m_min_density_to_allow_flow;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -37,7 +38,8 @@ public class Game : MonoBehaviour
         var solid_layers = m_solid_simulation.GetLayers();
         m_solid_mesher = CreateSolidMesher(solid_layers);
 
-        m_liquid_simulation = new LiquidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions, solid_layers, m_solid_iso_level, m_liquid_tuning);
+        m_liquid_simulation = new LiquidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions, solid_layers, m_solid_iso_level, m_min_density_to_allow_flow);
+        m_liquid_simulation.SetSimulationEnabled(m_liquid_sim_enabled_on_startup);
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers());
         
 
