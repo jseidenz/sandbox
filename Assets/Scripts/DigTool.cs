@@ -38,6 +38,11 @@ public class DigTool : MonoBehaviour
             Game.Instance.GetLiquidSimulation().StepOnce(true);
         }
 
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            var liquid_simulation = Game.Instance.GetLiquidSimulation();
+            liquid_simulation.SetSimulationEnabled(!liquid_simulation.IsSimulationEnabled());
+        }
 
         UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
         UpdateLiquidControl(KeyCode.E, -m_liquid_remove_rate);
@@ -49,7 +54,7 @@ public class DigTool : MonoBehaviour
 
     void UpdateLiquidControl(KeyCode key_code, float amount)
     {
-        if (Input.GetKey(key_code))
+        if (Input.GetKeyDown(key_code))
         {
             if (Input.GetKeyDown(key_code))
             {
