@@ -168,10 +168,10 @@ public class VoxelChunk
         m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
-    public bool Triangulate(VoxelChunk.ScratchBuffer scratch_buffer)
+    public bool Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
         Profiler.BeginSample("March");
-        bool has_occlusion_changed = MarchMesh(scratch_buffer);
+        bool has_occlusion_changed = MarchMesh(scratch_buffer, vertex_attribute_descriptors);
         Profiler.EndSample();
 
 
@@ -328,7 +328,7 @@ public class VoxelChunk
     }
 
 
-    bool MarchMesh(ScratchBuffer scratch_buffer)
+    bool MarchMesh(ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
         var mesh = m_mesh;
         mesh.Clear();
@@ -682,10 +682,10 @@ public class VoxelChunk
         ushort vert_idx = (ushort)vertex_entry_count;
 
         scratch_buffer.m_vert_idx_to_normal_welding_info.Clear();
-        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vert_idx_to_normal_welding_info, ref vert_idx, ref triangle_idx, ref edge_idx);
+        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vert_idx_to_normal_welding_info, ref vert_idx, ref triangle_idx, ref edge_idx);       
 
-        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
-        mesh.SetVertexBufferParams(vert_idx, m_vertex_attribute_descriptors);
+        m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
+        m_mesh.SetVertexBufferParams(vert_idx, vertex_attribute_descriptors);
 
         mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_idx);
         mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_idx, 0, false);
@@ -767,10 +767,4 @@ public class VoxelChunk
     int m_chunk_dimension_in_voxels;
     bool m_is_empty;
     bool m_generate_collision;
-
-    VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
-    {
-        new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
-    };
 }

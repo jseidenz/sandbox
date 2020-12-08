@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class VoxelLayer
 {
-    public VoxelLayer(string name, float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, Vector3 voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, bool generate_collision, float density_height_weight)
+    public VoxelLayer(string name, float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, Vector3 voxel_size_in_meters, Material material, float iso_level, float bot_y, float top_y, bool generate_collision, float density_height_weight, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
         if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
@@ -20,6 +20,7 @@ public class VoxelLayer
         m_bot_y = bot_y;
         m_top_y = top_y;
         m_layer_idx = layer_idx;
+        m_vertex_attribute_descriptors = vertex_attribute_descriptors;
 
         m_material = material;
 
@@ -61,7 +62,7 @@ public class VoxelLayer
     {
         foreach(var chunk in m_voxel_chunks)
         {
-            chunk.Triangulate(scratch_buffer);
+            chunk.Triangulate(scratch_buffer, m_vertex_attribute_descriptors);
         }
     }
 
@@ -75,7 +76,7 @@ public class VoxelLayer
             var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
 
             var chunk = m_voxel_chunks[chunk_idx];
-            bool occlusion_dirtied = chunk.Triangulate(scratch_buffer);
+            bool occlusion_dirtied = chunk.Triangulate(scratch_buffer, m_vertex_attribute_descriptors);
             if (occlusion_dirtied && m_layer_idx > 0)
             {
                 m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, 0));
@@ -201,4 +202,5 @@ public class VoxelLayer
     int m_layer_idx;
     HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
     HashSet<Vector3Int> m_scratch_dirty_chunk_ids = new HashSet<Vector3Int>();
+    VertexAttributeDescriptor[] m_vertex_attribute_descriptors;
 }

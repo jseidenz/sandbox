@@ -62,7 +62,7 @@ public class VoxelWorld : MonoBehaviour
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters.y;
             float top_y = (float)y * m_voxel_size_in_meters.y;
 
-            var layer = new VoxelLayer(name, density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y, generate_collision, density_height_weight);
+            var layer = new VoxelLayer(name, density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, material, iso_level, bot_y, top_y, generate_collision, density_height_weight, m_vertex_attribute_descriptors);
             m_layers[y] = layer;
         }
 
@@ -131,14 +131,15 @@ public class VoxelWorld : MonoBehaviour
 
         m_dirty_chunk_occlusion_indices.Clear();
 
+
+        Profiler.BeginSample("Triangulate");
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
             var layer = m_layers[y];
 
-            Profiler.BeginSample("Triangulate");
-            layer.Triangulate(m_voxel_chunk_scratch_buffer, dirty_chunk_ids);
-            Profiler.EndSample();
-        }        
+            layer.Triangulate(m_voxel_chunk_scratch_buffer, dirty_chunk_ids);            
+        }
+        Profiler.EndSample();
     }
 
     public Material GetMaterial()
@@ -166,4 +167,11 @@ public class VoxelWorld : MonoBehaviour
 
     public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }
     public int GetGridWidthInVoxels() { return m_grid_depth_in_voxels; }
+
+
+    VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
+    {
+        new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
+        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
+    };
 }
