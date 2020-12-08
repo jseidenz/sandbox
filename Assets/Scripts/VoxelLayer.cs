@@ -99,6 +99,8 @@ public class VoxelLayer
 
         var bounding_spheres = new BoundingSphere[m_voxel_chunks.Length];
         int bounding_sphere_idx = 0;
+
+        const float SHADOW_SIZE_MULTIPLIER = 2;
         for (int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
         {
             for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
@@ -111,7 +113,7 @@ public class VoxelLayer
                 var pt_a = new Vector3(world_left, m_bot_y, world_near);
                 var pt_b = new Vector3(world_right, m_top_y, world_far);
 
-                var radius_vector = (pt_b - pt_a) * 0.5f;
+                var radius_vector = (pt_b - pt_a) * 0.5f * SHADOW_SIZE_MULTIPLIER;
                 var center = pt_a + radius_vector;
 
                 bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(center, radius_vector.magnitude);
