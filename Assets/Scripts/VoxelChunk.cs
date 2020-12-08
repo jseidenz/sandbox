@@ -361,11 +361,13 @@ public class VoxelChunk
                 var left_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset];
                 var right_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset + right_density_idx_offset];
 
+                /*
                 if (left_near_density > 0 || left_far_density > 0 || right_near_density > 0 || left_far_density > 0)
                 {
                     int bp = 0;
                     ++bp;
                 }
+                */
 
                 int sample_type = 0;
                 if (left_near_density >= m_iso_level) sample_type |= 1;

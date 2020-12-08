@@ -14,13 +14,18 @@ public class DigTool : MonoBehaviour
     
     void Update()
     {
-        if (Input.GetKey(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T))
         {
             if(CameraRayCast(out var hit))
             {
                 float teleport_vertical_offset = 1f;
                 GetComponent<IL3DN.IL3DN_SimpleFPSController>().Teleport(hit.point + new Vector3(0, teleport_vertical_offset, 0));
             }
+        }
+
+        if(Input.GetKeyDown(KeyCode.F1))
+        {
+            Game.Instance.GetLiquidMesher().TriangulateAll();
         }
 
 
@@ -40,7 +45,7 @@ public class DigTool : MonoBehaviour
             {
                 if (CameraRayCast(out var hit))
                 {
-                    var bias = hit.normal.y * 0.05f;
+                    var bias = 1f * hit.normal.y;
                     m_locked_fill_height = hit.point.y + bias;
                 }
             }

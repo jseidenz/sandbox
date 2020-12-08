@@ -6,11 +6,11 @@ using UnityEngine.Profiling;
 public class LiquidSimulation
 {
     const float MAX_VALUE = 1.0f;
-    const float MIN_VALUE = 0.005f;
+    const float MIN_VALUE = 0.0005f;
     const float MAX_COMPRESSION = 0.25f;
     const float MIN_FLOW = 0.005f;
     const float MAX_FLOW = 4f;
-    const float FLOW_SPEED = 1f;
+    const float FLOW_SPEED = 0.1f;
 
     const float SIMULATION_TICK_RATE = 1f / 30f;
     struct DensityChange
@@ -266,7 +266,7 @@ public class LiquidSimulation
             }
 
             flow = Mathf.Max(flow, 0);
-            flow = Mathf.Min(MAX_FLOW, remaining_liquid);
+            flow = Mathf.Min(remaining_liquid, Mathf.Min(MAX_FLOW, flow));
 
             if (flow != 0)
             {
@@ -328,7 +328,7 @@ public class LiquidSimulation
         while (m_simulation_timer >= SIMULATION_TICK_RATE)
         {
             Profiler.BeginSample("UpdateSimulation");
-            //UpdateSimulation();
+            UpdateSimulation();
             Profiler.EndSample();
             m_simulation_timer -= SIMULATION_TICK_RATE;
         }
@@ -338,37 +338,22 @@ public class LiquidSimulation
             var min_dirty_cell_coordinates = m_min_dirty_cell_per_layer[layer_idx];
             var max_dirty_cell_coordinates = m_max_dirty_cell_per_layer[layer_idx];
 
-            for(int z = min_dirty_cell_coordinates.z - 1 - min_dirty_cell_coordinates.z % m_chunk_dimensions_in_cells; z <= max_dirty_cell_coordinates.z + 1; z+= m_chunk_dimensions_in_cells)
-            {
-                for (int x = min_dirty_cell_coordinates.x - 1 - min_dirty_cell_coordinates.x % m_chunk_dimensions_in_cells; x <= max_dirty_cell_coordinates.z + 1; x += m_chunk_dimensions_in_cells)
-                {
-                    var chunk_grid_x = (int)(x * m_one_over_chunk_dimensions_in_cells);
-                    var chunk_grid_z = (int)(z * m_one_over_chunk_dimensions_in_cells);
+            int min_chunk_grid_z = (int)((min_dirty_cell_coordinates.z - 1) * m_one_over_chunk_dimensions_in_cells);
+            int max_chunk_grid_z = (int)((max_dirty_cell_coordinates.z + 1) * m_one_over_chunk_dimensions_in_cells);
 
+            int min_chunk_grid_x = (int)((min_dirty_cell_coordinates.x - 1) * m_one_over_chunk_dimensions_in_cells);
+            int max_chunk_grid_x = (int)((max_dirty_cell_coordinates.x + 1) * m_one_over_chunk_dimensions_in_cells);
+
+            for(int chunk_grid_z = min_chunk_grid_z; chunk_grid_z <= max_chunk_grid_z; ++chunk_grid_z)
+            {
+                for (int chunk_grid_x = min_chunk_grid_x; chunk_grid_x <= max_chunk_grid_x; ++chunk_grid_x)
+                {
                     dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
                 }
             }
         }
 
         m_density_changes.Clear();
-    }
-
-    public void ApplyHeightMap(float[] densities)
-    {
-        for (int y = 0; y < m_layers.Length; ++y)
-        {
-            var layer = m_layers[y];
-
-            for (int z = 0; z < m_dimensions_in_cells.z; ++z)
-            {
-                for (int x = 0; x < m_dimensions_in_cells.x; ++x)
-                {
-                    var cell_idx = z * m_dimensions_in_cells.x + x;
-
-                    layer[cell_idx] = densities[cell_idx];
-                }
-            }
-        }
     }
 
     public float[][] GetLayers() { return m_layers; }

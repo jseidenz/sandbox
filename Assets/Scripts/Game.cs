@@ -87,15 +87,13 @@ public class Game : MonoBehaviour
         }
 
         // Make just a solid floor.
-        /*
         var bottom_layer = layers[20];
         for(int i = 0; i < bottom_layer.Length; ++i)
         {
             bottom_layer[i] = 1;
         }
-        */
 
-        m_solid_simulation.ApplyHeightMap(densities);
+        //m_solid_simulation.ApplyHeightMap(densities);
         solid_mesher.TriangulateAll();
 
         //solid_mesher.enabled = false;
@@ -130,6 +128,11 @@ public class Game : MonoBehaviour
     public SolidSimulation GetSolidSimulation()
     {
         return m_solid_simulation;
+    }
+
+    public VoxelWorld GetLiquidMesher()
+    {
+        return m_liquid_mesher;
     }
 
     void Update()
