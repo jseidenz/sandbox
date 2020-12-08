@@ -6,6 +6,7 @@ using UnityEngine.Profiling;
 public class LayeredBrush
 {
     static int LAYER_IDX_ID = Shader.PropertyToID("_LayerIdx");
+    static int COLOR_BLEND_ID = Shader.PropertyToID("_ColorBlend");
 
     public LayeredBrush(Material[] materials)
     {
@@ -15,8 +16,7 @@ public class LayeredBrush
             m_material_entries[i] = new MaterialEntry
             {
                 m_material = materials[i],
-                m_layer_idx = materials[i].GetInt(LAYER_IDX_ID),
-                m_property_block = new MaterialPropertyBlock()
+                m_layer_idx = materials[i].GetInt(LAYER_IDX_ID)
             };
         };
 
@@ -45,17 +45,23 @@ public class LayeredBrush
             Array.Sort(m_material_entries, (x, y) => x.m_layer_idx - y.m_layer_idx);
             m_layer_idx_to_material = new MaterialLayer[max_layer_idx + 1];
 
+            int last_layer_idx = 0;
             int layer_idx = 0;
             foreach(var material_entry in m_material_entries)
             {
+                float blend_range = Mathf.Max((float)material_entry.m_layer_idx - (float)last_layer_idx, 1f);
                 for(; layer_idx <= material_entry.m_layer_idx; ++layer_idx)
                 {
+                    float color_blend = (layer_idx - last_layer_idx) / blend_range;
+                    var property_block = new MaterialPropertyBlock();
+                    property_block.SetFloat(COLOR_BLEND_ID, color_blend);
                     m_layer_idx_to_material[layer_idx] = new MaterialLayer
                     {
                         m_material = material_entry.m_material,
-                        m_property_block = material_entry.m_property_block
+                        m_property_block = property_block
                     };
                 }
+                last_layer_idx = material_entry.m_layer_idx;
             }
         }
     }
@@ -77,7 +83,6 @@ public class LayeredBrush
     {
         public Material m_material;
         public int m_layer_idx;
-        public MaterialPropertyBlock m_property_block;
     }
 
     struct MaterialLayer
