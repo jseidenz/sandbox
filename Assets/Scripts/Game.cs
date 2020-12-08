@@ -36,12 +36,19 @@ public class Game : MonoBehaviour
         Application.targetFrameRate = -1;
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
         var solid_layers = m_solid_simulation.GetLayers();
-        m_solid_mesher = CreateSolidMesher(solid_layers);
 
         m_liquid_simulation = new LiquidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions, solid_layers, m_solid_iso_level, m_min_density_to_allow_flow);
+        var liquid_layers = m_liquid_simulation.GetLayers();
         m_liquid_simulation.SetSimulationEnabled(m_liquid_sim_enabled_on_startup);
+
+        GenerateWorld(solid_layers, liquid_layers);
+
+        m_solid_mesher = CreateSolidMesher(solid_layers);
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers());
-        
+
+        m_solid_mesher.TriangulateAll();
+        m_liquid_mesher.TriangulateAll();
+
 
         m_player_avatar = CreateAvatar();
 
@@ -68,8 +75,24 @@ public class Game : MonoBehaviour
         var solid_mesher = GameObject.Instantiate(m_solid_mesher);
         solid_mesher.m_tuneables = m_solid_mesher.m_tuneables;
         solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level, 0f);
- 
-        if(m_use_height_map)
+
+        //solid_mesher.enabled = false;
+
+        return solid_mesher;
+    }
+
+    VoxelWorld CreateLiquidMesher(float[][] layers)
+    {
+        var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
+        liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
+        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level, 1f);
+
+        return liquid_mesher;
+    }
+
+    void GenerateWorld(float[][] solid_layers, float[][] liquid_layers)
+    {
+        if (m_use_height_map)
         {
             var height_map_tex = Resources.Load<Texture2D>("heightmap");
             var pixels = height_map_tex.GetPixels();
@@ -98,28 +121,30 @@ public class Game : MonoBehaviour
             // Make just a solid floor.
             for (int layer_idx = 20; layer_idx < 22; ++layer_idx)
             {
-                var layer = layers[layer_idx];
+                var layer = solid_layers[layer_idx];
                 for (int i = 0; i < layer.Length; ++i)
                 {
                     layer[i] = 1;
                 }
             }
+
+            var sdf = new DensityField(solid_layers, m_grid_width_in_voxels, m_grid_depth_in_voxels);
+            var ldf = new DensityField(liquid_layers, m_grid_width_in_voxels, m_grid_depth_in_voxels);
+            var l = 22;
+
+            {
+                var x = 188;
+                var y = 206;
+
+                sdf.Line(x + 0, y + 0, x + 2, y + 0, l, 1f);
+                sdf.Line(x + 0, y + 2, x + 2, y + 2, l, 1f);
+                sdf.Line(x + 0, y + 0, x + 0, y + 2, l, 1f);
+                sdf.Line(x + 2, y + 0, x + 2, y + 2, l, 1f);
+
+                ldf.Line(x + 1, y + 1, x + 1, y + 1, l, 1f);
+
+            }
         }
-        
-        solid_mesher.TriangulateAll();
-
-        //solid_mesher.enabled = false;
-
-        return solid_mesher;
-    }
-
-    VoxelWorld CreateLiquidMesher(float[][] layers)
-    {
-        var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
-        liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
-        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level, 1f);
-
-        return liquid_mesher;
     }
 
     GameObject CreateAvatar()
