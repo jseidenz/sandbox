@@ -140,7 +140,7 @@ public class LiquidSimulation
                 max_x = m_dimensions_in_cells.x - 1;
 
                 min_z = 0;
-                max_x = m_dimensions_in_cells.z - 1;
+                max_z = m_dimensions_in_cells.z - 1;
             }
 
             for (int z = min_z; z <= max_z; ++z)
