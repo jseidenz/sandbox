@@ -741,11 +741,11 @@ public class VoxelChunk
 
     }
 
-    public void Render(float dt, Material material)
+    public void Render(float dt, Material material, MaterialPropertyBlock property_block)
     {
         if (!m_is_empty)
         {
-            Graphics.DrawMesh(m_mesh, Matrix4x4.identity, material, 0);
+            Graphics.DrawMesh(m_mesh, Matrix4x4.identity, material, 0, null, 0, property_block);
         }
     }
 
