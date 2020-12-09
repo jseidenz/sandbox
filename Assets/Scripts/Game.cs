@@ -58,8 +58,10 @@ public class Game : MonoBehaviour
         var liquid_brush = LayeredBrush.LoadBrush("LiquidMaterials");
 
         m_solid_mesher = CreateSolidMesher(solid_layers, solid_brush);
+        m_solid_mesher.SetEdgeLoopOffset(m_tuneables.m_edge_loop_offset);
 
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers(), liquid_brush);
+        m_solid_mesher.SetEdgeLoopOffset(m_tuneables.m_edge_loop_offset);
 
         m_solid_mesher.TriangulateAll();
         m_liquid_mesher.TriangulateAll();
@@ -207,7 +209,7 @@ public class Game : MonoBehaviour
         float dt = Time.deltaTime;
 
         m_solid_mesher.SetEdgeLoopOffset(m_tuneables.m_edge_loop_offset);
-
+        m_liquid_mesher.SetEdgeLoopOffset(m_tuneables.m_edge_loop_offset);
         m_solid_mesher.Render(dt);
         m_liquid_mesher.Render(dt);
     }

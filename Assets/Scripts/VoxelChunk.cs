@@ -785,25 +785,24 @@ public class VoxelChunk
             var vert_a = vertices[vert_idx_a];
             var vert_b = vertices[vert_idx_b];
 
-            var vert_c = vert_a;
-            vert_c.m_position.y = m_bot_y;
-
-            var vert_d = vert_b;
-            vert_d.m_position.y = m_bot_y;
-
             var left_normal = vertex_id_to_accumulated_normal[vert_idx_a].normalized;
             var right_normal = vertex_id_to_accumulated_normal[vert_idx_b].normalized;
 
-            vert_a.m_normal = left_normal;
-            vert_b.m_normal = right_normal;
+            var vert_c = vert_a;
+            vert_c.m_position = vert_c.m_position + left_normal * m_edge_loop_offset.x;
+            vert_c.m_position.y += m_edge_loop_offset.y;
             vert_c.m_normal = left_normal;
+
+            var vert_d = vert_b;
+            vert_d.m_position = vert_d.m_position + right_normal * m_edge_loop_offset.x;
+            vert_d.m_position.y += m_edge_loop_offset.y;
             vert_d.m_normal = right_normal;
 
-            vert_idx_a = vert_idx;
-            vertices[vert_idx++] = vert_a;
+            var vert_e = vert_c;
+            vert_e.m_position.y = m_bot_y;
 
-            vert_idx_b = vert_idx;
-            vertices[vert_idx++] = vert_b;
+            var vert_f = vert_d;
+            vert_f.m_position.y = m_bot_y;
 
             var vert_idx_c = vert_idx;
             vertices[vert_idx++] = vert_c;
@@ -811,12 +810,24 @@ public class VoxelChunk
             var vert_idx_d = vert_idx;
             vertices[vert_idx++] = vert_d;
 
+            var vert_idx_e = vert_idx;
+            vertices[vert_idx++] = vert_e;
+
+            var vert_idx_f = vert_idx;
+            vertices[vert_idx++] = vert_f;
+
             triangles[triangle_idx++] = vert_idx_a;
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_c;
             triangles[triangle_idx++] = vert_idx_c;
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_d;
+            triangles[triangle_idx++] = vert_idx_c;
+            triangles[triangle_idx++] = vert_idx_d;
+            triangles[triangle_idx++] = vert_idx_e;
+            triangles[triangle_idx++] = vert_idx_e;
+            triangles[triangle_idx++] = vert_idx_d;
+            triangles[triangle_idx++] = vert_idx_f;
         }
     }
 
