@@ -43,8 +43,12 @@ public class Game : MonoBehaviour
 
         GenerateWorld(solid_layers, liquid_layers);
 
-        m_solid_mesher = CreateSolidMesher(solid_layers);
-        m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers());
+        var solid_brush = LayeredBrush.LoadBrush("SolidMaterials");
+        var liquid_brush = LayeredBrush.LoadBrush("LiquidMaterials");
+
+        m_solid_mesher = CreateSolidMesher(solid_layers, solid_brush);
+
+        m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers(), liquid_brush);
 
         m_solid_mesher.TriangulateAll();
         m_liquid_mesher.TriangulateAll();
@@ -56,7 +60,7 @@ public class Game : MonoBehaviour
         m_solid_mesher.BindCamera(camera);
         m_liquid_mesher.BindCamera(camera);
 
-        CreateGroundPlane();
+        CreateGroundPlane(solid_brush);
 
         m_water = GameObject.Instantiate(m_water);
 
@@ -70,11 +74,9 @@ public class Game : MonoBehaviour
         ScreenFader.StartScreenFade(m_initial_black.gameObject, false, 5f, 0.25f, () => m_initial_black.gameObject.SetActive(false));
     }
 
-    VoxelWorld CreateSolidMesher(float[][] layers)
+    VoxelWorld CreateSolidMesher(float[][] layers, LayeredBrush brush)
     {
-        var brush = LayeredBrush.LoadBrush("SolidMaterials");
         var solid_mesher = GameObject.Instantiate(m_solid_mesher);
-        solid_mesher.m_tuneables = m_solid_mesher.m_tuneables;
         solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level, 0f, brush);
 
         //solid_mesher.enabled = false;
@@ -82,11 +84,9 @@ public class Game : MonoBehaviour
         return solid_mesher;
     }
 
-    VoxelWorld CreateLiquidMesher(float[][] layers)
+    VoxelWorld CreateLiquidMesher(float[][] layers, LayeredBrush brush)
     {
-        var brush = LayeredBrush.LoadBrush("LiquidMaterials");
         var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
-        liquid_mesher.m_tuneables = m_liquid_mesher.m_tuneables;
         liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level, 1f, brush);
 
         return liquid_mesher;
@@ -191,16 +191,16 @@ public class Game : MonoBehaviour
         }
     }
 
-    void CreateGroundPlane()
+    void CreateGroundPlane(LayeredBrush brush)
     {
         m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
         m_ground_plane.name = "GroundPlane";
 
-        var ground_plane_material = GameObject.Instantiate(m_solid_mesher.GetMaterial());
-        ground_plane_material.color = m_solid_mesher.GetColorForLayer(0);
+        brush.GetMaterialForLayer(0, out var material, out var property_block);
 
         var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
-        ground_plane_mesh_renderer.sharedMaterial = ground_plane_material;
+        ground_plane_mesh_renderer.sharedMaterial = material;
+        ground_plane_mesh_renderer.SetPropertyBlock(property_block);
         ground_plane_mesh_renderer.receiveShadows = false;
         m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);

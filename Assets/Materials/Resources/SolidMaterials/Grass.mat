@@ -76,8 +76,8 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _HueVariationAmount: 0
-    - _LayerIdx: 30
+    - _HueVariationAmount: 0.1
+    - _LayerIdx: 32
     - _Metallic: 0
     - _NoiseOpacity: 0.02
     - _OcclusionStrength: 1

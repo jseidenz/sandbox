@@ -136,17 +136,11 @@ public class VoxelLayer
     }
 
 
-    public void Render(float dt, Material material, Color color)
+    public void Render(float dt, Material material, MaterialPropertyBlock property_block)
     {
-        if(m_color != color)
-        {
-            m_property_block.SetColor(COLOR_ID, color);
-            m_color = color;
-        }        
-
         foreach(var chunk in m_visible_voxel_chunks)
         {
-            chunk.Render(dt, m_material, m_property_block);
+            chunk.Render(dt, m_material, property_block);
         }
     }
 
@@ -223,5 +217,4 @@ public class VoxelLayer
     HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
     HashSet<Vector3Int> m_scratch_dirty_chunk_ids = new HashSet<Vector3Int>();
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors;
-    MaterialPropertyBlock m_property_block = new MaterialPropertyBlock();
 }

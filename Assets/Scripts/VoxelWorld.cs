@@ -6,19 +6,6 @@ using UnityEngine.Profiling;
 
 public class VoxelWorld : MonoBehaviour
 {
-    [System.Serializable]
-    public class LiveTuneable
-    {
-        public Gradient m_height_gradient = new Gradient();
-
-        public float m_saturation_variation_rate;
-        public float m_saturation_variation_amount;
-        public float m_hue_variation_rate;
-        public float m_hue_variaton_amount;
-    }
-
-    public LiveTuneable m_tuneables;
-
     [SerializeField] Material m_material;
 
     int m_voxel_chunk_dimensions;
@@ -103,29 +90,10 @@ public class VoxelWorld : MonoBehaviour
         for (int y = 0; y < m_layers.Length; ++y)
         {
             m_brush.GetMaterialForLayer(y, out var material, out var property_block);
-            var color = GetColorForLayer(y);
 
-            m_layers[y].Render(dt, material, color);
+            m_layers[y].Render(dt, material, property_block);
         }
         Profiler.EndSample();
-    }
-
-    public Color GetColorForLayer(int layer_idx)
-    {
-        float layer_height_in_meters = m_grid_height_in_voxels * m_voxel_size_in_meters.y;
-        float layer_height_over_world_height = layer_idx / layer_height_in_meters;
-
-        var color = m_tuneables.m_height_gradient.Evaluate(layer_height_over_world_height);
-        if(layer_height_in_meters > m_water_height)
-        {
-            Color.RGBToHSV(color, out var hue, out var saturation, out var value);
-
-            hue += Mathf.Sin(layer_height_over_world_height * m_tuneables.m_hue_variation_rate) * m_tuneables.m_hue_variaton_amount;
-            saturation += Mathf.Sin(layer_height_over_world_height * m_tuneables.m_saturation_variation_rate) * m_tuneables.m_saturation_variation_amount;
-
-            color = Color.HSVToRGB(hue, saturation, value);
-        }
-        return color;
     }
 
     public void Triangulate(HashSet<Vector3Int> dirty_chunk_ids)
@@ -143,11 +111,6 @@ public class VoxelWorld : MonoBehaviour
             layer.Triangulate(m_voxel_chunk_scratch_buffer, dirty_chunk_ids);            
         }
         Profiler.EndSample();
-    }
-
-    public Material GetMaterial()
-    {
-        return m_material;
     }
 
     public void TriangulateAll()
