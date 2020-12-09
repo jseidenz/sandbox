@@ -51,7 +51,7 @@ public class VoxelChunk
             scratch_buffer.m_vertices = new Vertex[ushort.MaxValue];
             scratch_buffer.m_triangles = new System.UInt16[ushort.MaxValue * 24];
             scratch_buffer.m_edges = new Edge[ushort.MaxValue];
-            scratch_buffer.m_vertex_id_to_accumulated_normal = new Dictionary<ushort, Vector3>();
+            scratch_buffer.m_vert_idx_to_normal_welding_info = new Dictionary<ushort, NormalWeldingInfo>();
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
             return scratch_buffer;
@@ -62,7 +62,7 @@ public class VoxelChunk
         public System.UInt16[] m_triangles;
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
-        public Dictionary<ushort, Vector3> m_vertex_id_to_accumulated_normal;
+        public Dictionary<ushort, NormalWeldingInfo> m_vert_idx_to_normal_welding_info;
         public DensitySample[] m_density_samples;
     }
 
@@ -77,6 +77,12 @@ public class VoxelChunk
     {
         public System.UInt16 m_vertex_idx_a;
         public System.UInt16 m_vertex_idx_b;
+    }
+
+    public struct NormalWeldingInfo
+    {
+        public Vector3 m_normal;
+        public int m_normal_count;
     }
 
     public struct VertexEntry
@@ -737,8 +743,8 @@ public class VoxelChunk
         vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
-        scratch_buffer.m_vertex_id_to_accumulated_normal.Clear();
-        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vertex_id_to_accumulated_normal, ref vert_count, ref triangle_count, ref edge_idx);
+        scratch_buffer.m_vert_idx_to_normal_welding_info.Clear();
+        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vert_idx_to_normal_welding_info, ref vert_count, ref triangle_count, ref edge_idx);
         Profiler.EndSample();
     }
 
@@ -746,7 +752,7 @@ public class VoxelChunk
         Vertex[] vertices, 
         ushort[] triangles, 
         Edge[] edges,
-        Dictionary<ushort, Vector3> vertex_id_to_accumulated_normal,
+        Dictionary<ushort, NormalWeldingInfo> vertex_id_to_normal_welding_info,
         ref ushort vert_idx, 
         ref int triangle_idx, 
         ref int edge_count
@@ -764,52 +770,12 @@ public class VoxelChunk
             var vert_c = vert_a;
             vert_c.m_position.y = m_bot_y;
 
-            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position);
-
-            vertex_id_to_accumulated_normal.TryGetValue(vert_idx_a, out var vert_a_normal);
-            vertex_id_to_accumulated_normal.TryGetValue(vert_idx_b, out var vert_b_normal);
-            
-            vert_a_normal += normal;
-            vert_b_normal += normal;
-
-            vertex_id_to_accumulated_normal[vert_idx_a] = vert_a_normal;
-            vertex_id_to_accumulated_normal[vert_idx_b] = vert_b_normal;
-        }
-
-        for (int i = 0; i < edge_count; ++i)
-        {
-            var edge = edges[i];
-            var vert_idx_a = edge.m_vertex_idx_a;
-            var vert_idx_b = edge.m_vertex_idx_b;
-
-            var vert_a = vertices[vert_idx_a];
-            var vert_b = vertices[vert_idx_b];
-
-            var left_normal = vertex_id_to_accumulated_normal[vert_idx_a].normalized;
-            var right_normal = vertex_id_to_accumulated_normal[vert_idx_b].normalized;
-
-            var left_top_normal = left_normal;
-            var left_bot_normal = left_normal;
-
-            var right_top_normal = right_normal;
-            var right_bot_normal = right_normal;
-
-
-            var vert_c = vert_a;
-            vert_c.m_position.y += m_edge_loop_offset.y;
-            vert_c.m_normal = left_top_normal;
-
             var vert_d = vert_b;
-            vert_d.m_position.y += m_edge_loop_offset.y;
-            vert_d.m_normal = right_top_normal;
+            vert_d.m_position.y = m_bot_y;
 
-            var vert_e = vert_c;
-            vert_e.m_position.y = m_bot_y;
-            vert_e.m_normal = left_bot_normal;
-
-            var vert_f = vert_d;
-            vert_f.m_position.y = m_bot_y;
-            vert_f.m_normal = right_bot_normal;
+            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
+            vert_c.m_normal = normal;
+            vert_d.m_normal = normal;
 
             var vert_idx_c = vert_idx;
             vertices[vert_idx++] = vert_c;
@@ -817,25 +783,14 @@ public class VoxelChunk
             var vert_idx_d = vert_idx;
             vertices[vert_idx++] = vert_d;
 
-            var vert_idx_e = vert_idx;
-            vertices[vert_idx++] = vert_e;
-
-            var vert_idx_f = vert_idx;
-            vertices[vert_idx++] = vert_f;
-
             triangles[triangle_idx++] = vert_idx_a;
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_c;
             triangles[triangle_idx++] = vert_idx_c;
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_d;
-            triangles[triangle_idx++] = vert_idx_c;
-            triangles[triangle_idx++] = vert_idx_d;
-            triangles[triangle_idx++] = vert_idx_e;
-            triangles[triangle_idx++] = vert_idx_e;
-            triangles[triangle_idx++] = vert_idx_d;
-            triangles[triangle_idx++] = vert_idx_f;
         }
+
     }
 
     public void Render(float dt, Material material)
@@ -844,11 +799,6 @@ public class VoxelChunk
         {
             Graphics.DrawMesh(m_mesh, Matrix4x4.identity, material, 0, null, 0);
         }
-    }
-
-    public void SetEdgeLoopOffset(Vector2 edge_loop_offset)
-    {
-        m_edge_loop_offset = edge_loop_offset;
     }
 
     bool[] m_layer_above_occlusion_grid;
@@ -869,7 +819,6 @@ public class VoxelChunk
     int m_chunk_dimension_in_voxels;
     bool m_is_empty = true;
     bool m_generate_collision;
-    Vector2 m_edge_loop_offset;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
         | MeshUpdateFlags.DontValidateIndices

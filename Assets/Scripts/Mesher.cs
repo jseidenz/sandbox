@@ -17,7 +17,6 @@ public class Mesher
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
     float m_water_height;
     LayeredBrush m_brush;
-    Vector2 m_edge_loop_offset;
 
     struct DensityChange
     {
@@ -120,18 +119,6 @@ public class Mesher
             m_layers[y].Triangulate(m_voxel_chunk_scratch_buffer);
         }
         Profiler.EndSample();
-    }
-
-    public void SetEdgeLoopOffset(Vector2 edge_loop_offset)
-    {
-        if (m_edge_loop_offset == edge_loop_offset) return;
-
-        foreach(var layer in m_layers)
-        {
-            layer.SetEdgeLoopOffset(edge_loop_offset);
-        }
-
-        m_edge_loop_offset = edge_loop_offset;               
     }
 
     public void OnDestroy()

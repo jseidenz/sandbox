@@ -43,6 +43,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a5e37ee79533d4281bdaef708f6547, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_solid_mesher: {fileID: -4783240192274886246, guid: f68439f6cf81f4349b0e2b0901997f2f,
+    type: 3}
+  m_liquid_mesher: {fileID: -4783240192274886246, guid: 5e8f2702d31139347b60b7ad28998432,
+    type: 3}
   m_player_avatar: {fileID: 5372770372708608955, guid: 6adbf587ccf463c40a51f92b37d5c887,
     type: 3}
   m_initial_black: {fileID: 0}
@@ -56,9 +60,6 @@ MonoBehaviour:
   m_water: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9, type: 3}
   m_solid_iso_level: 0.95
   m_liquid_iso_level: 0.01
-  m_use_height_map: 1
+  m_use_height_map: 0
   m_liquid_sim_enabled_on_startup: 1
   m_min_density_to_allow_flow: 0.05
-  m_game: {fileID: 4905298800713076011}
-  m_tuneables:
-    m_edge_loop_offset: {x: 0, y: -0.025}
