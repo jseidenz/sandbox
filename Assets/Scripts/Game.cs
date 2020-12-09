@@ -23,8 +23,8 @@ public class Game : MonoBehaviour
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
-    VoxelWorld m_solid_mesher;
-    VoxelWorld m_liquid_mesher;
+    Mesher m_solid_mesher;
+    Mesher m_liquid_mesher;
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
@@ -74,9 +74,9 @@ public class Game : MonoBehaviour
         ScreenFader.StartScreenFade(m_initial_black.gameObject, false, 5f, 0.25f, () => m_initial_black.gameObject.SetActive(false));
     }
 
-    VoxelWorld CreateSolidMesher(float[][] layers, LayeredBrush brush)
+    Mesher CreateSolidMesher(float[][] layers, LayeredBrush brush)
     {
-        var solid_mesher = new VoxelWorld();
+        var solid_mesher = new Mesher();
         solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level, 0f, brush);
 
         //solid_mesher.enabled = false;
@@ -84,9 +84,9 @@ public class Game : MonoBehaviour
         return solid_mesher;
     }
 
-    VoxelWorld CreateLiquidMesher(float[][] layers, LayeredBrush brush)
+    Mesher CreateLiquidMesher(float[][] layers, LayeredBrush brush)
     {
-        var liquid_mesher = new VoxelWorld();
+        var liquid_mesher = new Mesher();
         liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level, 1f, brush);
 
         return liquid_mesher;
@@ -154,7 +154,7 @@ public class Game : MonoBehaviour
         return GameObject.Instantiate(m_player_avatar);
     }
 
-    public VoxelWorld GetVoxelWorld()
+    public Mesher GetVoxelWorld()
     {
         return m_solid_mesher;
     }
@@ -169,7 +169,7 @@ public class Game : MonoBehaviour
         return m_solid_simulation;
     }
 
-    public VoxelWorld GetLiquidMesher()
+    public Mesher GetLiquidMesher()
     {
         return m_liquid_mesher;
     }

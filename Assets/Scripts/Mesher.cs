@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
 
-public class VoxelWorld
+public class Mesher
 {
     int m_voxel_chunk_dimensions;
     int m_grid_height_in_voxels;
