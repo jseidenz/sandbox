@@ -5406,7 +5406,7 @@ PrefabInstance:
     - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_tuneables.m_edge_loop_offset.y
-      value: -0.1
+      value: -0.025
       objectReference: {fileID: 0}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
