@@ -767,7 +767,7 @@ public class VoxelChunk
     int m_density_grid_x;
     int m_density_grid_y;
     int m_chunk_dimension_in_voxels;
-    bool m_is_empty;
+    bool m_is_empty = true;
     bool m_generate_collision;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
