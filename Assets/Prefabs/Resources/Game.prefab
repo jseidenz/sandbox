@@ -50,8 +50,8 @@ MonoBehaviour:
   m_player_avatar: {fileID: 5372770372708608955, guid: 6adbf587ccf463c40a51f92b37d5c887,
     type: 3}
   m_initial_black: {fileID: 0}
-  m_grid_width_in_voxels: 256
-  m_grid_depth_in_voxels: 256
+  m_grid_width_in_voxels: 320
+  m_grid_depth_in_voxels: 320
   m_grid_height_in_voxels: 64
   m_voxel_size_in_meters: {x: 0.6, y: 0.6, z: 0.6}
   m_voxel_chunk_dimensions: 32
