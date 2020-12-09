@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
 
-public class VoxelWorld : MonoBehaviour
+public class VoxelWorld
 {
     int m_voxel_chunk_dimensions;
     int m_grid_height_in_voxels;
@@ -76,10 +76,8 @@ public class VoxelWorld : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
+    public void Render(float dt)
     {
-        float dt = Time.deltaTime;
-
 #if UNITY_EDITOR
         Profiler.BeginSample("RefreshLookupTable");
         m_brush.RefreshLookupTable();
@@ -123,7 +121,7 @@ public class VoxelWorld : MonoBehaviour
         Profiler.EndSample();
     }
 
-    void OnDestroy()
+    public void OnDestroy()
     {
         foreach(var layer in m_layers)
         {

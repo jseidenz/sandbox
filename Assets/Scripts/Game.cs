@@ -5,8 +5,6 @@ using System.Collections.Generic;
 
 public class Game : MonoBehaviour 
 {
-    [SerializeField] VoxelWorld m_solid_mesher;
-    [SerializeField] VoxelWorld m_liquid_mesher;
     [SerializeField] GameObject m_player_avatar;
     [SerializeField] Image m_initial_black;
     [SerializeField] int m_grid_width_in_voxels;
@@ -25,6 +23,8 @@ public class Game : MonoBehaviour
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
+    VoxelWorld m_solid_mesher;
+    VoxelWorld m_liquid_mesher;
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
@@ -76,7 +76,7 @@ public class Game : MonoBehaviour
 
     VoxelWorld CreateSolidMesher(float[][] layers, LayeredBrush brush)
     {
-        var solid_mesher = GameObject.Instantiate(m_solid_mesher);
+        var solid_mesher = new VoxelWorld();
         solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, true, m_solid_iso_level, 0f, brush);
 
         //solid_mesher.enabled = false;
@@ -86,7 +86,7 @@ public class Game : MonoBehaviour
 
     VoxelWorld CreateLiquidMesher(float[][] layers, LayeredBrush brush)
     {
-        var liquid_mesher = GameObject.Instantiate(m_liquid_mesher);
+        var liquid_mesher = new VoxelWorld();
         liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, m_water_height, false, m_liquid_iso_level, 1f, brush);
 
         return liquid_mesher;
@@ -191,6 +191,14 @@ public class Game : MonoBehaviour
         }
     }
 
+    void LateUpdate()
+    {
+        float dt = Time.deltaTime;
+
+        m_solid_mesher.Render(dt);
+        m_liquid_mesher.Render(dt);
+    }
+
     void CreateGroundPlane(LayeredBrush brush)
     {
         m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -203,6 +211,12 @@ public class Game : MonoBehaviour
         ground_plane_mesh_renderer.receiveShadows = false;
         m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
+    }
+
+    void OnDestroy()
+    {
+        m_solid_mesher.OnDestroy();
+        m_liquid_mesher.OnDestroy();
     }
 
     public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
