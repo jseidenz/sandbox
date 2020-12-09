@@ -186,8 +186,13 @@ public class VoxelChunk
 
     public bool Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
+        Profiler.BeginSample("GatherDensitySamples");
+        var density_samples = scratch_buffer.m_density_samples;
+        GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count, out var has_occlusion_changed);
+        Profiler.EndSample();
+
         Profiler.BeginSample("March");
-        bool has_occlusion_changed = MarchMesh(scratch_buffer, vertex_attribute_descriptors);
+        MarchMesh(scratch_buffer, vertex_attribute_descriptors, density_samples, density_sample_count);
         Profiler.EndSample();
 
 
@@ -427,12 +432,8 @@ public class VoxelChunk
     }
 
 
-    bool MarchMesh(ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
+    void MarchMesh(ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors, DensitySample[] density_samples, int density_sample_count)
     {
-        Profiler.BeginSample("GatherDensitySamples");
-        GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count, out var has_occlusion_changed);
-        Profiler.EndSample();
-
         var mesh = m_mesh;
         mesh.Clear();
 
@@ -444,7 +445,7 @@ public class VoxelChunk
         Profiler.BeginSample("GenerateTriangles");
         for (int density_sample_idx = 0; density_sample_idx < density_sample_count; ++density_sample_idx)
         {
-            var density_sample = scratch_buffer.m_density_samples[density_sample_idx];
+            var density_sample = density_samples[density_sample_idx];
             var y = density_sample.m_y;
             var x = density_sample.m_x;
             var left_near_density = density_sample.m_left_near_density;
@@ -744,8 +745,6 @@ public class VoxelChunk
         Profiler.EndSample();
 
         m_is_empty = triangle_idx == 0;
-
-        return has_occlusion_changed;
     }
 
     void FinalizeEdges(
