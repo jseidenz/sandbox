@@ -788,20 +788,18 @@ public class VoxelChunk
             var left_normal = vertex_id_to_accumulated_normal[vert_idx_a].normalized;
             var right_normal = vertex_id_to_accumulated_normal[vert_idx_b].normalized;
 
-            var left_top_normal = Vector3.Slerp(vert_a.m_normal, left_normal, 0.25f);
-            var left_bot_normal = left_normal;// Vector3.Slerp(left_normal, Vector3.down, 0.25f);
+            var left_top_normal = left_normal;
+            var left_bot_normal = left_normal;
 
-            var right_top_normal = Vector3.Slerp(vert_b.m_normal, right_normal, 0.25f);
-            var right_bot_normal = right_normal;//Vector3.Slerp(right_normal, Vector3.down, 0.25f);
+            var right_top_normal = right_normal;
+            var right_bot_normal = right_normal;
 
 
             var vert_c = vert_a;
-            vert_c.m_position = vert_c.m_position + left_normal * m_edge_loop_offset.x;
             vert_c.m_position.y += m_edge_loop_offset.y;
             vert_c.m_normal = left_top_normal;
 
             var vert_d = vert_b;
-            vert_d.m_position = vert_d.m_position + right_normal * m_edge_loop_offset.x;
             vert_d.m_position.y += m_edge_loop_offset.y;
             vert_d.m_normal = right_top_normal;
 
