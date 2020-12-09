@@ -48,11 +48,12 @@ public class VoxelChunk
         {
             var scratch_buffer = new ScratchBuffer();
 
-            scratch_buffer.m_vertices = new Vertex[System.UInt16.MaxValue];
-            scratch_buffer.m_triangles = new System.UInt16[System.UInt16.MaxValue * 24];
-            scratch_buffer.m_edges = new Edge[System.UInt16.MaxValue];
+            scratch_buffer.m_vertices = new Vertex[ushort.MaxValue];
+            scratch_buffer.m_triangles = new System.UInt16[ushort.MaxValue * 24];
+            scratch_buffer.m_edges = new Edge[ushort.MaxValue];
             scratch_buffer.m_vert_idx_to_normal_welding_info = new Dictionary<ushort, NormalWeldingInfo>();
             scratch_buffer.m_vertex_table = new VertexTable();
+            scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
             return scratch_buffer;
         }
 
@@ -62,6 +63,7 @@ public class VoxelChunk
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
         public Dictionary<ushort, NormalWeldingInfo> m_vert_idx_to_normal_welding_info;
+        public DensitySample[] m_density_samples;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -89,6 +91,17 @@ public class VoxelChunk
         public ushort m_vertex_idx;
         public Vector3 m_position;
         public Vector3 m_normal;
+    }
+
+    public struct DensitySample
+    {
+        public int m_sample_type;
+        public float m_left_near_density;
+        public float m_right_near_density;
+        public float m_left_far_density;
+        public float m_right_far_density;
+        public int m_x;
+        public int m_y;
     }
 
     [System.Flags]
@@ -330,24 +343,13 @@ public class VoxelChunk
         }
     }
 
-
-    bool MarchMesh(ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
+    void GatherDensitySamples(DensitySample[] density_samples, out int sample_count, out bool has_occlusion_changed)
     {
-        var mesh = m_mesh;
-        mesh.Clear();
-
-        int triangle_idx = 0;
-        int edge_idx = 0;
-
-        bool has_occlusion_changed = false;
-
-        scratch_buffer.m_vertex_table.Clear();
+        sample_count = 0;
+        has_occlusion_changed = false;
 
         for (int y = m_density_grid_y; y < m_density_grid_y + m_chunk_dimension_in_voxels; ++y)
         {
-            var near_z = (float)y * m_voxel_size_in_meters.z;
-            var far_z = near_z + m_voxel_size_in_meters.z;
-
             var top_density_idx_offset = m_layer_width_in_voxels;
             if (y == m_layer_height_in_voxels - 1)
             {
@@ -359,7 +361,7 @@ public class VoxelChunk
                 int left_near_cell_idx = y * m_layer_width_in_voxels + x;
 
                 var right_density_idx_offset = 1;
-                if(x == m_layer_width_in_voxels - 1)
+                if (x == m_layer_width_in_voxels - 1)
                 {
                     right_density_idx_offset = 0;
                 }
@@ -392,7 +394,7 @@ public class VoxelChunk
                         m_layer_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
 
-                    if(sample_type == SAMPLE_TYPE_EMTPY)
+                    if (sample_type == SAMPLE_TYPE_EMTPY)
                     {
                         continue;
                     }
@@ -405,267 +407,309 @@ public class VoxelChunk
                         has_occlusion_changed = true;
                         m_layer_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
-                    
+
                     bool is_occluded = m_layer_above_occlusion_grid[left_near_cell_idx];
                     if (is_occluded) continue;
-                }             
+                }
 
-
-                int chunk_relative_x = x - m_density_grid_x;
-                int chunk_relative_y = y - m_density_grid_y;
-                int chunk_relative_cell_idx = chunk_relative_y * m_chunk_dimension_in_voxels + chunk_relative_x;
-
-                var left_x = (float)x * m_voxel_size_in_meters.x;
-                var right_x = left_x + m_voxel_size_in_meters.x;
-
-                var left_near_top_y_delta =  m_density_height_weight * -m_voxel_size_in_meters.y * (1- left_near_density);
-                var left_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_far_density);
-                var right_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_near_density);
-                var right_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_far_density);
-
-                var marcher = new MeshMarcher
+                density_samples[sample_count++] = new DensitySample
                 {
-                    m_left_x = left_x,
-                    m_right_x = right_x,
-                    m_near_z = near_z,
-                    m_far_z = far_z,
-                    m_bot_y = m_bot_y,
-                    m_left_near_top_y = m_top_y + left_near_top_y_delta,
-                    m_left_far_top_y = m_top_y + left_far_top_y_delta,
-                    m_right_near_top_y = m_top_y + right_near_top_y_delta,
-                    m_right_far_top_y = m_top_y + right_far_top_y_delta,
+                    m_x = x,
+                    m_y = y,
                     m_left_near_density = left_near_density,
-                    m_right_near_density = right_near_density,
                     m_left_far_density = left_far_density,
+                    m_right_near_density = right_near_density,
                     m_right_far_density = right_far_density,
-                    m_iso_level = m_iso_level,
-                    m_triangle_idx = triangle_idx,
-                    m_chunk_dimensions_in_voxels = m_chunk_dimension_in_voxels,
-                    m_triangles = scratch_buffer.m_triangles,
-                    m_edge_idx = edge_idx,
-                    m_edges = scratch_buffer.m_edges,
-                    m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
-                    m_chunk_relative_x = chunk_relative_x,
-                    m_chunk_relative_y = chunk_relative_y,
-                    m_normal = Vector3.up,
-                    m_vertex_table = scratch_buffer.m_vertex_table
+                    m_sample_type = sample_type
                 };
+            }
+        }
+    }
 
 
-                if(sample_type == 1)
+    bool MarchMesh(ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
+    {
+        Profiler.BeginSample("GatherDensitySamples");
+        GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count, out var has_occlusion_changed);
+        Profiler.EndSample();
+
+        var mesh = m_mesh;
+        mesh.Clear();
+
+        int triangle_idx = 0;
+        int edge_idx = 0;
+
+        scratch_buffer.m_vertex_table.Clear();
+
+        for (int density_sample_idx = 0; density_sample_idx < density_sample_count; ++density_sample_idx)
+        {
+            var density_sample = scratch_buffer.m_density_samples[density_sample_idx];
+            var y = density_sample.m_y;
+            var x = density_sample.m_x;
+            var left_near_density = density_sample.m_left_near_density;
+            var left_far_density = density_sample.m_left_far_density;
+            var right_near_density = density_sample.m_right_near_density;
+            var right_far_density = density_sample.m_right_far_density;
+            var sample_type = density_sample.m_sample_type;
+
+            var near_z = (float)y * m_voxel_size_in_meters.z;
+            var far_z = near_z + m_voxel_size_in_meters.z;
+
+
+            int chunk_relative_x = x - m_density_grid_x;
+            int chunk_relative_y = y - m_density_grid_y;
+            int chunk_relative_cell_idx = chunk_relative_y * m_chunk_dimension_in_voxels + chunk_relative_x;
+
+            var left_x = (float)x * m_voxel_size_in_meters.x;
+            var right_x = left_x + m_voxel_size_in_meters.x;
+
+            var left_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_near_density);
+            var left_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_far_density);
+            var right_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_near_density);
+            var right_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_far_density);
+
+            var marcher = new MeshMarcher
+            {
+                m_left_x = left_x,
+                m_right_x = right_x,
+                m_near_z = near_z,
+                m_far_z = far_z,
+                m_bot_y = m_bot_y,
+                m_left_near_top_y = m_top_y + left_near_top_y_delta,
+                m_left_far_top_y = m_top_y + left_far_top_y_delta,
+                m_right_near_top_y = m_top_y + right_near_top_y_delta,
+                m_right_far_top_y = m_top_y + right_far_top_y_delta,
+                m_left_near_density = left_near_density,
+                m_right_near_density = right_near_density,
+                m_left_far_density = left_far_density,
+                m_right_far_density = right_far_density,
+                m_iso_level = m_iso_level,
+                m_triangle_idx = triangle_idx,
+                m_chunk_dimensions_in_voxels = m_chunk_dimension_in_voxels,
+                m_triangles = scratch_buffer.m_triangles,
+                m_edge_idx = edge_idx,
+                m_edges = scratch_buffer.m_edges,
+                m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
+                m_chunk_relative_x = chunk_relative_x,
+                m_chunk_relative_y = chunk_relative_y,
+                m_normal = Vector3.up,
+                m_vertex_table = scratch_buffer.m_vertex_table
+            };
+
+
+            if (sample_type == 1)
+            {
+                var left_near = marcher.LeftNear();
+                var left_edge = marcher.LeftEdge();
+                var near_edge = marcher.NearEdge();
+
+                marcher.Triangle(left_near, left_edge, near_edge);
+                marcher.ExtrudeTopToBot(near_edge, left_edge);
+            }
+            else if (sample_type == 2)
+            {
+                var near_edge = marcher.NearEdge();
+                var right_edge = marcher.RightEdge();
+                var right_near = marcher.RightNear();
+
+                marcher.Triangle(near_edge, right_edge, right_near);
+                marcher.ExtrudeTopToBot(right_edge, near_edge);
+            }
+            else if (sample_type == 3)
+            {
+                var left_edge = marcher.LeftEdge();
+                var right_near = marcher.RightNear();
+                var left_near = marcher.LeftNear();
+                var right_edge = marcher.RightEdge();
+
+                marcher.Triangle(left_edge, right_near, left_near);
+                marcher.Triangle(left_edge, right_edge, right_near);
+                marcher.ExtrudeTopToBot(right_edge, left_edge);
+            }
+            else if (sample_type == 4)
+            {
+                var far_edge = marcher.FarEdge();
+                var right_far = marcher.RightFar();
+                var right_edge = marcher.RightEdge();
+
+                marcher.Triangle(far_edge, right_far, right_edge);
+                marcher.ExtrudeTopToBot(far_edge, right_edge);
+            }
+            else if (sample_type == 5)
+            {
+                if (marcher.AverageDensity() > m_iso_level)
                 {
                     var left_near = marcher.LeftNear();
                     var left_edge = marcher.LeftEdge();
                     var near_edge = marcher.NearEdge();
+                    var right_edge = marcher.RightEdge();
+                    var far_edge = marcher.FarEdge();
+                    var right_far = marcher.RightFar();
 
                     marcher.Triangle(left_near, left_edge, near_edge);
-                    marcher.ExtrudeTopToBot(near_edge, left_edge);
-                }
-                else if(sample_type == 2)
-                {
-                    var near_edge = marcher.NearEdge();
-                    var right_edge = marcher.RightEdge();
-                    var right_near = marcher.RightNear();
-
-                    marcher.Triangle(near_edge, right_edge, right_near);
-                    marcher.ExtrudeTopToBot(right_edge, near_edge);
-                }
-                else if (sample_type == 3)
-                {
-                    var left_edge = marcher.LeftEdge();
-                    var right_near = marcher.RightNear();
-                    var left_near = marcher.LeftNear();
-                    var right_edge = marcher.RightEdge();
-
-                    marcher.Triangle(left_edge, right_near, left_near);
-                    marcher.Triangle(left_edge, right_edge, right_near);
-                    marcher.ExtrudeTopToBot(right_edge, left_edge);
-                }
-                else if (sample_type == 4)
-                {
-                    var far_edge = marcher.FarEdge();
-                    var right_far = marcher.RightFar();
-                    var right_edge = marcher.RightEdge();
-
+                    marcher.Triangle(left_edge, right_edge, near_edge);
+                    marcher.Triangle(left_edge, far_edge, right_edge);
                     marcher.Triangle(far_edge, right_far, right_edge);
-                    marcher.ExtrudeTopToBot(far_edge, right_edge);
-                }
-                else if (sample_type == 5)
-                {
-                    if (marcher.AverageDensity() > m_iso_level)
-                    {
-                        var left_near = marcher.LeftNear();
-                        var left_edge = marcher.LeftEdge();
-                        var near_edge = marcher.NearEdge();
-                        var right_edge = marcher.RightEdge();
-                        var far_edge = marcher.FarEdge();
-                        var right_far = marcher.RightFar();
-
-                        marcher.Triangle(left_near, left_edge, near_edge);
-                        marcher.Triangle(left_edge, right_edge, near_edge);
-                        marcher.Triangle(left_edge, far_edge, right_edge);
-                        marcher.Triangle(far_edge, right_far, right_edge);
-                        marcher.ExtrudeTopToBot(far_edge, left_edge);
-                        marcher.ExtrudeTopToBot(near_edge, right_edge);
-                    }
-                    else
-                    {
-                        var left_near = marcher.LeftNear();
-                        var left_edge = marcher.LeftEdge();
-                        var near_edge = marcher.NearEdge();
-                        var far_edge = marcher.FarEdge();
-                        var right_far = marcher.RightFar();
-                        var right_edge = marcher.RightEdge();
-
-                        marcher.Triangle(left_near, left_edge, near_edge);
-                        marcher.Triangle(far_edge, right_far, right_edge);
-                        marcher.ExtrudeTopToBot(near_edge, left_edge);
-                        marcher.ExtrudeTopToBot(far_edge, right_edge);
-                    }
-                }
-                else if (sample_type == 6)
-                {
-                    var far_edge = marcher.FarEdge();
-                    var right_far = marcher.RightFar();
-                    var right_near = marcher.RightNear();
-                    var near_edge = marcher.NearEdge();
-
-                    marcher.Triangle(far_edge, right_far, right_near);
-                    marcher.Triangle(far_edge, right_near, near_edge);
-                    marcher.ExtrudeTopToBot(far_edge, near_edge);
-                }
-                else if (sample_type == 7)
-                {
-                    var left_edge = marcher.LeftEdge();
-                    var right_near = marcher.RightNear();
-                    var left_near = marcher.LeftNear();
-                    var far_edge = marcher.FarEdge();
-                    var right_far = marcher.RightFar();
-
-                    marcher.Triangle(left_edge, right_near, left_near);
-                    marcher.Triangle(left_edge, far_edge, right_near);
-                    marcher.Triangle(far_edge, right_far, right_near);
                     marcher.ExtrudeTopToBot(far_edge, left_edge);
-                }
-                else if (sample_type == 8)
-                {
-                    var left_far = marcher.LeftFar();
-                    var far_edge = marcher.FarEdge();
-                    var left_edge = marcher.LeftEdge();
-
-                    marcher.Triangle(left_far, far_edge, left_edge);
-                    marcher.ExtrudeTopToBot(left_edge, far_edge);
-                }
-                else if (sample_type == 9)
-                {
-                    var left_far = marcher.LeftFar();
-                    var far_edge = marcher.FarEdge();
-                    var near_edge = marcher.NearEdge();
-                    var left_near = marcher.LeftNear();
-
-                    marcher.Triangle(left_far, far_edge, near_edge);
-                    marcher.Triangle(left_far, near_edge, left_near);
-                    marcher.ExtrudeTopToBot(near_edge, far_edge);
-                }
-                else if (sample_type == 10)
-                {
-                    if (marcher.AverageDensity() > m_iso_level)
-                    {
-                        var left_far = marcher.LeftFar();
-                        var left_edge = marcher.LeftEdge();
-                        var near_edge = marcher.NearEdge();
-                        var right_edge = marcher.RightEdge();
-                        var far_edge = marcher.FarEdge();
-                        var right_near = marcher.RightNear();
-
-                        marcher.Triangle(left_far, far_edge, left_edge);
-                        marcher.Triangle(left_edge, far_edge, right_edge);
-                        marcher.Triangle(left_edge, right_edge, near_edge);
-                        marcher.Triangle(near_edge, right_edge, right_near);
-                        marcher.ExtrudeTopToBot(left_edge, near_edge);
-                        marcher.ExtrudeTopToBot(right_edge, far_edge);
-                    }
-                    else
-                    {
-                        var near_edge = marcher.NearEdge();
-                        var right_edge = marcher.RightEdge();
-                        var right_near = marcher.RightNear();
-                        var left_edge = marcher.LeftEdge();
-                        var far_edge = marcher.FarEdge();
-                        var left_far = marcher.LeftFar();
-
-                        marcher.Triangle(near_edge, right_edge, right_near);
-                        marcher.Triangle(left_far, far_edge, left_edge);
-                        marcher.ExtrudeTopToBot(left_edge, far_edge);
-                        marcher.ExtrudeTopToBot(right_edge, near_edge);
-
-                    }
-                }
-                else if (sample_type == 11)
-                {
-                    var left_far = marcher.LeftFar();
-                    var far_edge = marcher.FarEdge();
-                    var left_near = marcher.LeftNear();
-                    var right_edge = marcher.RightEdge();
-                    var right_near = marcher.RightNear();
-
-                    marcher.Triangle(left_far, far_edge, left_near);
-                    marcher.Triangle(left_near, far_edge, right_edge);
-                    marcher.Triangle(left_near, right_edge, right_near);
-                    marcher.ExtrudeTopToBot(right_edge, far_edge);
-                }
-                else if (sample_type == 12)
-                {
-                    var left_far = marcher.LeftFar();
-                    var right_far = marcher.RightFar();
-                    var left_edge = marcher.LeftEdge();
-                    var right_edge = marcher.RightEdge();
-
-                    marcher.Triangle(left_far, right_far, left_edge);
-                    marcher.Triangle(left_edge, right_far, right_edge);
-                    marcher.ExtrudeTopToBot(left_edge, right_edge);
-                }
-                else if (sample_type == 13)
-                {
-                    var left_near = marcher.LeftNear();
-                    var left_far = marcher.LeftFar();
-                    var near_edge = marcher.NearEdge();
-                    var right_edge = marcher.RightEdge();
-                    var right_far = marcher.RightFar();
-
-                    marcher.Triangle(left_near, left_far, near_edge);
-                    marcher.Triangle(left_far, right_edge, near_edge);
-                    marcher.Triangle(left_far, right_far, right_edge);
                     marcher.ExtrudeTopToBot(near_edge, right_edge);
                 }
-                else if (sample_type == 14)
-                {
-                    var left_far = marcher.LeftFar();
-                    var right_far = marcher.RightFar();
-                    var left_edge = marcher.LeftEdge();
-                    var near_edge = marcher.NearEdge();
-                    var right_near = marcher.RightNear();
-
-                    marcher.Triangle(left_far, right_far, left_edge);
-                    marcher.Triangle(left_edge, right_far, near_edge);
-                    marcher.Triangle(near_edge, right_far, right_near);
-                    marcher.ExtrudeTopToBot(left_edge, near_edge);
-
-                }
-                else if (sample_type == SAMPLE_TYPE_FULL_SQUARE)
+                else
                 {
                     var left_near = marcher.LeftNear();
-                    var left_far = marcher.LeftFar();
-                    var right_near = marcher.RightNear();
+                    var left_edge = marcher.LeftEdge();
+                    var near_edge = marcher.NearEdge();
+                    var far_edge = marcher.FarEdge();
                     var right_far = marcher.RightFar();
+                    var right_edge = marcher.RightEdge();
 
-                    marcher.Triangle(left_near, left_far, right_near);
-                    marcher.Triangle(left_far, right_far, right_near);
+                    marcher.Triangle(left_near, left_edge, near_edge);
+                    marcher.Triangle(far_edge, right_far, right_edge);
+                    marcher.ExtrudeTopToBot(near_edge, left_edge);
+                    marcher.ExtrudeTopToBot(far_edge, right_edge);
                 }
-
-                edge_idx = marcher.m_edge_idx;
-                triangle_idx = marcher.m_triangle_idx;
             }
+            else if (sample_type == 6)
+            {
+                var far_edge = marcher.FarEdge();
+                var right_far = marcher.RightFar();
+                var right_near = marcher.RightNear();
+                var near_edge = marcher.NearEdge();
+
+                marcher.Triangle(far_edge, right_far, right_near);
+                marcher.Triangle(far_edge, right_near, near_edge);
+                marcher.ExtrudeTopToBot(far_edge, near_edge);
+            }
+            else if (sample_type == 7)
+            {
+                var left_edge = marcher.LeftEdge();
+                var right_near = marcher.RightNear();
+                var left_near = marcher.LeftNear();
+                var far_edge = marcher.FarEdge();
+                var right_far = marcher.RightFar();
+
+                marcher.Triangle(left_edge, right_near, left_near);
+                marcher.Triangle(left_edge, far_edge, right_near);
+                marcher.Triangle(far_edge, right_far, right_near);
+                marcher.ExtrudeTopToBot(far_edge, left_edge);
+            }
+            else if (sample_type == 8)
+            {
+                var left_far = marcher.LeftFar();
+                var far_edge = marcher.FarEdge();
+                var left_edge = marcher.LeftEdge();
+
+                marcher.Triangle(left_far, far_edge, left_edge);
+                marcher.ExtrudeTopToBot(left_edge, far_edge);
+            }
+            else if (sample_type == 9)
+            {
+                var left_far = marcher.LeftFar();
+                var far_edge = marcher.FarEdge();
+                var near_edge = marcher.NearEdge();
+                var left_near = marcher.LeftNear();
+
+                marcher.Triangle(left_far, far_edge, near_edge);
+                marcher.Triangle(left_far, near_edge, left_near);
+                marcher.ExtrudeTopToBot(near_edge, far_edge);
+            }
+            else if (sample_type == 10)
+            {
+                if (marcher.AverageDensity() > m_iso_level)
+                {
+                    var left_far = marcher.LeftFar();
+                    var left_edge = marcher.LeftEdge();
+                    var near_edge = marcher.NearEdge();
+                    var right_edge = marcher.RightEdge();
+                    var far_edge = marcher.FarEdge();
+                    var right_near = marcher.RightNear();
+
+                    marcher.Triangle(left_far, far_edge, left_edge);
+                    marcher.Triangle(left_edge, far_edge, right_edge);
+                    marcher.Triangle(left_edge, right_edge, near_edge);
+                    marcher.Triangle(near_edge, right_edge, right_near);
+                    marcher.ExtrudeTopToBot(left_edge, near_edge);
+                    marcher.ExtrudeTopToBot(right_edge, far_edge);
+                }
+                else
+                {
+                    var near_edge = marcher.NearEdge();
+                    var right_edge = marcher.RightEdge();
+                    var right_near = marcher.RightNear();
+                    var left_edge = marcher.LeftEdge();
+                    var far_edge = marcher.FarEdge();
+                    var left_far = marcher.LeftFar();
+
+                    marcher.Triangle(near_edge, right_edge, right_near);
+                    marcher.Triangle(left_far, far_edge, left_edge);
+                    marcher.ExtrudeTopToBot(left_edge, far_edge);
+                    marcher.ExtrudeTopToBot(right_edge, near_edge);
+
+                }
+            }
+            else if (sample_type == 11)
+            {
+                var left_far = marcher.LeftFar();
+                var far_edge = marcher.FarEdge();
+                var left_near = marcher.LeftNear();
+                var right_edge = marcher.RightEdge();
+                var right_near = marcher.RightNear();
+
+                marcher.Triangle(left_far, far_edge, left_near);
+                marcher.Triangle(left_near, far_edge, right_edge);
+                marcher.Triangle(left_near, right_edge, right_near);
+                marcher.ExtrudeTopToBot(right_edge, far_edge);
+            }
+            else if (sample_type == 12)
+            {
+                var left_far = marcher.LeftFar();
+                var right_far = marcher.RightFar();
+                var left_edge = marcher.LeftEdge();
+                var right_edge = marcher.RightEdge();
+
+                marcher.Triangle(left_far, right_far, left_edge);
+                marcher.Triangle(left_edge, right_far, right_edge);
+                marcher.ExtrudeTopToBot(left_edge, right_edge);
+            }
+            else if (sample_type == 13)
+            {
+                var left_near = marcher.LeftNear();
+                var left_far = marcher.LeftFar();
+                var near_edge = marcher.NearEdge();
+                var right_edge = marcher.RightEdge();
+                var right_far = marcher.RightFar();
+
+                marcher.Triangle(left_near, left_far, near_edge);
+                marcher.Triangle(left_far, right_edge, near_edge);
+                marcher.Triangle(left_far, right_far, right_edge);
+                marcher.ExtrudeTopToBot(near_edge, right_edge);
+            }
+            else if (sample_type == 14)
+            {
+                var left_far = marcher.LeftFar();
+                var right_far = marcher.RightFar();
+                var left_edge = marcher.LeftEdge();
+                var near_edge = marcher.NearEdge();
+                var right_near = marcher.RightNear();
+
+                marcher.Triangle(left_far, right_far, left_edge);
+                marcher.Triangle(left_edge, right_far, near_edge);
+                marcher.Triangle(near_edge, right_far, right_near);
+                marcher.ExtrudeTopToBot(left_edge, near_edge);
+
+            }
+            else if (sample_type == SAMPLE_TYPE_FULL_SQUARE)
+            {
+                var left_near = marcher.LeftNear();
+                var left_far = marcher.LeftFar();
+                var right_near = marcher.RightNear();
+                var right_far = marcher.RightFar();
+
+                marcher.Triangle(left_near, left_far, right_near);
+                marcher.Triangle(left_far, right_far, right_near);
+            }
+
+            edge_idx = marcher.m_edge_idx;
+            triangle_idx = marcher.m_triangle_idx;
         }
 
 
