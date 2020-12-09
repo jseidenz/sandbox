@@ -6,7 +6,6 @@ using System.Collections.Generic;
 public class Game : MonoBehaviour 
 {
     [SerializeField] GameObject m_player_avatar;
-    [SerializeField] Image m_initial_black;
     [SerializeField] int m_grid_width_in_voxels;
     [SerializeField] int m_grid_depth_in_voxels;
     [SerializeField] int m_grid_height_in_voxels;
@@ -56,11 +55,11 @@ public class Game : MonoBehaviour
         m_liquid_mesher.TriangulateAll();
 
 
-        m_player_avatar = CreateAvatar();
+        m_solid_mesher.BindCamera(m_camera);
+        m_liquid_mesher.BindCamera(m_camera);
 
-        var camera = Camera.main;
-        m_solid_mesher.BindCamera(camera);
-        m_liquid_mesher.BindCamera(camera);
+
+        m_player_avatar = CreateAvatar();
 
         CreateGroundPlane(solid_brush);
 
@@ -73,7 +72,7 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        ScreenFader.StartScreenFade(m_initial_black.gameObject, false, 5f, 0.25f, () => m_initial_black.gameObject.SetActive(false));
+        //ScreenFader.StartScreenFade(m_initial_black.gameObject, false, 5f, 0.25f, () => m_initial_black.gameObject.SetActive(false));
     }
 
     Mesher CreateSolidMesher(float[][] layers, LayeredBrush brush)

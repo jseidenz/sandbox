@@ -8,6 +8,7 @@ public class ScreenFader : MonoBehaviour
     float m_fade_delay;
     bool m_fade_in;
     System.Action m_fade_callback;
+    float m_fade_amount;
 
     CanvasGroup m_canvas_group;
 
@@ -24,7 +25,9 @@ public class ScreenFader : MonoBehaviour
         {
             if(m_fade_in)
             {
-                m_canvas_group.alpha = System.Math.Min(m_canvas_group.alpha + dt * m_fade_speed, 1.0f);
+                m_fade_amount = System.Math.Min(m_fade_amount + dt * m_fade_speed, 1.0f);
+
+                m_canvas_group.alpha = m_fade_amount * m_fade_amount;
                 if (m_canvas_group.alpha >= 1.0f)
                 {
                     enabled = false;
@@ -36,7 +39,10 @@ public class ScreenFader : MonoBehaviour
             }
             else
             {
-                m_canvas_group.alpha = System.Math.Max(m_canvas_group.alpha - dt * m_fade_speed, 0.0f);
+
+                m_fade_amount = System.Math.Min(m_fade_amount + dt * m_fade_speed, 1.0f);
+
+                m_canvas_group.alpha = 1 - m_fade_amount * m_fade_amount;
                 if (m_canvas_group.alpha <= 0.0f)
                 {
                     enabled = false;
@@ -63,10 +69,12 @@ public class ScreenFader : MonoBehaviour
 
         if (fade_in)
         {
+            m_fade_amount = 0f;
             m_canvas_group.alpha = 0f;
         }
         else
         {
+            m_fade_amount = 0f;
             m_canvas_group.alpha = 1f;
         }
 
