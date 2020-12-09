@@ -42,6 +42,47 @@ public class VoxelChunk
         }
     }
 
+    public class VertexTable2
+    {
+        public VertexEntry2[] m_vertex_entries = new VertexEntry2[ushort.MaxValue];
+        public Dictionary<uint, ushort> m_vertex_id_to_vertex_idx = new Dictionary<uint, ushort>();
+
+        public void Clear()
+        {
+            m_vertex_id_to_vertex_idx.Clear();
+        }
+        public ushort CreateVertexEntry(VertexLocation location, int chunk_relative_cell_idx)
+        {
+            var shifted_cell_number = ((uint)chunk_relative_cell_idx) << 16;
+            var shifted_location = (uint)location;
+            var vertex_id = shifted_cell_number | shifted_location;
+
+            if (!m_vertex_id_to_vertex_idx.TryGetValue(vertex_id, out var vertex_idx))
+            {
+                vertex_idx = (ushort)m_vertex_id_to_vertex_idx.Count;
+                m_vertex_id_to_vertex_idx[vertex_id] = vertex_idx;
+
+                m_vertex_entries[vertex_idx] = new VertexEntry2
+                {
+                    m_vertex_location = location,
+                    m_vertex_idx = vertex_idx
+                };
+            }
+
+            return vertex_idx;
+        }
+
+        public void Triangle(ushort vert_idx_a, ushort vert_idx_b, ushort vert_idx_c)
+        {
+
+        }
+
+        public void ExtrudeTopToBot(ushort vert_idx_a, ushort vert_idx_b)
+        {
+
+        }
+    }
+
     public struct ScratchBuffer
     {
         public static ScratchBuffer CreateScratchBuffer()
@@ -53,6 +94,7 @@ public class VoxelChunk
             scratch_buffer.m_edges = new Edge[ushort.MaxValue];
             scratch_buffer.m_vert_idx_to_normal_welding_info = new Dictionary<ushort, NormalWeldingInfo>();
             scratch_buffer.m_vertex_table = new VertexTable();
+            scratch_buffer.m_vertex_table2 = new VertexTable2();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
             return scratch_buffer;
         }
@@ -62,6 +104,7 @@ public class VoxelChunk
         public System.UInt16[] m_triangles;
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
+        public VertexTable2 m_vertex_table2;
         public Dictionary<ushort, NormalWeldingInfo> m_vert_idx_to_normal_welding_info;
         public DensitySample[] m_density_samples;
     }
@@ -93,6 +136,12 @@ public class VoxelChunk
         public Vector3 m_normal;
     }
 
+    public struct VertexEntry2
+    {
+        public VertexLocation m_vertex_location;
+        public ushort m_vertex_idx;
+    }
+
     public struct DensitySample
     {
         public int m_sample_type;
@@ -100,6 +149,12 @@ public class VoxelChunk
         public float m_right_near_density;
         public float m_left_far_density;
         public float m_right_far_density;
+
+        public float GetAverageDensity()
+        {
+            return (m_left_near_density + m_right_near_density + m_left_far_density + m_right_far_density) / 4f;
+        }
+
         public int m_x;
         public int m_y;
     }
@@ -426,11 +481,244 @@ public class VoxelChunk
         }
     }
 
+    void CreateVerticesAndEdges(VertexTable2 vertex_table, DensitySample[] density_samples, int density_sample_count)
+    {
+        for (int density_sample_idx = 0; density_sample_idx < density_sample_count; ++density_sample_idx)
+        {
+            var density_sample = density_samples[density_sample_idx];
+            var y = density_sample.m_y;
+            var x = density_sample.m_x;
+            var sample_type = density_sample.m_sample_type;
+
+            int chunk_relative_x = x - m_density_grid_x;
+            int chunk_relative_y = y - m_density_grid_y;
+            int chunk_relative_cell_idx = chunk_relative_y * m_chunk_dimension_in_voxels + chunk_relative_x;
+
+            if (sample_type == 1)
+            {
+                var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_near, left_edge, near_edge);
+                vertex_table.ExtrudeTopToBot(near_edge, left_edge);
+            }
+            else if (sample_type == 2)
+            {
+                var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+                var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(near_edge, right_edge, right_near);
+                vertex_table.ExtrudeTopToBot(right_edge, near_edge);
+            }
+            else if (sample_type == 3)
+            {
+                var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+                var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_edge, right_near, left_near);
+                vertex_table.Triangle(left_edge, right_edge, right_near);
+                vertex_table.ExtrudeTopToBot(right_edge, left_edge);
+            }
+            else if (sample_type == 4)
+            {
+                var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+                var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+
+
+                vertex_table.Triangle(far_edge, right_far, right_edge);
+                vertex_table.ExtrudeTopToBot(far_edge, right_edge);
+            }
+            else if (sample_type == 5)
+            {
+                if (density_sample.GetAverageDensity() > m_iso_level)
+                {
+                    var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                    var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                    var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                    var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+                    var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                    var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+
+
+                    vertex_table.Triangle(left_near, left_edge, near_edge);
+                    vertex_table.Triangle(left_edge, right_edge, near_edge);
+                    vertex_table.Triangle(left_edge, far_edge, right_edge);
+                    vertex_table.Triangle(far_edge, right_far, right_edge);
+                    vertex_table.ExtrudeTopToBot(far_edge, left_edge);
+                    vertex_table.ExtrudeTopToBot(near_edge, right_edge);
+                }
+                else
+                {
+                    var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                    var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                    var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                    var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                    var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+                    var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+
+                    vertex_table.Triangle(left_near, left_edge, near_edge);
+                    vertex_table.Triangle(far_edge, right_far, right_edge);
+                    vertex_table.ExtrudeTopToBot(near_edge, left_edge);
+                    vertex_table.ExtrudeTopToBot(far_edge, right_edge);
+                }
+            }
+            else if (sample_type == 6)
+            {
+                var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+                var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+                var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(far_edge, right_far, right_near);
+                vertex_table.Triangle(far_edge, right_near, near_edge);
+                vertex_table.ExtrudeTopToBot(far_edge, near_edge);
+            }
+            else if (sample_type == 7)
+            {
+                var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+                var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_edge, right_near, left_near);
+                vertex_table.Triangle(left_edge, far_edge, right_near);
+                vertex_table.Triangle(far_edge, right_far, right_near);
+                vertex_table.ExtrudeTopToBot(far_edge, left_edge);
+            }
+            else if (sample_type == 8)
+            {
+                var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_far, far_edge, left_edge);
+                vertex_table.ExtrudeTopToBot(left_edge, far_edge);
+            }
+            else if (sample_type == 9)
+            {
+                var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_far, far_edge, near_edge);
+                vertex_table.Triangle(left_far, near_edge, left_near);
+                vertex_table.ExtrudeTopToBot(near_edge, far_edge);
+            }
+            else if (sample_type == 10)
+            {
+                if (density_sample.GetAverageDensity() > m_iso_level)
+                {
+                    var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                    var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                    var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                    var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+                    var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                    var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+
+                    vertex_table.Triangle(left_far, far_edge, left_edge);
+                    vertex_table.Triangle(left_edge, far_edge, right_edge);
+                    vertex_table.Triangle(left_edge, right_edge, near_edge);
+                    vertex_table.Triangle(near_edge, right_edge, right_near);
+                    vertex_table.ExtrudeTopToBot(left_edge, near_edge);
+                    vertex_table.ExtrudeTopToBot(right_edge, far_edge);
+                }
+                else
+                {
+                    var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                    var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+                    var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+                    var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                    var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                    var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+
+                    vertex_table.Triangle(near_edge, right_edge, right_near);
+                    vertex_table.Triangle(left_far, far_edge, left_edge);
+                    vertex_table.ExtrudeTopToBot(left_edge, far_edge);
+                    vertex_table.ExtrudeTopToBot(right_edge, near_edge);
+
+                }
+            }
+            else if (sample_type == 11)
+            {
+                var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                var far_edge = vertex_table.CreateVertexEntry(VertexLocation.FarTop, chunk_relative_cell_idx);
+                var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+                var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_far, far_edge, left_near);
+                vertex_table.Triangle(left_near, far_edge, right_edge);
+                vertex_table.Triangle(left_near, right_edge, right_near);
+                vertex_table.ExtrudeTopToBot(right_edge, far_edge);
+            }
+            else if (sample_type == 12)
+            {
+                var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+                var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_far, right_far, left_edge);
+                vertex_table.Triangle(left_edge, right_far, right_edge);
+                vertex_table.ExtrudeTopToBot(left_edge, right_edge);
+            }
+            else if (sample_type == 13)
+            {
+                var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                var right_edge = vertex_table.CreateVertexEntry(VertexLocation.RightTop, chunk_relative_cell_idx);
+                var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_near, left_far, near_edge);
+                vertex_table.Triangle(left_far, right_edge, near_edge);
+                vertex_table.Triangle(left_far, right_far, right_edge);
+                vertex_table.ExtrudeTopToBot(near_edge, right_edge);
+            }
+            else if (sample_type == 14)
+            {
+                var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+                var left_edge = vertex_table.CreateVertexEntry(VertexLocation.LeftTop, chunk_relative_cell_idx);
+                var near_edge = vertex_table.CreateVertexEntry(VertexLocation.NearTop, chunk_relative_cell_idx);
+                var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_far, right_far, left_edge);
+                vertex_table.Triangle(left_edge, right_far, near_edge);
+                vertex_table.Triangle(near_edge, right_far, right_near);
+                vertex_table.ExtrudeTopToBot(left_edge, near_edge);
+
+            }
+            else if (sample_type == SAMPLE_TYPE_FULL_SQUARE)
+            {
+                var left_near = vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, chunk_relative_cell_idx);
+                var left_far = vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, chunk_relative_cell_idx);
+                var right_near = vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, chunk_relative_cell_idx);
+                var right_far = vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, chunk_relative_cell_idx);
+
+                vertex_table.Triangle(left_near, left_far, right_near);
+                vertex_table.Triangle(left_far, right_far, right_near);
+            }
+        }    
+    }
+
 
     bool MarchMesh(ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
         Profiler.BeginSample("GatherDensitySamples");
         GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count, out var has_occlusion_changed);
+        Profiler.EndSample();
+
+        Profiler.BeginSample("CreateVerticesAndEdges");
+        scratch_buffer.m_vertex_table2.Clear();
+        CreateVerticesAndEdges(scratch_buffer.m_vertex_table2, scratch_buffer.m_density_samples, density_sample_count);
         Profiler.EndSample();
 
         var mesh = m_mesh;
