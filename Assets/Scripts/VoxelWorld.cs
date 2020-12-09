@@ -89,9 +89,9 @@ public class VoxelWorld : MonoBehaviour
         Profiler.BeginSample("Render");
         for (int y = 0; y < m_layers.Length; ++y)
         {
-            m_brush.GetMaterialForLayer(y, out var material, out var property_block);
+            m_brush.GetMaterialForLayer(y, out var material);
 
-            m_layers[y].Render(dt, material, property_block);
+            m_layers[y].Render(dt, material);
         }
         Profiler.EndSample();
     }

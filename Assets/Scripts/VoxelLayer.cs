@@ -134,11 +134,11 @@ public class VoxelLayer
     }
 
 
-    public void Render(float dt, Material material, MaterialPropertyBlock property_block)
+    public void Render(float dt, Material material)
     {
         foreach(var chunk in m_visible_voxel_chunks)
         {
-            chunk.Render(dt, material, property_block);
+            chunk.Render(dt, material);
         }
     }
 

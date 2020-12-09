@@ -196,11 +196,10 @@ public class Game : MonoBehaviour
         m_ground_plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
         m_ground_plane.name = "GroundPlane";
 
-        brush.GetMaterialForLayer(0, out var material, out var property_block);
+        brush.GetMaterialForLayer(0, out var material);
 
         var ground_plane_mesh_renderer = m_ground_plane.GetComponent<MeshRenderer>();
         ground_plane_mesh_renderer.sharedMaterial = material;
-        ground_plane_mesh_renderer.SetPropertyBlock(property_block);
         ground_plane_mesh_renderer.receiveShadows = false;
         m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);

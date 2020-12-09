@@ -58,7 +58,7 @@
             "typeInfo": {
                 "fullName": "UnityEditor.ShaderGraph.Internal.ColorShaderProperty"
             },
-            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"e28aea0e-bfaf-4eec-a898-42d7883a92c2\"\n    },\n    \"m_Name\": \"_ComputedColor\",\n    \"m_DefaultReferenceName\": \"Color_12D8F678\",\n    \"m_OverrideReferenceName\": \"_ComputedColor\",\n    \"m_GeneratePropertyBlock\": false,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"r\": 0.0,\n        \"g\": 0.0,\n        \"b\": 0.0,\n        \"a\": 0.0\n    },\n    \"m_ColorMode\": 0\n}"
+            "JSONnodeData": "{\n    \"m_Guid\": {\n        \"m_GuidSerialized\": \"e28aea0e-bfaf-4eec-a898-42d7883a92c2\"\n    },\n    \"m_Name\": \"_ComputedColor\",\n    \"m_DefaultReferenceName\": \"Color_12D8F678\",\n    \"m_OverrideReferenceName\": \"_ComputedColor\",\n    \"m_GeneratePropertyBlock\": true,\n    \"m_Precision\": 0,\n    \"m_GPUInstanced\": false,\n    \"m_Hidden\": false,\n    \"m_Value\": {\n        \"r\": 0.0,\n        \"g\": 0.0,\n        \"b\": 0.0,\n        \"a\": 0.0\n    },\n    \"m_ColorMode\": 0\n}"
         }
     ],
     "m_SerializedKeywords": [],

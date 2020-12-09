@@ -94,12 +94,13 @@ public class LayeredBrush
                     }
 
                     computed_color = Color.HSVToRGB(hue, saturation, value);
-                    property_block.SetColor(COMPUTED_COLOR_ID, computed_color);
+
+                    var material = GameObject.Instantiate(entry.m_material);
+                    material.SetColor(COMPUTED_COLOR_ID, computed_color);
 
                     m_layer_idx_to_material[layer_idx] = new MaterialLayer
                     {
-                        m_material = entry.m_material,
-                        m_property_block = property_block
+                        m_material = material,
                     };
                 }
                 last_layer_idx = entry.m_layer_idx;
@@ -113,13 +114,12 @@ public class LayeredBrush
         return new LayeredBrush(materials);
     }
 
-    public void GetMaterialForLayer(int layer_idx, out Material material, out MaterialPropertyBlock property_block)
+    public void GetMaterialForLayer(int layer_idx, out Material material)
     {
         layer_idx = Math.Max(layer_idx, 0);
         layer_idx = Math.Min(layer_idx, m_layer_idx_to_material.Length - 1);
         var material_layer = m_layer_idx_to_material[layer_idx];
         material = material_layer.m_material;
-        property_block = material_layer.m_property_block;
     }
 
     struct MaterialEntry
@@ -135,7 +135,6 @@ public class LayeredBrush
     struct MaterialLayer
     {
         public Material m_material;
-        public MaterialPropertyBlock m_property_block;
     }
 
     MaterialLayer[] m_layer_idx_to_material;
