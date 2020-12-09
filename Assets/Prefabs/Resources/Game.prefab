@@ -60,4 +60,4 @@ MonoBehaviour:
   m_liquid_sim_enabled_on_startup: 1
   m_min_density_to_allow_flow: 0.05
   m_camera: {fileID: 0}
-  m_camera_offset: {x: 0, y: 2, z: 0}
+  m_camera_offset: {x: 0, y: 0.8, z: 0}
