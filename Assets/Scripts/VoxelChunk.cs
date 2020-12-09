@@ -754,6 +754,26 @@ public class VoxelChunk
     {
         for (int i = 0; i < edge_count; ++i)
         {
+            var edge = edges[i];
+            var vert_idx_a = edge.m_vertex_idx_a;
+            var vert_idx_b = edge.m_vertex_idx_b;
+
+            var vert_a = vertices[vert_idx_a];
+            var vert_b = vertices[vert_idx_b];
+
+            var vert_c = vert_a;
+            vert_c.m_position.y = m_bot_y;
+
+            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position);
+
+            vertex_id_to_accumulated_normal.TryGetValue(vert_idx_a, out var vert_a_normal);
+            vertex_id_to_accumulated_normal.TryGetValue(vert_idx_b, out var vert_b_normal);
+            
+            vert_a_normal += normal;
+            vert_b_normal += normal;
+
+            vertex_id_to_accumulated_normal[vert_idx_a] = vert_a_normal;
+            vertex_id_to_accumulated_normal[vert_idx_b] = vert_b_normal;
         }
 
         for (int i = 0; i < edge_count; ++i)
@@ -771,11 +791,13 @@ public class VoxelChunk
             var vert_d = vert_b;
             vert_d.m_position.y = m_bot_y;
 
-            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
-            vert_a.m_normal = normal;
-            vert_b.m_normal = normal;
-            vert_c.m_normal = normal;
-            vert_d.m_normal = normal;
+            var left_normal = vertex_id_to_accumulated_normal[vert_idx_a].normalized;
+            var right_normal = vertex_id_to_accumulated_normal[vert_idx_b].normalized;
+
+            vert_a.m_normal = left_normal;
+            vert_b.m_normal = right_normal;
+            vert_c.m_normal = left_normal;
+            vert_d.m_normal = right_normal;
 
             vert_idx_a = vert_idx;
             vertices[vert_idx++] = vert_a;
