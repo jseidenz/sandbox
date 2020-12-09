@@ -184,7 +184,7 @@ public class VoxelChunk
         m_layer_below_occlusion_grid = layer_below_occlusion_grid;
     }
 
-    public bool Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
+    public bool March(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
         Profiler.BeginSample("GatherDensitySamples");
         var density_samples = scratch_buffer.m_density_samples;
@@ -192,9 +192,19 @@ public class VoxelChunk
         Profiler.EndSample();
 
         Profiler.BeginSample("March");
-        MarchMesh(scratch_buffer, vertex_attribute_descriptors, density_samples, density_sample_count);
+        Triangulate(scratch_buffer, density_samples, density_sample_count, out var vert_count, out var triangle_count);
         Profiler.EndSample();
 
+
+        Profiler.BeginSample("UpdateMeshData");
+        m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
+        m_mesh.SetVertexBufferParams(vert_count, vertex_attribute_descriptors);
+
+        m_mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_count, 0, m_mesh_update_flags);
+        m_mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_count, 0, false);
+        Profiler.EndSample();
+
+        m_is_empty = triangle_count == 0;
 
         if (m_generate_collision)
         {
@@ -432,12 +442,12 @@ public class VoxelChunk
     }
 
 
-    void MarchMesh(ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors, DensitySample[] density_samples, int density_sample_count)
+    void Triangulate(ScratchBuffer scratch_buffer, DensitySample[] density_samples, int density_sample_count, out ushort vert_count, out int triangle_count)
     {
         var mesh = m_mesh;
         mesh.Clear();
 
-        int triangle_idx = 0;
+        triangle_count = 0;
         int edge_idx = 0;
 
         scratch_buffer.m_vertex_table.Clear();
@@ -486,7 +496,7 @@ public class VoxelChunk
                 m_left_far_density = left_far_density,
                 m_right_far_density = right_far_density,
                 m_iso_level = m_iso_level,
-                m_triangle_idx = triangle_idx,
+                m_triangle_idx = triangle_count,
                 m_chunk_dimensions_in_voxels = m_chunk_dimension_in_voxels,
                 m_triangles = scratch_buffer.m_triangles,
                 m_edge_idx = edge_idx,
@@ -711,7 +721,7 @@ public class VoxelChunk
             }
 
             edge_idx = marcher.m_edge_idx;
-            triangle_idx = marcher.m_triangle_idx;
+            triangle_count = marcher.m_triangle_idx;
         }
         Profiler.EndSample();
 
@@ -729,22 +739,13 @@ public class VoxelChunk
                 m_normal = entry.m_normal
             };
         }
-        ushort vert_idx = (ushort)vertex_entry_count;
+
+        vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
         scratch_buffer.m_vert_idx_to_normal_welding_info.Clear();
-        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vert_idx_to_normal_welding_info, ref vert_idx, ref triangle_idx, ref edge_idx);
+        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vert_idx_to_normal_welding_info, ref vert_count, ref triangle_count, ref edge_idx);
         Profiler.EndSample();
-
-        Profiler.BeginSample("UpdateMeshData");
-        m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
-        m_mesh.SetVertexBufferParams(vert_idx, vertex_attribute_descriptors);
-
-        mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_idx, 0, m_mesh_update_flags);
-        mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_idx, 0, false);
-        Profiler.EndSample();
-
-        m_is_empty = triangle_idx == 0;
     }
 
     void FinalizeEdges(

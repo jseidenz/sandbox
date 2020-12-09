@@ -63,7 +63,7 @@ public class VoxelLayer
     {
         foreach(var chunk in m_voxel_chunks)
         {
-            chunk.Triangulate(scratch_buffer, m_vertex_attribute_descriptors);
+            chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
         }
     }
 
@@ -77,7 +77,7 @@ public class VoxelLayer
             var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
 
             var chunk = m_voxel_chunks[chunk_idx];
-            bool occlusion_dirtied = chunk.Triangulate(scratch_buffer, m_vertex_attribute_descriptors);
+            bool occlusion_dirtied = chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
             if (occlusion_dirtied && m_layer_idx > 0)
             {
                 m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, 0));
