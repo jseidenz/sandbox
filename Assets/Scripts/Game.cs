@@ -20,6 +20,8 @@ public class Game : MonoBehaviour
     [SerializeField] bool m_use_height_map;
     [SerializeField] bool m_liquid_sim_enabled_on_startup;
     [SerializeField] public float m_min_density_to_allow_flow;
+    [SerializeField] Camera m_camera;
+    [SerializeField] Vector3 m_camera_offset;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -151,7 +153,12 @@ public class Game : MonoBehaviour
 
     GameObject CreateAvatar()
     {
-        return GameObject.Instantiate(m_player_avatar);
+        var player_go = GameObject.Instantiate(m_player_avatar);
+
+        m_camera.transform.parent = player_go.transform;
+        m_camera.transform.localPosition = m_camera_offset;
+        m_camera.transform.forward = -Vector3.forward;
+        return player_go;
     }
 
     public Mesher GetVoxelWorld()
