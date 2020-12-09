@@ -83,7 +83,9 @@ public class VoxelWorld : MonoBehaviour
         float dt = Time.deltaTime;
 
 #if UNITY_EDITOR
+        Profiler.BeginSample("RefreshLookupTable");
         m_brush.RefreshLookupTable();
+        Profiler.EndSample();
 #endif
 
         Profiler.BeginSample("Render");
