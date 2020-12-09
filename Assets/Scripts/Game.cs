@@ -2,9 +2,16 @@
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System;
 
 public class Game : MonoBehaviour 
 {
+    [Serializable]
+    public class Tuneable
+    {
+        public Vector2 m_edge_loop_offset;
+    }
+
     [SerializeField] GameObject m_player_avatar;
     [SerializeField] Image m_initial_black;
     [SerializeField] int m_grid_width_in_voxels;
@@ -20,6 +27,8 @@ public class Game : MonoBehaviour
     [SerializeField] bool m_use_height_map;
     [SerializeField] bool m_liquid_sim_enabled_on_startup;
     [SerializeField] public float m_min_density_to_allow_flow;
+    [SerializeField] Game m_game;
+    [SerializeField] Tuneable m_tuneables;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -33,6 +42,8 @@ public class Game : MonoBehaviour
 
     void Awake()
     {
+        m_tuneables = m_game.m_tuneables;
+        
         Application.targetFrameRate = -1;
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
         var solid_layers = m_solid_simulation.GetLayers();
@@ -194,6 +205,8 @@ public class Game : MonoBehaviour
     void LateUpdate()
     {
         float dt = Time.deltaTime;
+
+        m_solid_mesher.SetEdgeLoopOffset(m_tuneables.m_edge_loop_offset);
 
         m_solid_mesher.Render(dt);
         m_liquid_mesher.Render(dt);

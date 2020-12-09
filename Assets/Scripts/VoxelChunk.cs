@@ -828,6 +828,11 @@ public class VoxelChunk
         }
     }
 
+    public void SetEdgeLoopOffset(Vector2 edge_loop_offset)
+    {
+        m_edge_loop_offset = edge_loop_offset;
+    }
+
     bool[] m_layer_above_occlusion_grid;
     bool[] m_layer_below_occlusion_grid;
     float[] m_layer_density_grid;
@@ -846,6 +851,7 @@ public class VoxelChunk
     int m_chunk_dimension_in_voxels;
     bool m_is_empty = true;
     bool m_generate_collision;
+    Vector2 m_edge_loop_offset;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
         | MeshUpdateFlags.DontValidateIndices

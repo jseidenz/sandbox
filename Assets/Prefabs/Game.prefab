@@ -59,3 +59,6 @@ MonoBehaviour:
   m_use_height_map: 1
   m_liquid_sim_enabled_on_startup: 1
   m_min_density_to_allow_flow: 0.05
+  m_game: {fileID: 4905298800713076011}
+  m_tuneables:
+    m_edge_loop_offset: {x: 1, y: -1}

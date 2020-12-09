@@ -190,6 +190,14 @@ public class VoxelLayer
         }
     }
 
+    public void SetEdgeLoopOffset(Vector2 edge_loop_offset)
+    {
+        foreach(var chunk in m_voxel_chunks)
+        {
+            chunk.SetEdgeLoopOffset(edge_loop_offset);
+        }
+    }
+
     internal void OnDestroy()
     {
         m_culling_group.Dispose();
