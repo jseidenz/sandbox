@@ -113,11 +113,13 @@ public class LayeredBrush
         return new LayeredBrush(materials);
     }
 
-    public Material GetMaterialForLayer(int layer_idx)
+    public void GetMaterialForLayer(int layer_idx, out Material material, out MaterialPropertyBlock property_block)
     {
         layer_idx = Math.Max(layer_idx, 0);
         layer_idx = Math.Min(layer_idx, m_layer_idx_to_material.Length - 1);
-        return m_layer_idx_to_material[layer_idx].m_material;
+        var material_layer = m_layer_idx_to_material[layer_idx];
+        material = material_layer.m_material;
+        property_block = material_layer.m_property_block;
     }
 
     struct MaterialEntry
