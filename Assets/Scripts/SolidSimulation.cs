@@ -65,10 +65,10 @@ public class SolidSimulation
                         var pos = density_change.m_position;
 
                         var x = (int)(pos.x / (float)m_cell_size_in_meters.x) + range_offset_x;
-                        if (x < 0 || x >= m_dimensions_in_cells.x) return;
+                        if (x < 0 || x >= m_dimensions_in_cells.x) continue;
 
                         var z = (int)(pos.z / (float)m_cell_size_in_meters.z) + range_offset_z;
-                        if (z < 0 || z >= m_dimensions_in_cells.z) return;
+                        if (z < 0 || z >= m_dimensions_in_cells.z) continue;
 
                         var cell_idx = z * m_dimensions_in_cells.x + x;
 

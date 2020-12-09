@@ -32,6 +32,14 @@ public class Game : MonoBehaviour
 
     public static Game Instance;
 
+    enum State
+    {
+        InMainMenu,
+        Backend
+    }
+
+    State m_state = State.InMainMenu;
+
     void Awake()
     {
         Application.targetFrameRate = -1;
@@ -58,9 +66,6 @@ public class Game : MonoBehaviour
         m_solid_mesher.BindCamera(m_camera);
         m_liquid_mesher.BindCamera(m_camera);
 
-
-        m_player_avatar = CreateAvatar();
-
         CreateGroundPlane(solid_brush);
 
         m_water = GameObject.Instantiate(m_water);
@@ -70,10 +75,6 @@ public class Game : MonoBehaviour
         Instance = this;
     }
 
-    void Start()
-    {
-        //ScreenFader.StartScreenFade(m_initial_black.gameObject, false, 5f, 0.25f, () => m_initial_black.gameObject.SetActive(false));
-    }
 
     Mesher CreateSolidMesher(float[][] layers, LayeredBrush brush)
     {
@@ -150,14 +151,13 @@ public class Game : MonoBehaviour
         }
     }
 
-    GameObject CreateAvatar()
+    public void SpawnAvatar()
     {
-        var player_go = GameObject.Instantiate(m_player_avatar);
+        m_player_avatar = GameObject.Instantiate(m_player_avatar);
 
-        m_camera.transform.parent = player_go.transform;
+        m_camera.transform.parent = m_player_avatar.transform;
         m_camera.transform.localPosition = m_camera_offset;
         m_camera.transform.forward = -Vector3.forward;
-        return player_go;
     }
 
     public Mesher GetVoxelWorld()
