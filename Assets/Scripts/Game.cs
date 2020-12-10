@@ -271,7 +271,7 @@ public class Game : MonoBehaviour
         return System.IO.Directory.GetFiles(Game.Instance.GetSaveFileFolder(), "*.sav");
     }
 
-    public void Save()
+    public byte[] CreateSaveData()
     {
         var chunk_serializer = new ChunkSerializer();
         m_solid_simulation.Save(chunk_serializer);
@@ -279,20 +279,28 @@ public class Game : MonoBehaviour
 
         chunk_serializer.Finalize(out var data, out int data_length);
 
-        var path = GetSaveFilePath();
-        var compressed_stream = new MemoryStream();
-        Debug.Log($"Saving to {path}");
+        var compressed_stream = new MemoryStream();        
         using (var dstream = new DeflateStream(compressed_stream, System.IO.Compression.CompressionLevel.Fastest))
         {
             dstream.Write(data, 0, data_length);
             dstream.Close();
-            File.WriteAllBytes(path, compressed_stream.ToArray());
+            return compressed_stream.ToArray();
         }
+    }
+
+    public void Save()
+    {
+        var path = GetSaveFilePath();
+        Debug.Log($"Saving to {path}");
+        var data = CreateSaveData();
+        File.WriteAllBytes(path, data);
     }
 
     public void Load()
     {
-        using (var dstream = new DeflateStream(File.OpenRead(GetSaveFilePath()), CompressionMode.Decompress))
+        var path = GetSaveFilePath();
+        Debug.Log($"Loading {path}");
+        using (var dstream = new DeflateStream(File.OpenRead(path), CompressionMode.Decompress))
         {
             var data = new MemoryStream();
             dstream.CopyTo(data);

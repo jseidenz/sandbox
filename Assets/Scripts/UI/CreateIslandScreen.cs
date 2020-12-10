@@ -47,7 +47,8 @@ public class CreateIslandScreen : MonoBehaviour
         "Bliss",
         "Home",
         "Paradise",
-        "Place"
+        "Place",
+        "Treasure"
     };
 
     void Awake()
