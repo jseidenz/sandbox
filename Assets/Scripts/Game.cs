@@ -6,6 +6,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.IO;
 using UnityEngine.Profiling;
+using System.IO.Compression;
 
 public class Game : MonoBehaviour 
 {
@@ -277,19 +278,31 @@ public class Game : MonoBehaviour
         m_liquid_simulation.Save(chunk_serializer);
 
         chunk_serializer.Finalize(out var data, out int data_length);
+
         var path = GetSaveFilePath();
+        var compressed_stream = new MemoryStream();
         Debug.Log($"Saving to {path}");
-        File.WriteAllBytes(path, data);
+        using (var dstream = new DeflateStream(compressed_stream, System.IO.Compression.CompressionLevel.Fastest))
+        {
+            dstream.Write(data, 0, data_length);
+            dstream.Close();
+            File.WriteAllBytes(path, compressed_stream.ToArray());
+        }
     }
 
     public void Load()
     {
-        var bytes = File.ReadAllBytes(GetSaveFilePath());
+        using (var dstream = new DeflateStream(File.OpenRead(GetSaveFilePath()), CompressionMode.Decompress))
+        {
+            var data = new MemoryStream();
+            dstream.CopyTo(data);
 
-        var chunk_deserializer = new ChunkDeserializer(bytes, 0);
-        m_solid_simulation.Load(chunk_deserializer);
-        m_top_to_bottom_triangulate_layer_idx = m_grid_height_in_voxels - 1;        
-        m_liquid_simulation.Load(chunk_deserializer);
+            var save_file_bytes = data.ToArray();
+            var chunk_deserializer = new ChunkDeserializer(save_file_bytes, 0);
+            m_solid_simulation.Load(chunk_deserializer);
+            m_top_to_bottom_triangulate_layer_idx = m_grid_height_in_voxels - 1;
+            m_liquid_simulation.Load(chunk_deserializer);
+        }
     }
 
     public string GetRoomName()
