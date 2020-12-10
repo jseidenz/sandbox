@@ -232,9 +232,19 @@ public class Game : MonoBehaviour
         m_liquid_mesher.OnDestroy();
     }
 
-    string GetSaveFilePath()
+    public string GetSaveFilePath()
     {
-        return System.IO.Path.Combine(Application.persistentDataPath, "quick_save.sav");
+        return System.IO.Path.Combine(GetSaveFileFolder(), "quick_save.sav");
+    }
+
+    public string GetSaveFileFolder()
+    {
+        return Application.persistentDataPath;
+    }
+
+    public string[] GetSaveFiles()
+    {
+        return System.IO.Directory.GetFiles(Game.Instance.GetSaveFileFolder(), "*.sav");
     }
 
     public void Save()
