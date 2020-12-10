@@ -38,6 +38,14 @@ namespace IL3DN
         private AudioClip landSoundOverride;
         private bool isInSpecialSurface;
 
+        void Awake()
+        {
+            if(!GetComponent<Photon.Pun.PhotonView>().IsMine)
+            {
+                GameObject.Destroy(this);
+            }
+        }
+
         /// <summary>
         /// Initialize the controller
         /// </summary>

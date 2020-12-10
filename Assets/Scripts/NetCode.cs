@@ -73,6 +73,11 @@ public class NetCode : MonoBehaviourPunCallbacks
         Debug.Log("OnJoinedLobby");
     }
 
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
+
     public bool HasJoinedRoom()
     {
         return m_has_joined_room;

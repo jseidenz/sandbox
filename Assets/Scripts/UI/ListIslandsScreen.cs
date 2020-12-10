@@ -34,11 +34,13 @@ public class ListIslandsScreen : MonoBehaviour
             var widget = GameObject.Instantiate(m_join_island_widget);
             widget.GetComponent<RectTransform>().SetParent(m_join_island_widget.transform.parent);
             widget.m_island_name.text = room.Name.Split('|')[0];
-            widget.gameObject.SetActive(true);
+            widget.transform.localScale = Vector3.one;
             widget.m_button.onClick.AddListener(() =>
             {
-                NetCode.Instance.JoinRoom(room.Name);
+                MainMenu.Instance.m_join_island_screen.SetRoom(room.Name);
+                MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_join_island_screen.gameObject);
             });
+            widget.gameObject.SetActive(true);
             m_join_widgets.Add(widget);
         }
     }
