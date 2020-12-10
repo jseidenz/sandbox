@@ -48,7 +48,11 @@ public class CreateIslandScreen : MonoBehaviour
 
     void Awake()
     {
-        m_your_name.text = "Islander";
+        m_your_name.text = Player.GetPlayerName();
+        m_your_name.onSubmit.AddListener((name) =>
+        {
+            Player.SetPlayerName(name);
+        });
 
         m_back_button.onClick.AddListener(() =>
         {
