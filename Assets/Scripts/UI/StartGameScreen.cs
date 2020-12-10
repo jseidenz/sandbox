@@ -23,7 +23,7 @@ public class StartGameScreen : MonoBehaviour
         {
             if(is_connected_to_master)
             {
-                m_text.text = "Start Game";
+                m_text.text = "Start";
                 m_button.interactable = true;
             }
             else
