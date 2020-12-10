@@ -239,7 +239,9 @@ public class Game : MonoBehaviour
         m_liquid_simulation.Save(chunk_serializer);
 
         chunk_serializer.Finalize(out var data, out int data_length);
-        //File.WriteAllBytes("quick_save.sav", data);
+        var path = System.IO.Path.Combine(Application.persistentDataPath, "quick_save.sav");
+        Debug.Log($"Saving to {path}");
+        File.WriteAllBytes(path, data);
     }
 
     public void Load()
