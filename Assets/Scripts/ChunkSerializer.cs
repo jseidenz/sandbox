@@ -15,7 +15,7 @@ public class ChunkSerializer
     {
         m_max_chunks = max_chunks;
 
-        m_memory_stream = new MemoryStream();
+        m_memory_stream = new MemoryStream(50 * 1024 * 1024);
         m_writer = new BinaryWriter(m_memory_stream);
 
         int placeholder_chunk_count = 0;
@@ -82,6 +82,10 @@ public class ChunkSerializer
             m_writer.Write(kvp.Value.m_positon);
             m_writer.Write(kvp.Value.m_version_number);
         }
+
+
+        m_memory_stream.Seek(0, SeekOrigin.Begin);
+        Debug.Log($"Length={m_memory_stream.Length}, Capacity={m_memory_stream.Capacity}");
 
         return m_memory_stream;
     }
