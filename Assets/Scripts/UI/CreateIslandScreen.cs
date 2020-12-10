@@ -7,11 +7,14 @@ public class CreateIslandScreen : MonoBehaviour
 {
     [SerializeField] Button m_create_button;
     [SerializeField] Button m_back_button;
+    [SerializeField] TMPro.TMP_InputField m_island_name;
 
     bool m_is_screen_faded;
 
     void Awake()
     {
+        m_island_name.text = "Paradise Hills";
+
         m_back_button.onClick.AddListener(() =>
         {
             MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_select_game_mode_screen.gameObject);
