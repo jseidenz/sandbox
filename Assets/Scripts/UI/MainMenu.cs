@@ -7,7 +7,10 @@ public class MainMenu : MonoBehaviour
 {
     [SerializeField] Image m_full_background;
     [SerializeField] Image m_right_background;
-    [SerializeField] StartGameScreen m_start_game_screen;
+    [SerializeField] public StartGameScreen m_start_game_screen;
+    [SerializeField] public JoinScreen m_join_screen;
+    [SerializeField] public CreateIslandScreen m_create_island_screen;
+    [SerializeField] public SelectGameModeScreen m_select_game_mode_screen;
 
     public static MainMenu Instance;
 
@@ -17,14 +20,26 @@ public class MainMenu : MonoBehaviour
         m_start_game_screen.gameObject.SetActive(false);    
     }
 
-    private void Start()
+    void Start()
     {
         ScreenFader.StartScreenFade(m_full_background.gameObject, false, 0.4f, 2f, () =>
         {
             m_full_background.gameObject.SetActive(false);
             
-            m_start_game_screen.gameObject.SetActive(true);
-            ScreenFader.StartScreenFade(m_start_game_screen.gameObject, true, 0.4f, 0.5f);
+        });
+
+        m_start_game_screen.gameObject.SetActive(true);
+        ScreenFader.StartScreenFade(m_start_game_screen.gameObject, true, 0.4f, 3.5f);
+    }
+
+    public void TransitionScreens(GameObject previous_screen, GameObject next_screen)
+    {
+        float fade_speed = 12f;
+        next_screen.gameObject.SetActive(true);
+        ScreenFader.StartScreenFade(next_screen.gameObject, true, fade_speed, 1f / fade_speed);
+        ScreenFader.StartScreenFade(previous_screen, false, fade_speed, 0, () =>
+        {
+            previous_screen.gameObject.SetActive(false);            
         });
     }
 }

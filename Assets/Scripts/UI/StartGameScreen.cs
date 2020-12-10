@@ -12,14 +12,7 @@ public class StartGameScreen : MonoBehaviour
     {
         m_button.onClick.AddListener(() =>
         {
-            ScreenFader.StartScreenFade(gameObject, false, 0.4f, 0.25f, () =>
-            {
-                ScreenFader.StartScreenFade(MainMenu.Instance.gameObject, false, 0.4f, 2f, () =>
-                {
-                    Game.Instance.SpawnAvatar();
-                    MainMenu.Instance.gameObject.SetActive(false);
-                });
-            });
+            MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_select_game_mode_screen.gameObject);
         });
     }
 
