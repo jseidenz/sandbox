@@ -259,5 +259,10 @@ public class Game : MonoBehaviour
         m_liquid_simulation.Load(chunk_deserializer);
     }
 
+    void OnApplicationQuit()
+    {
+        Save();
+    }
+
     public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
 }
