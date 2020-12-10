@@ -423,7 +423,7 @@ public class LiquidSimulation
 
     public void Load(ChunkDeserializer deserializer)
     {
-        if (deserializer.TryGetChunk(LIQUID_SIMULATION_ID, out var reader))
+        if (deserializer.TryGetChunk(LIQUID_SIMULATION_ID))
         {
 
         }

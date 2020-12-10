@@ -232,6 +232,11 @@ public class Game : MonoBehaviour
         m_liquid_mesher.OnDestroy();
     }
 
+    string GetSaveFilePath()
+    {
+        return System.IO.Path.Combine(Application.persistentDataPath, "quick_save.sav");
+    }
+
     public void Save()
     {
         var chunk_serializer = new ChunkSerializer();
@@ -239,15 +244,18 @@ public class Game : MonoBehaviour
         m_liquid_simulation.Save(chunk_serializer);
 
         chunk_serializer.Finalize(out var data, out int data_length);
-        var path = System.IO.Path.Combine(Application.persistentDataPath, "quick_save.sav");
+        var path = GetSaveFilePath();
         Debug.Log($"Saving to {path}");
         File.WriteAllBytes(path, data);
     }
 
     public void Load()
     {
-        var chunk_deserializer = new ChunkDeserializer(new MemoryStream());
+        var bytes = File.ReadAllBytes(GetSaveFilePath());
+
+        var chunk_deserializer = new ChunkDeserializer(bytes, 0);
         m_solid_simulation.Load(chunk_deserializer);
+        m_solid_mesher.TriangulateAll();
         m_liquid_simulation.Load(chunk_deserializer);
     }
 

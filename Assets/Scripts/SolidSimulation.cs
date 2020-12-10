@@ -160,10 +160,14 @@ public class SolidSimulation
 
     public void Load(ChunkDeserializer deserializer)
     {
-        if(deserializer.TryGetChunk(SOLID_SIMULATION_ID, out var reader))
+        if(deserializer.TryGetChunk(SOLID_SIMULATION_ID))
         {
-
-        }
+            for (int y = 0; y < m_layers.Length; ++y)
+            {
+                var layer = m_layers[y];
+                deserializer.Read(layer);
+            }
+        }        
     }
 
     float[][] m_layers;

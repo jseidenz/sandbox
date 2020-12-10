@@ -163,15 +163,19 @@ public class ChunkSerializer
 
 public class ChunkDeserializer
 {
-    public ChunkDeserializer(MemoryStream stream)
+    public ChunkDeserializer(byte[] buffer, int position)
     {
-        m_reader = new BinaryReader(stream);
-        int chunk_count = m_reader.ReadInt32();
+        m_buffer = buffer;
+        m_position = position;
+
+        var major_version = ReadInt();
+        var minor_version = ReadInt();
+        var chunk_count = ReadInt();
         for(int i = 0; i < chunk_count; ++i)
         {
-            var chunk_id = m_reader.ReadInt32();
-            var chunk_pos = m_reader.ReadInt32();
-            var chunk_version = m_reader.ReadInt32();
+            var chunk_id = ReadInt();
+            var chunk_pos = ReadInt();
+            var chunk_version = ReadInt();
 
             m_chunks[chunk_id] = new ChunkInfo
             {
@@ -181,23 +185,70 @@ public class ChunkDeserializer
         }
     }
 
-    public bool TryGetChunk(Hash chunk_id, out BinaryReader reader)
+    public bool TryGetChunk(Hash chunk_id)
     {
         if(m_chunks.TryGetValue(chunk_id.m_value, out var chunk_info))
         {
-            m_reader.BaseStream.Position = chunk_info.m_position;
-            reader = m_reader;
+            m_position = chunk_info.m_position;
             return true;
         }
         else
         {
-            reader = default;
             return false;
         }
     }
 
+    public int ReadInt()
+    {
+        var data_size_in_bytes = 4;
+
+        if (m_position + data_size_in_bytes > m_buffer.Length)
+        {
+            throw new System.Exception($"Reading past end of buffer. BufferLength={m_buffer.Length}, data_size_in_bytes={data_size_in_bytes}, position={m_position}");
+        }
+
+        unsafe
+        {
+            fixed (byte* my_bytes = &m_buffer[m_position])
+            {
+                var my_ints = (int*)my_bytes;
+                var value = my_ints[0];
+                m_position += data_size_in_bytes;
+                return value;
+            }
+        }
+    }
+
+    public void Read(float[] output_data)
+    {
+        var data_size_in_floats = output_data.Length;
+        var data_size_in_bytes = data_size_in_floats * 4;
+
+        if(m_position + data_size_in_bytes > m_buffer.Length)
+        {
+            throw new System.Exception($"Reading past end of buffer. BufferLength={m_buffer.Length}, data_size_in_bytes={data_size_in_bytes}, position={m_position}");
+        }
+
+        unsafe
+        {
+            fixed(byte* serializer_bytes = &m_buffer[m_position])
+            {
+                var serializer_floats = (float*)serializer_bytes;
+                fixed(float* output_data_floats = &output_data[0])
+                {
+                    for(int i = 0; i < data_size_in_floats; ++i)
+                    {
+                        output_data_floats[i] = serializer_floats[i];
+                    }
+                }
+            }
+        }
+
+        m_position += data_size_in_bytes;
+    }
+
     Dictionary<int, ChunkInfo> m_chunks = new Dictionary<int, ChunkInfo>();
 
-    BinaryReader m_reader;
-    MemoryStream m_memory_stream;
+    byte[] m_buffer;
+    int m_position;
 }
