@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using Photon.Pun;
+using Photon.Realtime;
 
 public class Game : MonoBehaviour 
 {
@@ -145,7 +147,8 @@ public class Game : MonoBehaviour
 
     public void SpawnAvatar()
     {
-        m_player_avatar = GameObject.Instantiate(m_player_avatar);
+        var pos = m_camera.transform.position - m_camera_offset;
+        m_player_avatar = PhotonNetwork.Instantiate("Player", pos, m_player_avatar.transform.rotation);
 
         m_camera.transform.parent = m_player_avatar.transform;
         m_camera.transform.localPosition = m_camera_offset;
