@@ -220,5 +220,15 @@ public class Game : MonoBehaviour
         m_liquid_mesher.OnDestroy();
     }
 
+    public void Save()
+    {
+
+    }
+
+    public void Load()
+    {
+
+    }
+
     public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
 }
