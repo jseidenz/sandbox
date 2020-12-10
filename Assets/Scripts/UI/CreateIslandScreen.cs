@@ -16,6 +16,7 @@ public class CreateIslandScreen : MonoBehaviour
     {
         "The",
         "Our",
+        "This"
     };
 
     string[] m_adjectives = new string[]
@@ -26,12 +27,14 @@ public class CreateIslandScreen : MonoBehaviour
         "Delightful",
         "Good",
         "Great",
-        "Exotic"
+        "Exotic",
+        "Peaceful",
+        "Tranquil",
+        "Serene"
     };
 
     string[] m_nouns = new string[]
     {
-        "Hills",
         "Land",
         "Island",
         "Archipelago",
