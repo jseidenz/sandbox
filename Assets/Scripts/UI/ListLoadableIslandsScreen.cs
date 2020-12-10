@@ -30,15 +30,15 @@ public class ListLoadableIslandsScreen : MonoBehaviour
 
         foreach(var file_path in Game.Instance.GetSaveFiles())
         {
-            var file_name = System.IO.Path.GetFileName(file_path);
+            var file_name = System.IO.Path.GetFileNameWithoutExtension(file_path);
             var widget = GameObject.Instantiate(m_load_island_widget);
             widget.GetComponent<RectTransform>().SetParent(m_load_island_widget.transform.parent);
-            widget.m_island_name.text = file_name.Split('|')[0];
+            widget.m_island_name.text = file_name.Split('_')[0];
             widget.transform.localScale = Vector3.one;
             widget.m_button.onClick.AddListener(() =>
             {
-                MainMenu.Instance.m_join_island_screen.SetRoom(file_name);
-                MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_join_island_screen.gameObject);
+                MainMenu.Instance.m_load_island_screen.SetRoom(file_name);
+                MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_load_island_screen.gameObject);
             });
             widget.gameObject.SetActive(true);
             m_load_widgets.Add(widget);

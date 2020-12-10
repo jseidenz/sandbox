@@ -13,6 +13,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] public CreateIslandScreen m_create_island_screen;
     [SerializeField] public SelectGameModeScreen m_select_game_mode_screen;
     [SerializeField] public ListLoadableIslandsScreen m_list_loadable_islands_screen;
+    [SerializeField] public LoadIslandScreen m_load_island_screen;
 
     public static MainMenu Instance;
 

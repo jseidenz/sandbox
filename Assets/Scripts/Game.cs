@@ -33,6 +33,7 @@ public class Game : MonoBehaviour
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
+    string m_room_id;
 
     public static Game Instance;
 
@@ -67,6 +68,8 @@ public class Game : MonoBehaviour
         m_water = GameObject.Instantiate(m_water);
 
         m_water.transform.position = new Vector3(0, m_water_height, 0);
+
+        SetRoomId("quicksave_12345");
 
         Instance = this;
     }
@@ -234,7 +237,7 @@ public class Game : MonoBehaviour
 
     public string GetSaveFilePath()
     {
-        return System.IO.Path.Combine(GetSaveFileFolder(), "quick_save.sav");
+        return System.IO.Path.Combine(GetSaveFileFolder(), $"{m_room_id}.sav");
     }
 
     public string GetSaveFileFolder()
@@ -267,6 +270,21 @@ public class Game : MonoBehaviour
         m_solid_simulation.Load(chunk_deserializer);
         m_solid_mesher.TriangulateAll();
         m_liquid_simulation.Load(chunk_deserializer);
+    }
+
+    public string GetRoomName()
+    {
+        return m_room_id;
+    }
+
+    public string GetIslandName()
+    {
+        return m_room_id.Split('_')[0];
+    }
+
+    public void SetRoomId(string room_id)
+    {
+        m_room_id = room_id;
     }
 
     void OnApplicationQuit()

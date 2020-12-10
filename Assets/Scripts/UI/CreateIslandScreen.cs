@@ -64,8 +64,9 @@ public class CreateIslandScreen : MonoBehaviour
 
         m_create_button.onClick.AddListener(() =>
         {
-            var room_name = $"{m_island_name.text.Replace("|", "")}|{UnityEngine.Random.Range(int.MinValue, int.MaxValue)}";
-            NetCode.Instance.CreateRoom(room_name);
+            var room_id = $"{m_island_name.text.Replace("_", " ")}_{UnityEngine.Random.Range(int.MinValue, int.MaxValue)}";
+            Game.Instance.SetRoomId(room_id);
+            NetCode.Instance.CreateRoom(room_id);
             ScreenFader.StartScreenFade(gameObject, false, 12f, 0.0f, () =>
             {
                 ScreenFader.StartScreenFade(MainMenu.Instance.gameObject, false, 0.4f, 1f, () =>

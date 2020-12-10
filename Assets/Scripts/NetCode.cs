@@ -36,14 +36,14 @@ public class NetCode : MonoBehaviourPunCallbacks
         PhotonNetwork.JoinLobby();
     }
 
-    public void CreateRoom(string room_name)
+    public void CreateRoom(string room_id)
     {
-        PhotonNetwork.CreateRoom(room_name, new RoomOptions());
+        PhotonNetwork.CreateRoom(room_id, new RoomOptions());
     }
 
-    public void JoinRoom(string room_name)
+    public void JoinRoom(string room_id)
     {
-        PhotonNetwork.JoinRoom(room_name);
+        PhotonNetwork.JoinRoom(room_id);
     }
 
     public override void OnJoinRandomFailed(short return_code, string message)

@@ -33,7 +33,7 @@ public class ListIslandsScreen : MonoBehaviour
         {
             var widget = GameObject.Instantiate(m_join_island_widget);
             widget.GetComponent<RectTransform>().SetParent(m_join_island_widget.transform.parent);
-            widget.m_island_name.text = room.Name.Split('|')[0];
+            widget.m_island_name.text = room.Name.Split('_')[0];
             widget.transform.localScale = Vector3.one;
             widget.m_button.onClick.AddListener(() =>
             {
