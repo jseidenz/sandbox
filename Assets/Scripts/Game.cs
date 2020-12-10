@@ -30,6 +30,7 @@ public class Game : MonoBehaviour
     SolidSimulation m_solid_simulation;
     Mesher m_solid_mesher;
     Mesher m_liquid_mesher;
+    int m_top_to_bottom_triangulate_layer_idx = -1;
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
@@ -183,6 +184,25 @@ public class Game : MonoBehaviour
     void Update()
     {
         m_dirty_chunk_ids.Clear();
+
+        if (m_top_to_bottom_triangulate_layer_idx >= 0)
+        {
+            var layer_idx = m_top_to_bottom_triangulate_layer_idx;
+
+            var depth_in_chunks = m_grid_depth_in_voxels / m_voxel_chunk_dimensions;
+            var width_in_chunks = m_grid_width_in_voxels / m_voxel_chunk_dimensions;
+            for(int z = 0; z < depth_in_chunks; ++z)
+            {
+                for(int x = 0; x < width_in_chunks; ++x)
+                {
+                    var chunk_id = new Vector3Int(x, layer_idx, z);
+                    m_dirty_chunk_ids.Add(chunk_id);
+                }
+            }
+
+            m_top_to_bottom_triangulate_layer_idx--;
+        }
+
         m_solid_simulation.Update(m_dirty_chunk_ids);
         if (m_dirty_chunk_ids.Count > 0)
         {
@@ -268,7 +288,7 @@ public class Game : MonoBehaviour
 
         var chunk_deserializer = new ChunkDeserializer(bytes, 0);
         m_solid_simulation.Load(chunk_deserializer);
-        m_solid_mesher.TriangulateAll();
+        m_top_to_bottom_triangulate_layer_idx = m_grid_height_in_voxels - 1;        
         m_liquid_simulation.Load(chunk_deserializer);
     }
 

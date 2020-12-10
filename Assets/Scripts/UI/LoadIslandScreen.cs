@@ -16,7 +16,7 @@ public class LoadIslandScreen : MonoBehaviour
     {
         m_back_button.onClick.AddListener(() =>
         { 
-            MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_list_islands_screen.gameObject);
+            MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_list_loadable_islands_screen.gameObject);
         });
 
         m_begin_button.onClick.AddListener(() =>
