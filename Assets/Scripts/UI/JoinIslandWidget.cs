@@ -6,5 +6,6 @@ using UnityEngine.UI;
 public class JoinIslandWidget : MonoBehaviour
 {
     [SerializeField] TMPro.TextMeshProUGUI m_island_name;
+    [SerializeField] Button m_button;
 
 }

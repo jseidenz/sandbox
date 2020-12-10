@@ -25,6 +25,7 @@ public class CreateIslandScreen : MonoBehaviour
         "Enchanting",
         "Delightful",
         "Good",
+        "Great",
         "Exotic"
     };
 

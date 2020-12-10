@@ -5,9 +5,7 @@ using UnityEngine.UI;
 
 public class JoinScreen : MonoBehaviour
 {
-    [SerializeField] TMPro.TextMeshProUGUI m_status_text;
-    [SerializeField] Button m_refresh_button;
-    [SerializeField] Button m_create_island_button;
+    [SerializeField] JoinIslandWidget m_join_island_widget;
     [SerializeField] Button m_back_button;
 
     void Awake()
@@ -17,9 +15,6 @@ public class JoinScreen : MonoBehaviour
             MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_select_game_mode_screen.gameObject);
         });
 
-        m_create_island_button.onClick.AddListener(() =>
-        {
-            MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_create_island_screen.gameObject);
-        });
+        m_join_island_widget.gameObject.SetActive(false);
     }
 }
