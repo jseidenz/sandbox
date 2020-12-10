@@ -91,23 +91,24 @@ public class NetCode : MonoBehaviourPunCallbacks
         return m_is_connceted_to_master;
     }
 
-    public const byte HELLO_EVENT_ID = 1;
+    public const byte LOAD_SAVE_DATA_ID = 1;
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player new_player)
     {
-        var content = new object[] { "Hello!" };
+        var content = new object[] { Game.Instance.CreateSaveData() };
         var raise_event_options = new RaiseEventOptions { TargetActors = new int[] { new_player.ActorNumber } };
-        PhotonNetwork.RaiseEvent(HELLO_EVENT_ID, content, raise_event_options, SendOptions.SendReliable);
+        PhotonNetwork.RaiseEvent(LOAD_SAVE_DATA_ID, content, raise_event_options, SendOptions.SendReliable);
     }
 
     private void OnEvent(EventData evt)
     {
         byte event_code = evt.Code;
-        if (event_code == HELLO_EVENT_ID)
+        if (event_code == LOAD_SAVE_DATA_ID)
         {
-            object[] data = (object[])evt.CustomData;
-            var message = data[0];
-            Debug.Log(message);
+            Debug.Log("LoadSaveData!");
+            var content = (object[])evt.CustomData;
+            var save_data = (byte[])content[0];
+            Game.Instance.LoadCompressedSaveFileBytes(save_data);
         }
     }
 

@@ -300,17 +300,38 @@ public class Game : MonoBehaviour
     {
         var path = GetSaveFilePath();
         Debug.Log($"Loading {path}");
+        byte[] save_file_bytes = null;
         using (var dstream = new DeflateStream(File.OpenRead(path), CompressionMode.Decompress))
         {
             var data = new MemoryStream();
             dstream.CopyTo(data);
 
-            var save_file_bytes = data.ToArray();
-            var chunk_deserializer = new ChunkDeserializer(save_file_bytes, 0);
-            m_solid_simulation.Load(chunk_deserializer);
-            m_top_to_bottom_triangulate_layer_idx = m_grid_height_in_voxels - 1;
-            m_liquid_simulation.Load(chunk_deserializer);
+            save_file_bytes = data.ToArray();
         }
+
+        LoadUncompressedSaveFileBytes(save_file_bytes);
+    }
+
+    public void LoadCompressedSaveFileBytes(byte[] compressed_save_file_bytes)
+    {
+        byte[] save_file_bytes = null;
+        using (var dstream = new DeflateStream(new MemoryStream(compressed_save_file_bytes), CompressionMode.Decompress))
+        {
+            var data = new MemoryStream();
+            dstream.CopyTo(data);
+
+            save_file_bytes = data.ToArray();
+        }
+
+        LoadUncompressedSaveFileBytes(save_file_bytes);
+    }
+
+    void LoadUncompressedSaveFileBytes(byte[] save_file_bytes)
+    {
+        var chunk_deserializer = new ChunkDeserializer(save_file_bytes, 0);
+        m_solid_simulation.Load(chunk_deserializer);
+        m_top_to_bottom_triangulate_layer_idx = m_grid_height_in_voxels - 1;
+        m_liquid_simulation.Load(chunk_deserializer);
     }
 
     public string GetRoomName()
