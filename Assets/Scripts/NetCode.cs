@@ -12,6 +12,7 @@ public class NetCode : MonoBehaviourPunCallbacks
 #endif
 
     bool m_has_joined_room;
+    bool m_is_connceted_to_master;
 
     public static NetCode Instance;
 
@@ -28,6 +29,7 @@ public class NetCode : MonoBehaviourPunCallbacks
     {
         //Debug.Log("ConnectedToMaster");
         //PhotonNetwork.JoinRandomRoom();
+        m_is_connceted_to_master = true;
     }
 
     public override void OnJoinRandomFailed(short return_code, string message)
@@ -50,5 +52,10 @@ public class NetCode : MonoBehaviourPunCallbacks
     public bool HasJoinedRoom()
     {
         return m_has_joined_room;
+    }
+
+    public bool IsConnectedToMaster()
+    {
+        return m_is_connceted_to_master;
     }
 }

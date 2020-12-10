@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class StartGameScreen : MonoBehaviour
 {
     [SerializeField] Button m_button;
+    [SerializeField] TMPro.TextMeshProUGUI m_text;
 
     void Awake()
     {
@@ -20,5 +21,23 @@ public class StartGameScreen : MonoBehaviour
                 });
             });
         });
+    }
+
+    void Update()
+    {
+        bool is_connected_to_master = NetCode.Instance.IsConnectedToMaster();
+        if (m_button.interactable != is_connected_to_master)
+        {
+            if(is_connected_to_master)
+            {
+                m_text.text = "Start Game";
+                m_button.interactable = true;
+            }
+            else
+            {
+                m_text.text = "Connecting...";
+                m_button.interactable = false;
+            }
+        }
     }
 }
