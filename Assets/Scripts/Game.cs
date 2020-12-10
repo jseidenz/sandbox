@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
 using System.IO;
+using UnityEngine.Profiling;
 
 public class Game : MonoBehaviour 
 {
@@ -234,17 +235,11 @@ public class Game : MonoBehaviour
     public void Save()
     {
         var chunk_serializer = new ChunkSerializer();
-
         m_solid_simulation.Save(chunk_serializer);
         m_liquid_simulation.Save(chunk_serializer);
 
-        var memory_stream = chunk_serializer.Finalize();
-
-        using(var file_stream = new FileStream("quick_save.sav", FileMode.OpenOrCreate))
-        {
-            memory_stream.CopyTo(file_stream);
-            file_stream.Flush();
-        }
+        chunk_serializer.Finalize(out var data, out int data_length);
+        //File.WriteAllBytes("quick_save.sav", data);
     }
 
     public void Load()

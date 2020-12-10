@@ -416,7 +416,7 @@ public class LiquidSimulation
     static Hash LIQUID_SIMULATION_ID = new Hash("LiquidSimulation");
     public void Save(ChunkSerializer serializer)
     {
-        var writer = serializer.BeginChunk(LIQUID_SIMULATION_ID);
+        serializer.BeginChunk(LIQUID_SIMULATION_ID);
 
         serializer.EndChunk();
     }
