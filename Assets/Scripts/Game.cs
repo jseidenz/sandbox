@@ -32,14 +32,6 @@ public class Game : MonoBehaviour
 
     public static Game Instance;
 
-    enum State
-    {
-        InMainMenu,
-        Backend
-    }
-
-    State m_state = State.InMainMenu;
-
     void Awake()
     {
         Application.targetFrameRate = -1;
