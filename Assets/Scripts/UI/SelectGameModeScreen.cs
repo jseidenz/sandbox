@@ -18,7 +18,7 @@ public class SelectGameModeScreen : MonoBehaviour
 
         m_join_island_button.onClick.AddListener(() =>
         {
-            MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_join_screen.gameObject);
+            MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_list_islands_screen.gameObject);
         });
 
         m_create_island_button.onClick.AddListener(() =>

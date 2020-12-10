@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using System.Collections.Generic;
 
 public class NetCode : MonoBehaviourPunCallbacks
 {
@@ -13,6 +14,7 @@ public class NetCode : MonoBehaviourPunCallbacks
 
     bool m_has_joined_room;
     bool m_is_connceted_to_master;
+    List<RoomInfo> m_rooms = new List<RoomInfo>();
 
     public static NetCode Instance;
 
@@ -30,11 +32,18 @@ public class NetCode : MonoBehaviourPunCallbacks
         //Debug.Log("ConnectedToMaster");
         //PhotonNetwork.JoinRandomRoom();
         m_is_connceted_to_master = true;
+
+        PhotonNetwork.JoinLobby();
     }
 
-    public void CreateRoom()
+    public void CreateRoom(string room_name)
     {
-        PhotonNetwork.CreateRoom(null, new RoomOptions());
+        PhotonNetwork.CreateRoom(room_name, new RoomOptions());
+    }
+
+    public void JoinRoom(string room_name)
+    {
+        PhotonNetwork.JoinRoom(room_name);
     }
 
     public override void OnJoinRandomFailed(short return_code, string message)
@@ -48,10 +57,20 @@ public class NetCode : MonoBehaviourPunCallbacks
         Debug.LogError($"CreateRoomFailed: {message} return_code={return_code}");
     }
 
+    public override void OnRoomListUpdate(List<RoomInfo> rooms)
+    {
+        m_rooms = rooms;
+    }
+
     public override void OnJoinedRoom()
     {
         Debug.Log("JoinedRoom");
         m_has_joined_room = true;
+    }
+
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("OnJoinedLobby");
     }
 
     public bool HasJoinedRoom()
@@ -63,4 +82,6 @@ public class NetCode : MonoBehaviourPunCallbacks
     {
         return m_is_connceted_to_master;
     }
+
+    public List<RoomInfo> GetRooms() { return m_rooms; }
 }

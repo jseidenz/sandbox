@@ -8,7 +8,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] Image m_full_background;
     [SerializeField] Image m_right_background;
     [SerializeField] public StartGameScreen m_start_game_screen;
-    [SerializeField] public JoinScreen m_join_screen;
+    [SerializeField] public JoinIslandScreen m_join_island_screen;
+    [SerializeField] public ListIslandsScreen m_list_islands_screen;
     [SerializeField] public CreateIslandScreen m_create_island_screen;
     [SerializeField] public SelectGameModeScreen m_select_game_mode_screen;
 

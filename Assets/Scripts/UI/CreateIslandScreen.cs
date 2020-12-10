@@ -49,7 +49,6 @@ public class CreateIslandScreen : MonoBehaviour
 
     void Awake()
     {
-        m_your_name.text = Player.GetPlayerName();
         m_your_name.onSubmit.AddListener((name) =>
         {
             Player.SetPlayerName(name);
@@ -62,7 +61,8 @@ public class CreateIslandScreen : MonoBehaviour
 
         m_create_button.onClick.AddListener(() =>
         {
-            NetCode.Instance.CreateRoom();
+            var room_name = $"{m_island_name.text.Replace("|", "")}|{UnityEngine.Random.Range(int.MinValue, int.MaxValue)}";
+            NetCode.Instance.CreateRoom(room_name);
             ScreenFader.StartScreenFade(gameObject, false, 12f, 0.0f, () =>
             {
                 ScreenFader.StartScreenFade(MainMenu.Instance.gameObject, false, 0.4f, 1f, () =>
@@ -75,6 +75,8 @@ public class CreateIslandScreen : MonoBehaviour
 
     void OnEnable()
     {
+        m_your_name.text = Player.GetPlayerName();
+
         var noun = m_nouns[UnityEngine.Random.Range(0, m_nouns.Length)];
         var adjective = m_adjectives[UnityEngine.Random.Range(0, m_adjectives.Length)];
 
