@@ -413,6 +413,22 @@ public class LiquidSimulation
         m_density_changes.Clear();
     }
 
+    static Hash LIQUID_SIMULATION_ID = new Hash("LiquidSimulation");
+    public void Save(ChunkSerializer serializer)
+    {
+        var writer = serializer.BeginChunk(LIQUID_SIMULATION_ID);
+
+        serializer.EndChunk();
+    }
+
+    public void Load(ChunkDeserializer deserializer)
+    {
+        if (deserializer.TryGetChunk(LIQUID_SIMULATION_ID, out var reader))
+        {
+
+        }
+    }
+
     public float[][] GetLayers() { return m_layers; }
 
     float[][] m_layers;

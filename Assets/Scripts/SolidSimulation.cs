@@ -140,8 +140,38 @@ public class SolidSimulation
         }
     }
 
-
     public float[][] GetLayers() { return m_layers; }
+
+
+    static Hash SOLID_SIMULATION_ID = new Hash("SolidSimulation");
+
+    public void Save(ChunkSerializer serializer)
+    {
+        var writer = serializer.BeginChunk(SOLID_SIMULATION_ID);
+
+        for(int y = 0; y < m_layers.Length; ++y)
+        {
+            var layer = m_layers[y];
+            for(int z = 0; z < m_dimensions_in_cells.z; ++z)
+            {
+                for(int x = 0; x < m_dimensions_in_cells.x; ++x)
+                {
+                    var cell_idx = z * m_dimensions_in_cells.x + x;
+                    writer.Write(layer[cell_idx]);
+                }
+            }
+        }
+
+        serializer.EndChunk();
+    }
+
+    public void Load(ChunkDeserializer deserializer)
+    {
+        if(deserializer.TryGetChunk(SOLID_SIMULATION_ID, out var reader))
+        {
+
+        }
+    }
 
     float[][] m_layers;
     Vector3 m_cell_size_in_meters;

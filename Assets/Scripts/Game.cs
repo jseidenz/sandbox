@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Photon.Pun;
 using Photon.Realtime;
+using System.IO;
 
 public class Game : MonoBehaviour 
 {
@@ -190,6 +191,16 @@ public class Game : MonoBehaviour
         {
             m_liquid_mesher.Triangulate(m_dirty_chunk_ids);
         }
+
+        if(Input.GetKeyDown(KeyCode.F9))
+        {
+            Save();
+        }
+
+        if (Input.GetKeyDown(KeyCode.F10))
+        {
+            Load();
+        }
     }
 
     void LateUpdate()
@@ -222,12 +233,25 @@ public class Game : MonoBehaviour
 
     public void Save()
     {
+        var chunk_serializer = new ChunkSerializer();
 
+        m_solid_simulation.Save(chunk_serializer);
+        m_liquid_simulation.Save(chunk_serializer);
+
+        var memory_stream = chunk_serializer.Finalize();
+
+        using(var file_stream = new FileStream("quick_save.sav", FileMode.OpenOrCreate))
+        {
+            memory_stream.CopyTo(file_stream);
+            file_stream.Flush();
+        }
     }
 
     public void Load()
     {
-
+        var chunk_deserializer = new ChunkDeserializer(new MemoryStream());
+        m_solid_simulation.Load(chunk_deserializer);
+        m_liquid_simulation.Load(chunk_deserializer);
     }
 
     public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
