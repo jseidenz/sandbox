@@ -32,6 +32,11 @@ public class NetCode : MonoBehaviourPunCallbacks
         m_is_connceted_to_master = true;
     }
 
+    public void CreateRoom()
+    {
+        PhotonNetwork.CreateRoom(null, new RoomOptions());
+    }
+
     public override void OnJoinRandomFailed(short return_code, string message)
     {
         Debug.Log("JoinRoomFailed");
