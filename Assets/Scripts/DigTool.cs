@@ -110,11 +110,14 @@ public class DigTool : MonoBehaviour
                 var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
 
-                Game.Instance.SendCommand(new AddSolidDensityCommand
+                var command = new AddSolidDensityCommand
                 {
                     m_position = hit_point,
                     m_amount = amount * Time.deltaTime
-                });
+                };
+
+                Game.Instance.SendCommand(command);
+                command.Run();
             }
         }
     }

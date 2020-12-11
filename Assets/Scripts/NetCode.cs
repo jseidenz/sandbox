@@ -98,8 +98,8 @@ public class NetCode : MonoBehaviourPunCallbacks
     public void SendCommandsToServer(byte[] command_buffer)
     {
         var content = new object[] { command_buffer };
-        var raise_event_options = new RaiseEventOptions { Receivers = ReceiverGroup.MasterClient };
-        PhotonNetwork.RaiseEvent(COMMAND_BUFFER_FROM_CLIENT_ID, content, raise_event_options, SendOptions.SendReliable);
+        var raise_event_options = new RaiseEventOptions { Receivers = ReceiverGroup.Others };
+        PhotonNetwork.RaiseEvent(COMMAND_BUFFER_FROM_SERVER_ID, content, raise_event_options, SendOptions.SendReliable);
     }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player new_player)
