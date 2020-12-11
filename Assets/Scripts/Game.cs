@@ -156,7 +156,7 @@ public class Game : MonoBehaviour
     public void SpawnAvatar()
     {
         var pos = m_camera.transform.position - m_camera_offset;
-        m_player_avatar = PhotonNetwork.Instantiate("Player", pos, m_player_avatar.transform.rotation);
+        m_player_avatar = PhotonNetwork.Instantiate("PlayerPrefab", pos, m_player_avatar.transform.rotation);
 
         m_camera.transform.parent = m_player_avatar.transform;
         m_camera.transform.localPosition = m_camera_offset;
