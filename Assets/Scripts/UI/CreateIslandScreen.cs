@@ -7,6 +7,7 @@ public class CreateIslandScreen : MonoBehaviour
 {
     [SerializeField] Button m_create_button;
     [SerializeField] Button m_back_button;
+    [SerializeField] Button m_randomize_button;
     [SerializeField] TMPro.TMP_InputField m_island_name;
     [SerializeField] TMPro.TMP_InputField m_your_name;
 
@@ -63,6 +64,11 @@ public class CreateIslandScreen : MonoBehaviour
             MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_select_game_mode_screen.gameObject);
         });
 
+        m_randomize_button.onClick.AddListener(() =>
+        {
+            Randomize();
+        });
+
         m_create_button.onClick.AddListener(() =>
         {
             var room_id = $"{m_island_name.text.Replace("_", " ")}_{UnityEngine.Random.Range(int.MinValue, int.MaxValue)}";
@@ -95,6 +101,11 @@ public class CreateIslandScreen : MonoBehaviour
         m_island_name.text = island_name;
 
         m_is_screen_faded = false;
+    }
+
+    void Randomize()
+    {
+        Game.Instance.GenerateWorld();
     }
 
     void Update()

@@ -10,7 +10,7 @@ public class WorldGenerator
         m_moisture_noise = new OpenSimplexNoise(moisture_seed);
     }
 
-    public float[] GenerateHeightMap(int width_in_cells, int height_in_cells)
+    public float[] GenerateHeightMap(int width_in_cells, int height_in_cells, double scale)
     {
         double width = (double)width_in_cells;
         double height = (double)height_in_cells;
@@ -35,6 +35,8 @@ public class WorldGenerator
                 elevation /= (1.00 + 0.50 + 0.25 + 0.13 + 0.06 + 0.03);
                 elevation = System.Math.Pow(elevation, 5.00);
 
+                elevation = elevation * scale;
+
                 height_map[cell_idx] = (float)elevation;
             }
         }
@@ -44,7 +46,7 @@ public class WorldGenerator
 
     public double ElevationNoise(double x, double y)
     {
-        return m_elevation_noise.Evaluate(x, y);
+        return m_elevation_noise.Evaluate(x, y) / 2 + 0.5;
     }
 
     public double MoistureNoise(double x, double y)

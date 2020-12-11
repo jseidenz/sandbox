@@ -26,6 +26,7 @@ public class Game : MonoBehaviour
     [SerializeField] float m_solid_iso_level;
     [SerializeField] float m_liquid_iso_level;
     [SerializeField] bool m_use_height_map;
+    [SerializeField] bool m_use_world_gen;
     [SerializeField] bool m_liquid_sim_enabled_on_startup;
     [SerializeField] public float m_min_density_to_allow_flow;
     [SerializeField] Camera m_camera;
@@ -57,18 +58,12 @@ public class Game : MonoBehaviour
         var liquid_layers = m_liquid_simulation.GetLayers();
         m_liquid_simulation.SetSimulationEnabled(m_liquid_sim_enabled_on_startup);
 
-        GenerateWorld(solid_layers, liquid_layers);
 
         var solid_brush = LayeredBrush.LoadBrush("SolidMaterials");
         var liquid_brush = LayeredBrush.LoadBrush("LiquidMaterials");
 
         m_solid_mesher = CreateSolidMesher(solid_layers, solid_brush);
-
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers(), liquid_brush);
-
-        m_solid_mesher.TriangulateAll();
-        m_liquid_mesher.TriangulateAll();
-
 
         m_solid_mesher.BindCamera(m_camera);
         m_liquid_mesher.BindCamera(m_camera);
@@ -82,6 +77,8 @@ public class Game : MonoBehaviour
         SetRoomId("quicksave_12345");
 
         ProcessCommandLineFile();
+
+        GenerateWorld(solid_layers, liquid_layers);
 
         Instance = this;
     }
@@ -105,9 +102,29 @@ public class Game : MonoBehaviour
         return liquid_mesher;
     }
 
+    public void GenerateWorld()
+    {
+        var world_generator = new WorldGenerator();
+        Profiler.BeginSample("GenerateHeightMap");
+        var height_map = world_generator.GenerateHeightMap(m_grid_width_in_voxels, m_grid_depth_in_voxels, 4);
+        Profiler.EndSample();
+
+        Profiler.BeginSample("ApplyHeightMap");
+        m_solid_simulation.ApplyHeightMap(height_map);
+        Profiler.EndSample();
+
+        Profiler.BeginSample("TriangulateAll");
+        m_solid_mesher.TriangulateAll();
+        Profiler.EndSample();
+    }
+
     void GenerateWorld(float[][] solid_layers, float[][] liquid_layers)
     {
-        if (m_use_height_map)
+        if(m_use_world_gen)
+        {
+            GenerateWorld();
+        }
+        else if (m_use_height_map)
         {
             var height_map_tex = Resources.Load<Texture2D>("heightmap");
             var pixels = height_map_tex.GetPixels();
@@ -130,6 +147,9 @@ public class Game : MonoBehaviour
             }
 
             m_solid_simulation.ApplyHeightMap(densities);
+
+            m_solid_mesher.TriangulateAll();
+            m_liquid_mesher.TriangulateAll();
         }
         else
         {
@@ -159,6 +179,9 @@ public class Game : MonoBehaviour
                 ldf.Line(x + 1, y + 1, x + 1, y + 1, l, 1f);
 
             }
+
+            m_solid_mesher.TriangulateAll();
+            m_liquid_mesher.TriangulateAll();
         }
     }
 
