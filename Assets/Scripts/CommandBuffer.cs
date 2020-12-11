@@ -52,19 +52,11 @@ public class CommandBuffer
 
 }
 
-struct ExampleCommand : ICommand
-{
-    public void Run()
-    {
-
-    }
-}
-
 static class CommandHandlerManager
 {
     static CommandHandlerManager()
     {
-        Registerhandler<ExampleCommand>();
+        Registerhandler<AddSolidDensityCommand>();
     }
 
     static void Registerhandler<T>() where T : struct, ICommand

@@ -1,6 +1,17 @@
 ﻿using UnityEngine;
 using System.Threading.Tasks;
 
+public struct AddSolidDensityCommand : ICommand
+{
+    public void Run()
+    {
+        Game.Instance.GetSolidSimulation().AddDensity(m_position, m_amount);
+    }
+
+    public float m_amount;
+    public Vector3 m_position;
+}
+
 public class DigTool : MonoBehaviour 
 {
     [SerializeField] float m_fill_rate;
@@ -99,7 +110,11 @@ public class DigTool : MonoBehaviour
                 var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
 
-                Game.Instance.GetSolidSimulation().AddDensity(hit_point, amount * Time.deltaTime);
+                Game.Instance.SendCommand(new AddSolidDensityCommand
+                {
+                    m_position = hit_point,
+                    m_amount = amount * Time.deltaTime
+                });
             }
         }
     }
