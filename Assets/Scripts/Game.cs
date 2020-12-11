@@ -35,6 +35,7 @@ public class Game : MonoBehaviour
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
+    CommandBuffer m_outgoing_command_buffer = new CommandBuffer();
     string m_room_id;
 
     public static Game Instance;
@@ -226,6 +227,11 @@ public class Game : MonoBehaviour
         {
             Load();
         }
+
+        if(m_outgoing_command_buffer.TryGetCommandBuffer(out var buffer))
+        {
+            NetCode.Instance.SendCommandsToServer(buffer);
+        }
     }
 
     void LateUpdate()
@@ -352,6 +358,11 @@ public class Game : MonoBehaviour
     void OnApplicationQuit()
     {
         Save();
+    }
+
+    public void SendCommand<T>(T command) where T : struct, ICommand
+    {
+        m_outgoing_command_buffer.WriteCommand(command);
     }
 
     public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }

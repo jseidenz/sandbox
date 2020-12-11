@@ -14,7 +14,7 @@ public class NetCode : MonoBehaviourPunCallbacks
 #endif
 
     bool m_has_joined_room;
-    bool m_is_connceted_to_master;
+    bool m_is_connected_to_master;
     List<RoomInfo> m_rooms = new List<RoomInfo>();
 
     public static NetCode Instance;
@@ -34,7 +34,7 @@ public class NetCode : MonoBehaviourPunCallbacks
     {
         //Debug.Log("ConnectedToMaster");
         //PhotonNetwork.JoinRandomRoom();
-        m_is_connceted_to_master = true;
+        m_is_connected_to_master = true;
 
         PhotonNetwork.JoinLobby();
     }
@@ -88,10 +88,19 @@ public class NetCode : MonoBehaviourPunCallbacks
 
     public bool IsConnectedToMaster()
     {
-        return m_is_connceted_to_master;
+        return m_is_connected_to_master;
     }
 
     public const byte LOAD_SAVE_DATA_ID = 1;
+    public const byte COMMAND_BUFFER_FROM_CLIENT_ID = 2;
+    public const byte COMMAND_BUFFER_FROM_SERVER_ID = 3;
+
+    public void SendCommandsToServer(byte[] command_buffer)
+    {
+        var content = new object[] { command_buffer };
+        var raise_event_options = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent(COMMAND_BUFFER_FROM_CLIENT_ID, content, raise_event_options, SendOptions.SendReliable);
+    }
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player new_player)
     {
@@ -111,6 +120,13 @@ public class NetCode : MonoBehaviourPunCallbacks
             var content = (object[])evt.CustomData;
             var save_data = (byte[])content[0];
             Game.Instance.LoadCompressedSaveFileBytes(save_data);
+        }
+        else if(event_code == COMMAND_BUFFER_FROM_SERVER_ID)
+        {
+            var content = (object[])evt.CustomData;
+            var command_buffer = (byte[])content[0];
+
+            CommandHandlerManager.RunCommands(command_buffer, 0 , command_buffer.Length);
         }
     }
 
