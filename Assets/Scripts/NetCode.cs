@@ -95,6 +95,8 @@ public class NetCode : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Photon.Realtime.Player new_player)
     {
+        if (!PhotonNetwork.IsMasterClient) return;
+
         var content = new object[] { Game.Instance.CreateSaveData() };
         var raise_event_options = new RaiseEventOptions { TargetActors = new int[] { new_player.ActorNumber } };
         PhotonNetwork.RaiseEvent(LOAD_SAVE_DATA_ID, content, raise_event_options, SendOptions.SendReliable);
