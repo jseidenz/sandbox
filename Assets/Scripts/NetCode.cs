@@ -15,6 +15,7 @@ public class NetCode : MonoBehaviourPunCallbacks
 
     bool m_has_joined_room;
     bool m_is_connected_to_master;
+    bool m_has_joined_lobby;
     List<RoomInfo> m_rooms = new List<RoomInfo>();
 
     public static NetCode Instance;
@@ -74,6 +75,7 @@ public class NetCode : MonoBehaviourPunCallbacks
     public override void OnJoinedLobby()
     {
         Debug.Log("OnJoinedLobby");
+        m_has_joined_lobby = true;
     }
 
     public void LeaveRoom()
@@ -89,6 +91,11 @@ public class NetCode : MonoBehaviourPunCallbacks
     public bool IsConnectedToMaster()
     {
         return m_is_connected_to_master;
+    }
+
+    public bool HasJoinedLobby()
+    {
+        return m_has_joined_lobby;
     }
 
     public const byte LOAD_SAVE_DATA_ID = 1;

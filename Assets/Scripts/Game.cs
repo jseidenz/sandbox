@@ -7,6 +7,10 @@ using Photon.Realtime;
 using System.IO;
 using UnityEngine.Profiling;
 using System.IO.Compression;
+using System.Collections;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class Game : MonoBehaviour 
 {
@@ -37,6 +41,9 @@ public class Game : MonoBehaviour
     GameObject m_ground_plane;
     CommandBuffer m_outgoing_command_buffer = new CommandBuffer();
     string m_room_id;
+    bool m_is_command_line_new_game;
+    bool m_is_waiting_to_spawn;
+    bool m_has_spawned_avatar;
 
     public static Game Instance;
 
@@ -73,6 +80,8 @@ public class Game : MonoBehaviour
         m_water.transform.position = new Vector3(0, m_water_height, 0);
 
         SetRoomId("quicksave_12345");
+
+        ProcessCommandLineFile();
 
         Instance = this;
     }
@@ -161,6 +170,8 @@ public class Game : MonoBehaviour
         m_camera.transform.parent = m_player_avatar.transform;
         m_camera.transform.localPosition = m_camera_offset;
         m_camera.transform.forward = -Vector3.forward;
+
+        m_has_spawned_avatar = true;
     }
 
     public Mesher GetVoxelWorld()
@@ -231,6 +242,23 @@ public class Game : MonoBehaviour
         if(m_outgoing_command_buffer.TryGetCommandBuffer(out var buffer))
         {
             NetCode.Instance.SendCommandsToServer(buffer);
+        }
+
+        if(m_is_command_line_new_game && NetCode.Instance.HasJoinedLobby())
+        {
+            if (!m_is_waiting_to_spawn)
+            {
+                var room_id = $"quick_save_{SystemInfo.deviceUniqueIdentifier}";
+                SetRoomId(room_id);
+                NetCode.Instance.CreateRoom(room_id);
+
+                m_is_waiting_to_spawn = true;
+            }
+            else if(NetCode.Instance.HasJoinedRoom() && !m_has_spawned_avatar)
+            {
+                SpawnAvatar();
+            }
+            
         }
     }
 
@@ -363,6 +391,45 @@ public class Game : MonoBehaviour
     public void SendCommand<T>(T command) where T : struct, ICommand
     {
         m_outgoing_command_buffer.WriteCommand(command);
+    }
+
+    static string COMMAND_LINE_FILE = "command_line.txt";
+
+    public static string NEW_GAME_COMMAND = "-new_game";
+
+#if UNITY_EDITOR
+    public static void LaunchGameWithCommandLine(string command_line)
+    {
+        EditorApplication.isPlaying = true;
+        File.WriteAllText(COMMAND_LINE_FILE, command_line);
+    }
+#endif
+
+    public void ProcessCommandLineFile()
+    {
+        if (!File.Exists(COMMAND_LINE_FILE)) return;
+        var command_line = File.ReadAllText(COMMAND_LINE_FILE).Split(' ')[0];
+
+        if(command_line == NEW_GAME_COMMAND)
+        {
+            StartCoroutine(NewGame());
+        }
+
+        DeleteCommandLineFile();
+    }
+
+    IEnumerator NewGame()
+    {
+        m_is_command_line_new_game = true;
+        yield return null;        
+        MainMenu.Instance.gameObject.SetActive(false);
+    }
+
+        public static void DeleteCommandLineFile()
+    {
+        if (!File.Exists(COMMAND_LINE_FILE)) return;
+
+        File.Delete(COMMAND_LINE_FILE);
     }
 
     public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
