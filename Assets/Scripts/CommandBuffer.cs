@@ -173,13 +173,14 @@ static class CommandHandlerManager
             {
                 fixed (byte* byte_ptr = &buffer[position])
                 {
-                    //UnsafeUtility.CopyPtrToStructure(byte_ptr, &command);
+                    UnsafeUtility.CopyPtrToStructure(byte_ptr, out command);
                 }
             }
 
-            command.Run();
 
             position += m_command_size_in_bytes;
+
+            command.Run();
         }
 
         int m_command_size_in_bytes;

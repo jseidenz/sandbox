@@ -98,7 +98,7 @@ public class NetCode : MonoBehaviourPunCallbacks
     public void SendCommandsToServer(byte[] command_buffer)
     {
         var content = new object[] { command_buffer };
-        var raise_event_options = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+        var raise_event_options = new RaiseEventOptions { Receivers = ReceiverGroup.MasterClient };
         PhotonNetwork.RaiseEvent(COMMAND_BUFFER_FROM_CLIENT_ID, content, raise_event_options, SendOptions.SendReliable);
     }
 
@@ -121,12 +121,17 @@ public class NetCode : MonoBehaviourPunCallbacks
             var save_data = (byte[])content[0];
             Game.Instance.LoadCompressedSaveFileBytes(save_data);
         }
+        else if(event_code == COMMAND_BUFFER_FROM_CLIENT_ID)
+        {
+            var raise_event_options = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+            PhotonNetwork.RaiseEvent(COMMAND_BUFFER_FROM_SERVER_ID, (object[])evt.CustomData, raise_event_options, SendOptions.SendReliable);
+        }
         else if(event_code == COMMAND_BUFFER_FROM_SERVER_ID)
         {
             var content = (object[])evt.CustomData;
             var command_buffer = (byte[])content[0];
 
-            CommandHandlerManager.RunCommands(command_buffer, 0 , command_buffer.Length);
+            CommandHandlerManager.RunCommands(command_buffer, 0, command_buffer.Length);
         }
     }
 
