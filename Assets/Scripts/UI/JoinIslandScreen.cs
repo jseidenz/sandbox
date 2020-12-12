@@ -50,7 +50,7 @@ public class JoinIslandScreen : MonoBehaviour
 
     void Update()
     {
-        if (m_is_screen_faded && NetCode.Instance.HasJoinedRoom())
+        if (m_is_screen_faded && NetCode.Instance.HasJoinedRoom() && Game.Instance.IsWorldGenerationComplete())
         {
             Game.Instance.SpawnAvatar();
             MainMenu.Instance.gameObject.SetActive(false);
