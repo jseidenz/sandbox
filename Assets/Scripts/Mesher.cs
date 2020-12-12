@@ -114,7 +114,7 @@ public class Mesher
         Profiler.BeginSample("TriangulateAll");
         for(int y = m_layers.Length - 1; y >= 0; --y)
         {
-            m_layers[y].Triangulate(m_voxel_chunk_scratch_buffer);
+            m_layers[y].Triangulate(m_voxel_chunk_scratch_buffer, false);
         }
         Profiler.EndSample();
     }
@@ -143,9 +143,9 @@ public class Mesher
         }
     }
 
-    public void TriangulateLayer(int layer_idx)
+    public void TriangulateLayer(int layer_idx, bool only_visible_chunks)
     {
-        m_layers[layer_idx].Triangulate(m_voxel_chunk_scratch_buffer);
+        m_layers[layer_idx].Triangulate(m_voxel_chunk_scratch_buffer, only_visible_chunks);
     }
 
     public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }

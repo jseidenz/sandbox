@@ -27,7 +27,7 @@ public class WorldGenerator
 
     bool FadingIn()
     {
-        m_solid_mesher.TriangulateLayer(m_layer_idx);
+        m_solid_mesher.TriangulateLayer(m_layer_idx, true);
 
         m_layer_idx++;
 
@@ -36,7 +36,7 @@ public class WorldGenerator
 
     bool Finalizing()
     {
-        m_solid_mesher.TriangulateLayer(m_layer_idx);
+        m_solid_mesher.TriangulateLayer(m_layer_idx, false);
 
         m_layer_idx--;
 

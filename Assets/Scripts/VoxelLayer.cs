@@ -59,11 +59,21 @@ public class VoxelLayer
         }
     }
 
-    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer)
+    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, bool only_visible_chunks)
     {
-        foreach(var chunk in m_voxel_chunks)
+        if(only_visible_chunks)
         {
-            chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
+            foreach (var chunk in m_visible_voxel_chunks)
+            {
+                chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
+            }
+        }
+        else
+        {
+            foreach (var chunk in m_voxel_chunks)
+            {
+                chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
+            }
         }
     }
 
