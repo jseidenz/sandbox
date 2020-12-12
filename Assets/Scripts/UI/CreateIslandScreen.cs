@@ -111,8 +111,8 @@ public class CreateIslandScreen : MonoBehaviour
 
     void RandomizeWorld()
     {
-        Game.Instance.GenerateWorld();
-    }
+        m_world_generator = new WorldGenerator(Game.Instance.GetSolidSimulation(), Game.Instance.GetSolidMesher());
+            }
 
     void Update()
     {

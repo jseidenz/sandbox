@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
-using System.Threading.Tasks;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using Photon.Pun;
-using Photon.Realtime;
 using System.IO;
 using UnityEngine.Profiling;
 using System.IO.Compression;
@@ -197,7 +194,7 @@ public class Game : MonoBehaviour
         m_has_spawned_avatar = true;
     }
 
-    public Mesher GetVoxelWorld()
+    public Mesher GetSolidMesher()
     {
         return m_solid_mesher;
     }
