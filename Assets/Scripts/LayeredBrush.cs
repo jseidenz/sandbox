@@ -12,6 +12,7 @@ public class LayeredBrush
     static int BOTTOM_COLOR_ID = Shader.PropertyToID("_BottomColor");
     static int TOP_COLOR_ID = Shader.PropertyToID("_TopColor");
     static int NOISE_OPACITY_ID = Shader.PropertyToID("_NoiseOpacity");
+    static int NOISE_TILING_ID = Shader.PropertyToID("_NoiseTiling");
 
     static float[] HUE_VARIATION_PATTERN = new float[] { 0, -0.3f, 0.1f, 0.5f, -0.15f, 0.25f };
     static float[] SATURATION_VARIATION_PATTERN = new float[] { 0, -0.5f, 0.1f, -0.3f, -0.4f };
@@ -45,6 +46,7 @@ public class LayeredBrush
             var new_bottom_color = material.GetColor(BOTTOM_COLOR_ID);
             var new_top_color = material.GetColor(TOP_COLOR_ID);
             var new_noise_opacity = material.GetFloat(NOISE_OPACITY_ID);
+            var new_noise_tiling = material.GetFloat(NOISE_TILING_ID);
 
             max_layer_idx = Math.Max(max_layer_idx, new_layer_idx);
 
@@ -54,7 +56,8 @@ public class LayeredBrush
             bool is_bottom_color_dirty = new_bottom_color != entry.m_bottom_color;
             bool is_top_color_dirty = new_top_color != entry.m_top_color;
             bool is_noise_opacity_dirty = new_noise_opacity != entry.m_noise_opacity;
-            bool are_parameters_dirty = is_layer_idx_dirty || is_hue_variation_amount_dirty || is_saturation_variation_amount_dirty || is_bottom_color_dirty || is_top_color_dirty || is_noise_opacity_dirty;
+            bool is_noise_tiling_dirty = new_noise_tiling != entry.m_noise_tiling;
+            bool are_parameters_dirty = is_layer_idx_dirty || is_hue_variation_amount_dirty || is_saturation_variation_amount_dirty || is_bottom_color_dirty || is_top_color_dirty || is_noise_opacity_dirty || is_noise_tiling_dirty;
 
             if (!are_parameters_dirty) continue;
 
@@ -65,6 +68,7 @@ public class LayeredBrush
             entry.m_bottom_color = new_bottom_color;
             entry.m_top_color = new_top_color;
             entry.m_noise_opacity = new_noise_opacity;
+            entry.m_noise_tiling = new_noise_tiling;
             m_material_entries[i] = entry;
         }
 
@@ -102,6 +106,7 @@ public class LayeredBrush
                     var material = GameObject.Instantiate(entry.m_material);
                     material.SetColor(COMPUTED_COLOR_ID, computed_color);
                     material.SetFloat(NOISE_OPACITY_ID, entry.m_noise_opacity);
+                    material.SetFloat(NOISE_TILING_ID, entry.m_noise_tiling);
 
                     m_layer_idx_to_material[layer_idx] = new MaterialLayer
                     {
@@ -136,6 +141,7 @@ public class LayeredBrush
         public Color m_bottom_color;
         public Color m_top_color;
         public float m_noise_opacity;
+        public float m_noise_tiling;
     }
 
     struct MaterialLayer
