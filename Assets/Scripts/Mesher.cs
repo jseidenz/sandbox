@@ -127,14 +127,6 @@ public class Mesher
         }
     }
 
-    public void SetOcclusionChecksEnabled(bool is_enabled)
-    {
-        foreach (var layer in m_layers)
-        {
-            layer.SetOcclusionChecksEnabled(is_enabled);
-        }
-    }
-
     public void SetCollisionGenerationEnabled(bool is_enabled)
     {
         foreach(var layer in m_layers)

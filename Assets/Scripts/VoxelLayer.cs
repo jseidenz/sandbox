@@ -216,14 +216,6 @@ public class VoxelLayer
         }
     }
 
-    public void SetOcclusionChecksEnabled(bool is_enabled)
-    {
-        foreach (var chunk in m_voxel_chunks)
-        {
-            chunk.SetOcclusionChecksEnabled(is_enabled);
-        }
-    }
-
     internal void OnDestroy()
     {
         m_culling_group.Dispose();
