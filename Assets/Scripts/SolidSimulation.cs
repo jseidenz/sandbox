@@ -170,6 +170,8 @@ public class SolidSimulation
         }        
     }
 
+    public Vector3Int GetDimensionsInCells() { return m_dimensions_in_cells; }
+
     float[][] m_layers;
     Vector3 m_cell_size_in_meters;
 
