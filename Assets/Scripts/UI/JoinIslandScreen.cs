@@ -10,8 +10,8 @@ public class JoinIslandScreen : MonoBehaviour
     [SerializeField] TMPro.TMP_InputField m_your_name;
     [SerializeField] TMPro.TextMeshProUGUI m_island_name;
 
-    string m_room_id;
     bool m_is_screen_faded;
+    bool m_has_started_loading_island;
 
     void Awake()
     {
@@ -37,20 +37,46 @@ public class JoinIslandScreen : MonoBehaviour
     void OnEnable()
     {
         m_is_screen_faded = false;
+        m_has_started_loading_island = false;
         m_your_name.text = Player.GetPlayerName();
+
+
+        MainMenu.Instance.m_connecting_text.gameObject.SetActive(true);
+        ScreenFader.StartScreenFade(MainMenu.Instance.m_connecting_text.gameObject, true, 12f, 0.25f, () =>
+        {
+
+        });
+    }
+
+    public void OnIslandStartLoading()
+    {
+        ScreenFader.StartScreenFade(MainMenu.Instance.m_connecting_text.gameObject, false, 12f, 0f, () =>
+        {
+            MainMenu.Instance.m_connecting_text.gameObject.SetActive(false);
+        });
+    }
+
+    void OnDisable()
+    {
+        if (MainMenu.Instance.m_connecting_text.gameObject.activeSelf)
+        {
+            ScreenFader.StartScreenFade(MainMenu.Instance.m_connecting_text.gameObject, false, 12f, 0f, () =>
+            {
+                MainMenu.Instance.m_connecting_text.gameObject.SetActive(false);
+            });
+        }
     }
 
     public void SetRoom(string room_id)
     {
         Game.Instance.SetRoomId(room_id);
         NetCode.Instance.JoinRoom(room_id);
-        m_room_id = room_id;
         m_island_name.text = Game.Instance.GetIslandName();
     }
 
     void Update()
     {
-        if (m_is_screen_faded && NetCode.Instance.HasJoinedRoom() && Game.Instance.IsWorldGenerationComplete())
+        if (m_is_screen_faded && NetCode.Instance.HasJoinedRoom() && m_has_started_loading_island && Game.Instance.IsWorldGenerationComplete())
         {
             Game.Instance.SpawnAvatar();
             MainMenu.Instance.gameObject.SetActive(false);

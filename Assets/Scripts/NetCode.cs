@@ -127,6 +127,7 @@ public class NetCode : MonoBehaviourPunCallbacks
             var content = (object[])evt.CustomData;
             var save_data = (byte[])content[0];
             Game.Instance.LoadCompressedSaveFileBytes(save_data);
+            MainMenu.Instance.m_join_island_screen.OnIslandStartLoading();
         }
         else if(event_code == COMMAND_BUFFER_FROM_CLIENT_ID)
         {

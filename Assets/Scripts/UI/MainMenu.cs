@@ -4,9 +4,10 @@ using System;
 using UnityEngine.UI;
 
 public class MainMenu : MonoBehaviour
-{
+{    
     [SerializeField] Image m_full_background;
     [SerializeField] Image m_right_background;
+    [SerializeField] public TMPro.TextMeshProUGUI m_connecting_text;
     [SerializeField] public StartGameScreen m_start_game_screen;
     [SerializeField] public JoinIslandScreen m_join_island_screen;
     [SerializeField] public ListIslandsScreen m_list_islands_screen;
@@ -20,7 +21,8 @@ public class MainMenu : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        m_start_game_screen.gameObject.SetActive(false);    
+        m_start_game_screen.gameObject.SetActive(false);
+        m_connecting_text.gameObject.SetActive(false);
     }
 
     void Start()
