@@ -6,7 +6,8 @@ public class Player
     const string PLAYER_NAME_ID = "PlayerName";
     public static string GetPlayerName()
     {
-        return PlayerPrefs.GetString(PLAYER_NAME_ID, "Islander");
+        var default_name = $"Islander #{UnityEngine.Random.Range(100, 999)}";
+        return PlayerPrefs.GetString(PLAYER_NAME_ID, default_name);
     }
 
     public static void SetPlayerName(string player_name)
