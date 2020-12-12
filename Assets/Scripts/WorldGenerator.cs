@@ -12,8 +12,8 @@ public class WorldGenerator
 
     public float[] GenerateHeightMap(int width_in_cells, int height_in_cells, double scale)
     {
-        double width = (double)width_in_cells;
-        double height = (double)height_in_cells;
+        float width = (float)width_in_cells;
+        float height = (float)height_in_cells;
         float[] height_map = new float[width_in_cells * height_in_cells];
         for(int int_y = 0; int_y < height_in_cells; ++int_y)
         {
@@ -21,11 +21,11 @@ public class WorldGenerator
             {
                 int cell_idx = int_y * width_in_cells + int_x;
 
-                double x = (float)int_x;
-                double y = (float)int_y;
+                float x = (float)int_x;
+                float y = (float)int_y;
 
-                var nx = x / width - 0.5;
-                var ny = y / height - 0.5;
+                var nx = x / width - 0.5f;
+                var ny = y / height - 0.5f;
                 var elevation = (1.00 * ElevationNoise(1 * nx, 1 * ny)
                        + 0.50 * ElevationNoise(2 * nx, 2 * ny)
                        + 0.25 * ElevationNoise(4 * nx, 4 * ny)
@@ -44,12 +44,12 @@ public class WorldGenerator
         return height_map;
     }
 
-    public double ElevationNoise(double x, double y)
+    public float ElevationNoise(float x, float y)
     {
-        return m_elevation_noise.Evaluate(x, y) / 2 + 0.5;
+        return m_elevation_noise.Evaluate(x, y) / 2 + 0.5f;
     }
 
-    public double MoistureNoise(double x, double y)
+    public float MoistureNoise(float x, float y)
     {
         return m_moisture_noise.Evaluate(x, y);
     }
