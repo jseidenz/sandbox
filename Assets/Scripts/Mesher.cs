@@ -15,7 +15,6 @@ public class Mesher
     bool[] m_empty_occlusion_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
-    float m_water_height;
     LayeredBrush m_brush;
 
     struct DensityChange
@@ -25,9 +24,8 @@ public class Mesher
         public float m_amount;
     }
 
-    public void Init(string name, float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, Vector3 voxel_size_in_meters, int voxel_chunk_dimesnions, float water_height, bool generate_collision, float iso_level, float density_height_weight, LayeredBrush brush)
+    public void Init(string name, float[][] density_grids, int grid_width_in_voxels, int grid_height_in_voxels, int grid_depth_in_voxels, Vector3 voxel_size_in_meters, int voxel_chunk_dimesnions, bool generate_collision, float iso_level, float density_height_weight, LayeredBrush brush)
     {
-        m_water_height = water_height;
         m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
         m_voxel_size_in_meters = voxel_size_in_meters;
         m_grid_width_in_voxels = grid_width_in_voxels;

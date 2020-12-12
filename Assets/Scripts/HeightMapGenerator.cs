@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-public class WorldGenerator
+public class HeightMapGenerator
 {
-    public WorldGenerator()
+    public HeightMapGenerator()
     {
         var elevation_seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
         var moisture_seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
