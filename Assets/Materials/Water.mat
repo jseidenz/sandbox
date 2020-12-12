@@ -163,7 +163,7 @@ Material:
     - _TessValue: 16
     - _Tiling: 0.05
     - _TranslucencyViewDependency: 0
-    - _Transparency: 10
+    - _Transparency: 5
     - _UVSec: 0
     - _WaterDepth: 0
     - _WaterFalloff: -0.905
@@ -176,7 +176,7 @@ Material:
     - _ZWrite: 0
     - __dirty: 0
     m_Colors:
-    - _BottomColor: {r: 0.2781999, g: 0.09594162, b: 0.41509432, a: 1}
+    - _BottomColor: {r: 0.25975013, g: 0.09411765, b: 0.41568628, a: 1}
     - _Color: {r: 0.09545212, g: 0.31258285, b: 0.3679245, a: 0.42745098}
     - _Color0: {r: 1, g: 1, b: 1, a: 1}
     - _DeepColor: {r: 0.02990388, g: 0.16228628, b: 0.30188626, a: 1}

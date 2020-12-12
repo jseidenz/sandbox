@@ -80,8 +80,8 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
-    - _HueVariationAmount: 0.105
-    - _LayerIdx: 38.04
+    - _HueVariationAmount: 0.03
+    - _LayerIdx: 38.2
     - _Metallic: 0
     - _NoiseOpacity: 0.02
     - _NoiseTiling: 0.1
@@ -98,9 +98,9 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BottomColor: {r: 0.43, g: 0.27526945, b: 0.21371, a: 1}
+    - _BottomColor: {r: 0.07881961, g: 0.39607844, b: 0.2215861, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ComputedColor: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _TopColor: {r: 0.45400003, g: 0.3067743, b: 0.247884, a: 1}
+    - _TopColor: {r: 0.50980395, g: 0.41522408, b: 0.27450982, a: 1}
