@@ -66,7 +66,8 @@ public class CreateIslandScreen : MonoBehaviour
 
         m_randomize_button.onClick.AddListener(() =>
         {
-            Randomize();
+            RandomizeIslandName();
+            RandomizeWorld();
         });
 
         m_create_button.onClick.AddListener(() =>
@@ -88,6 +89,13 @@ public class CreateIslandScreen : MonoBehaviour
     {
         m_your_name.text = Player.GetPlayerName();
 
+        RandomizeIslandName();
+
+        m_is_screen_faded = false;
+    }
+
+    void RandomizeIslandName()
+    {
         var noun = m_nouns[UnityEngine.Random.Range(0, m_nouns.Length)];
         var adjective = m_adjectives[UnityEngine.Random.Range(0, m_adjectives.Length)];
 
@@ -99,11 +107,9 @@ public class CreateIslandScreen : MonoBehaviour
         }
 
         m_island_name.text = island_name;
-
-        m_is_screen_faded = false;
     }
 
-    void Randomize()
+    void RandomizeWorld()
     {
         Game.Instance.GenerateWorld();
     }
