@@ -114,7 +114,6 @@ public class Game : MonoBehaviour
         Profiler.EndSample();
 
         Profiler.BeginSample("TriangulateAll");
-        //m_top_to_bottom_triangulate_layer_idx = m_grid_height_in_voxels - 1;
         m_solid_mesher.TriangulateAll();
         Profiler.EndSample();
     }

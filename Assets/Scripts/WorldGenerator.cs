@@ -9,6 +9,11 @@ public class WorldGenerator
         m_height_map = new HeightMapGenerator().GenerateHeightMap(m_dimensions_in_cells.x, m_dimensions_in_cells.z, 4f);
     }
 
+    public bool Update()
+    {
+        return true;
+    }
+
     Vector3Int m_dimensions_in_cells;
     float[] m_height_map;
 }

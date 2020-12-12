@@ -116,10 +116,14 @@ public class CreateIslandScreen : MonoBehaviour
 
     void Update()
     {
-        if(m_is_screen_faded && NetCode.Instance.HasJoinedRoom())
+        bool is_world_generation_complete = m_world_generator == null || m_world_generator.Update();
+
+        if(m_is_screen_faded && NetCode.Instance.HasJoinedRoom() && is_world_generation_complete)
         {
             Game.Instance.SpawnAvatar();
             MainMenu.Instance.gameObject.SetActive(false);
         }
     }
+
+    WorldGenerator m_world_generator;
 }
