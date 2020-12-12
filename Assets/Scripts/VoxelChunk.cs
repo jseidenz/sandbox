@@ -802,6 +802,11 @@ public class VoxelChunk
         m_occlusion_checks_enabled = is_enabled;
     }
 
+    public void UpdateOcclusion(ScratchBuffer scratch_buffer)
+    {
+        GatherDensitySamples(scratch_buffer.m_density_samples, out var _, out var _);
+    }
+
     public void Render(float dt, Material material)
     {
         if (!m_is_empty)

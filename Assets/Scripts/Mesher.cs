@@ -148,6 +148,15 @@ public class Mesher
         m_layers[layer_idx].Triangulate(m_voxel_chunk_scratch_buffer, only_visible_chunks);
     }
 
+    public void UpdateOcclusion()
+    {
+        for(int layer_idx = m_grid_height_in_voxels - 1; layer_idx >= 0; layer_idx--)
+        {
+            var layer = m_layers[layer_idx];
+            layer.UpdateOcclusion(m_voxel_chunk_scratch_buffer);
+        }
+    }
+
     public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }
     public int GetGridWidthInVoxels() { return m_grid_depth_in_voxels; }
 

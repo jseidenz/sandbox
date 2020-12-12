@@ -20,7 +20,7 @@ public class WorldGenerator
         Profiler.EndSample();
 
         m_solid_mesher.SetCollisionGenerationEnabled(false);
-        solid_mesher.SetOcclusionChecksEnabled(false);
+        m_solid_mesher.UpdateOcclusion();
 
         m_layer_idx = 0;
     }
@@ -52,7 +52,6 @@ public class WorldGenerator
                 {
                     m_state = State.Finalizing;
                     m_solid_mesher.SetCollisionGenerationEnabled(true);
-                    m_solid_mesher.SetOcclusionChecksEnabled(true);
                     m_layer_idx = m_dimensions_in_cells.y - 1;
                 }
 

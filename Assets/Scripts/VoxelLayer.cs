@@ -77,6 +77,14 @@ public class VoxelLayer
         }
     }
 
+    public void UpdateOcclusion(VoxelChunk.ScratchBuffer scratch_buffer)
+    {
+        foreach(var chunk in m_voxel_chunks)
+        {
+            chunk.UpdateOcclusion(scratch_buffer);
+        }
+    }
+
     public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
     {
         m_scratch_dirty_chunk_ids.Clear();
