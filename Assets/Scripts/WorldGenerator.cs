@@ -10,15 +10,6 @@ public class WorldGenerator
         m_solid_mesher = solid_mesher;
         m_dimensions_in_cells = solid_simulation.GetDimensionsInCells();
 
-
-        Profiler.BeginSample("GenerateHeightMap");
-        m_height_map = new HeightMapGenerator().GenerateHeightMap(m_dimensions_in_cells.x, m_dimensions_in_cells.z, 4f);
-        Profiler.EndSample();
-
-        Profiler.BeginSample("ApplyHeightMap");
-        m_solid_simulation.ApplyHeightMap(m_height_map);
-        Profiler.EndSample();
-
         m_solid_mesher.SetCollisionGenerationEnabled(false);
         m_solid_mesher.UpdateOcclusion();
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
+using UnityEngine.Profiling;
 
 public class CreateIslandScreen : MonoBehaviour
 {
@@ -111,7 +112,17 @@ public class CreateIslandScreen : MonoBehaviour
 
     void RandomizeWorld()
     {
-        Game.Instance.SetWorldGenerator(new WorldGenerator(Game.Instance.GetSolidSimulation(), Game.Instance.GetSolidMesher()));
+        Profiler.BeginSample("GenerateHeightMap");
+        var solid_simulation = Game.Instance.GetSolidSimulation();
+        var dimensions_in_cells = solid_simulation.GetDimensionsInCells();
+        var height_map = new HeightMapGenerator().GenerateHeightMap(dimensions_in_cells.x, dimensions_in_cells.z, 4f);
+        Profiler.EndSample();
+
+        Profiler.BeginSample("ApplyHeightMap");
+        solid_simulation.ApplyHeightMap(height_map);
+        Profiler.EndSample();
+
+        Game.Instance.StartWorldGeneration();
     }
 
     void Update()
