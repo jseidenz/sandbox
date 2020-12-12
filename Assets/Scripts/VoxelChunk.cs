@@ -423,7 +423,7 @@ public class VoxelChunk
                         m_layer_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
 
-                    bool is_occluded = m_layer_above_occlusion_grid[left_near_cell_idx];
+                    bool is_occluded = m_occlusion_checks_enabled && m_layer_above_occlusion_grid[left_near_cell_idx];
                     if (is_occluded) continue;
                 }
 
@@ -790,7 +790,16 @@ public class VoxelChunk
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_d;
         }
+    }
 
+    public void SetCollisionGenerationEnabled(bool is_enabled)
+    {
+        m_generate_collision = is_enabled;
+    }
+
+    public void SetOcclusionChecksEnabled(bool is_enabled)
+    {
+        m_occlusion_checks_enabled = is_enabled;
     }
 
     public void Render(float dt, Material material)
@@ -819,6 +828,7 @@ public class VoxelChunk
     int m_chunk_dimension_in_voxels;
     bool m_is_empty = true;
     bool m_generate_collision;
+    bool m_occlusion_checks_enabled = true;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
         | MeshUpdateFlags.DontValidateIndices

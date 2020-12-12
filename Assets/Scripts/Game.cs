@@ -33,6 +33,7 @@ public class Game : MonoBehaviour
     SolidSimulation m_solid_simulation;
     Mesher m_solid_mesher;
     Mesher m_liquid_mesher;
+    WorldGenerator m_world_generator;
     int m_top_to_bottom_triangulate_layer_idx = -1;
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
@@ -216,6 +217,14 @@ public class Game : MonoBehaviour
 
     void Update()
     {
+        if(m_world_generator != null)
+        {
+            if(m_world_generator.Update())
+            {
+                m_world_generator = null;
+            }
+        }
+
         m_dirty_chunk_ids.Clear();
 
         if (m_top_to_bottom_triangulate_layer_idx >= 0)
@@ -406,6 +415,16 @@ public class Game : MonoBehaviour
     void OnApplicationQuit()
     {
         Save();
+    }
+
+    public void SetWorldGenerator(WorldGenerator world_generator)
+    {
+        m_world_generator = world_generator;
+    }
+
+    public bool IsWorldGenerationComplete()
+    {
+        return m_world_generator == null;
     }
 
     public void SendCommand<T>(T command) where T : struct, ICommand

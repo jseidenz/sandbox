@@ -127,6 +127,27 @@ public class Mesher
         }
     }
 
+    public void SetOcclusionChecksEnabled(bool is_enabled)
+    {
+        foreach (var layer in m_layers)
+        {
+            layer.SetOcclusionChecksEnabled(is_enabled);
+        }
+    }
+
+    public void SetCollisionGenerationEnabled(bool is_enabled)
+    {
+        foreach(var layer in m_layers)
+        {
+            layer.SetCollisionGenerationEnabled(is_enabled);
+        }
+    }
+
+    public void TriangulateLayer(int layer_idx)
+    {
+        m_layers[layer_idx].Triangulate(m_voxel_chunk_scratch_buffer);
+    }
+
     public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }
     public int GetGridWidthInVoxels() { return m_grid_depth_in_voxels; }
 

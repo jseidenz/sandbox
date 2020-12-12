@@ -111,19 +111,15 @@ public class CreateIslandScreen : MonoBehaviour
 
     void RandomizeWorld()
     {
-        m_world_generator = new WorldGenerator(Game.Instance.GetSolidSimulation(), Game.Instance.GetSolidMesher());
-            }
+        Game.Instance.SetWorldGenerator(new WorldGenerator(Game.Instance.GetSolidSimulation(), Game.Instance.GetSolidMesher()));
+    }
 
     void Update()
     {
-        bool is_world_generation_complete = m_world_generator == null || m_world_generator.Update();
-
-        if(m_is_screen_faded && NetCode.Instance.HasJoinedRoom() && is_world_generation_complete)
+        if(m_is_screen_faded && NetCode.Instance.HasJoinedRoom() && Game.Instance.IsWorldGenerationComplete())
         {
             Game.Instance.SpawnAvatar();
             MainMenu.Instance.gameObject.SetActive(false);
         }
     }
-
-    WorldGenerator m_world_generator;
 }
