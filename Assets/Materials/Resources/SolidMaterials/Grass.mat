@@ -83,8 +83,8 @@ Material:
     - _HueVariationAmount: 0.12
     - _LayerIdx: 27
     - _Metallic: 0
-    - _NoiseOpacity: 0.02
-    - _NoiseTiling: 0.1
+    - _NoiseOpacity: 0.12
+    - _NoiseTiling: 0.05
     - _OcclusionStrength: 1
     - _QueueOffset: 0
     - _ReceiveShadows: 1
