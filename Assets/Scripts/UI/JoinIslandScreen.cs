@@ -12,6 +12,8 @@ public class JoinIslandScreen : MonoBehaviour
 
     bool m_is_screen_faded;
     bool m_has_started_loading_island;
+    float m_connecting_timer;
+    int m_connecting_timer_iteration;
 
     void Awake()
     {
@@ -42,6 +44,9 @@ public class JoinIslandScreen : MonoBehaviour
 
 
         MainMenu.Instance.m_connecting_text.gameObject.SetActive(true);
+        MainMenu.Instance.m_connecting_text.text = "Connecting...";
+        m_connecting_timer = 0;
+        m_connecting_timer_iteration = 0;
         ScreenFader.StartScreenFade(MainMenu.Instance.m_connecting_text.gameObject, true, 12f, 0.25f, () =>
         {
 
@@ -50,6 +55,8 @@ public class JoinIslandScreen : MonoBehaviour
 
     public void OnIslandStartLoading()
     {
+        m_has_started_loading_island = true;
+
         ScreenFader.StartScreenFade(MainMenu.Instance.m_connecting_text.gameObject, false, 12f, 0f, () =>
         {
             MainMenu.Instance.m_connecting_text.gameObject.SetActive(false);
@@ -81,5 +88,26 @@ public class JoinIslandScreen : MonoBehaviour
             Game.Instance.SpawnAvatar();
             MainMenu.Instance.gameObject.SetActive(false);
         }
+
+
+        m_connecting_timer += Time.deltaTime;
+        const float TEXT_UPDATE_INTERVAL = 1f;
+        if(m_connecting_timer > TEXT_UPDATE_INTERVAL)
+        {
+            m_connecting_timer = 0f;
+            var text = "Connecting.";
+            if(m_connecting_timer_iteration == 1)
+            {
+                text = "Connecting..";
+            }
+            else if(m_connecting_timer_iteration == 2)
+            {
+                text = "Connecting...";
+            }
+            MainMenu.Instance.m_connecting_text.text = text;
+
+            m_connecting_timer_iteration = (m_connecting_timer_iteration + 1) % 3;
+        }
+        
     }
 }
