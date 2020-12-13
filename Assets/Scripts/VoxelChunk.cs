@@ -770,12 +770,53 @@ public class VoxelChunk
             var vert_c = vert_a;
             vert_c.m_position.y = m_bot_y;
 
-            var vert_d = vert_b;
-            vert_d.m_position.y = m_bot_y;
+            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position);
 
-            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
-            vert_c.m_normal = normal;
-            vert_d.m_normal = normal;
+            vertex_id_to_accumulated_normal.TryGetValue(vert_idx_a, out var vert_a_normal);
+            vertex_id_to_accumulated_normal.TryGetValue(vert_idx_b, out var vert_b_normal);
+
+            vert_a_normal += normal;
+            vert_b_normal += normal;
+
+            vertex_id_to_accumulated_normal[vert_idx_a] = vert_a_normal;
+            vertex_id_to_accumulated_normal[vert_idx_b] = vert_b_normal;
+        }
+
+        for (int i = 0; i < edge_count; ++i)
+        {
+            var edge = edges[i];
+            var vert_idx_a = edge.m_vertex_idx_a;
+            var vert_idx_b = edge.m_vertex_idx_b;
+
+            var vert_a = vertices[vert_idx_a];
+            var vert_b = vertices[vert_idx_b];
+
+            var left_normal = vertex_id_to_accumulated_normal[vert_idx_a].normalized;
+            var right_normal = vertex_id_to_accumulated_normal[vert_idx_b].normalized;
+
+            var left_top_normal = left_normal;
+            var left_bot_normal = left_normal;
+
+            var right_top_normal = right_normal;
+            var right_bot_normal = right_normal;
+
+            const float EDGE_LOOP_OFFSET = -0.05f;
+
+            var vert_c = vert_a;
+            vert_c.m_position.y += EDGE_LOOP_OFFSET;
+            vert_c.m_normal = left_top_normal;
+
+            var vert_d = vert_b;
+            vert_d.m_position.y += EDGE_LOOP_OFFSET;
+            vert_d.m_normal = right_top_normal;
+
+            var vert_e = vert_c;
+            vert_e.m_position.y = m_bot_y;
+            vert_e.m_normal = left_bot_normal;
+
+            var vert_f = vert_d;
+            vert_f.m_position.y = m_bot_y;
+            vert_f.m_normal = right_bot_normal;
 
             var vert_idx_c = vert_idx;
             vertices[vert_idx++] = vert_c;
@@ -783,12 +824,24 @@ public class VoxelChunk
             var vert_idx_d = vert_idx;
             vertices[vert_idx++] = vert_d;
 
+            var vert_idx_e = vert_idx;
+            vertices[vert_idx++] = vert_e;
+
+            var vert_idx_f = vert_idx;
+            vertices[vert_idx++] = vert_f;
+
             triangles[triangle_idx++] = vert_idx_a;
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_c;
             triangles[triangle_idx++] = vert_idx_c;
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_d;
+            triangles[triangle_idx++] = vert_idx_c;
+            triangles[triangle_idx++] = vert_idx_d;
+            triangles[triangle_idx++] = vert_idx_e;
+            triangles[triangle_idx++] = vert_idx_e;
+            triangles[triangle_idx++] = vert_idx_d;
+            triangles[triangle_idx++] = vert_idx_f;
         }
     }
 
