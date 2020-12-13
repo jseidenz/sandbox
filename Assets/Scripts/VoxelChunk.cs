@@ -51,7 +51,7 @@ public class VoxelChunk
             scratch_buffer.m_vertices = new Vertex[ushort.MaxValue];
             scratch_buffer.m_triangles = new System.UInt16[ushort.MaxValue * 24];
             scratch_buffer.m_edges = new Edge[ushort.MaxValue];
-            scratch_buffer.m_vert_idx_to_normal_welding_info = new Dictionary<ushort, NormalWeldingInfo>();
+            scratch_buffer.m_vertex_id_to_accumulated_normal = new Dictionary<ushort, Vector3>();
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
             return scratch_buffer;
@@ -62,7 +62,7 @@ public class VoxelChunk
         public System.UInt16[] m_triangles;
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
-        public Dictionary<ushort, NormalWeldingInfo> m_vert_idx_to_normal_welding_info;
+        public Dictionary<ushort, Vector3> m_vertex_id_to_accumulated_normal;
         public DensitySample[] m_density_samples;
     }
 
@@ -743,8 +743,8 @@ public class VoxelChunk
         vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
-        scratch_buffer.m_vert_idx_to_normal_welding_info.Clear();
-        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vert_idx_to_normal_welding_info, ref vert_count, ref triangle_count, ref edge_idx);
+        scratch_buffer.m_vertex_id_to_accumulated_normal.Clear();
+        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vertex_id_to_accumulated_normal, ref vert_count, ref triangle_count, ref edge_idx);
         Profiler.EndSample();
     }
 
@@ -752,7 +752,7 @@ public class VoxelChunk
         Vertex[] vertices, 
         ushort[] triangles, 
         Edge[] edges,
-        Dictionary<ushort, NormalWeldingInfo> vertex_id_to_normal_welding_info,
+        Dictionary<ushort, Vector3> vertex_id_to_accumulated_normal,
         ref ushort vert_idx, 
         ref int triangle_idx, 
         ref int edge_count
