@@ -21,8 +21,8 @@ public class SdfTest : MonoBehaviour
     [SerializeField] float m_iso_dist;
     [SerializeField] int m_corner_idx;
     [SerializeField] Vector3Int m_texture_dimensions;
-    [SerializeField] Vector3 m_world_size_in_meters;
-    [SerializeField] Vector3Int m_cube_dimensions;
+    [SerializeField] Vector3Int m_world_size_in_cells;
+    [SerializeField] Vector3 m_cell_size_in_meters;
     [SerializeField] SdfTuning m_sdf_tuning;
     public Texture3D m_texture;
     byte[] m_texture_data;
@@ -38,54 +38,16 @@ public class SdfTest : MonoBehaviour
         m_texture.wrapMode = TextureWrapMode.Clamp;
 
         m_texture_data = new byte[m_texture_dimensions.x * m_texture_dimensions.y * m_texture_dimensions.z];
-
-        var densities = new HeightMapGenerator().GenerateHeightMap(m_texture_dimensions.x, m_texture_dimensions.z, 4f);
-
-        float one_layer_height_in_density_space = (float)m_texture_dimensions.y;
-
-        for (int layer_idx = 0; layer_idx < m_texture_dimensions.y; ++layer_idx)
+        
+        for(int i = 0; i < m_texture_data.Length; ++i)
         {
-            float iso_level = layer_idx / (float)m_texture_dimensions.y;
-
-            for (int z = 0; z < m_texture_dimensions.z; ++z)
+            var value = (byte)255;
+            if(i == 14)
             {
-                for (int x = 0; x < m_texture_dimensions.x; ++x)
-                {
-                    var density_cell_idx = z * m_texture_dimensions.x + x;
-
-                    float input_density = densities[density_cell_idx];
-                    float deltaed_density = input_density - iso_level;
-                    float normalized_density = deltaed_density * one_layer_height_in_density_space;
-                    float clamped_density = 1f - Mathf.Clamp01(normalized_density);
-
-                    byte density_byte = (byte)(clamped_density * 255f);
-                    var pixel_idx = z * m_texture_dimensions.z * m_texture_dimensions.x + layer_idx * m_texture_dimensions.x + x;
-                    m_texture_data[pixel_idx] = density_byte;
-                }
+                value = 0;
             }
+            m_texture_data[i] = value;
         }
-
-        /*
-        for (int layer_idx = 0; layer_idx < m_texture_dimensions.y; ++layer_idx)
-        {
-            for (int z = 0; z < m_texture_dimensions.z; ++z)
-            {
-                for (int x = 0; x < m_texture_dimensions.x; ++x)
-                {
-                    byte value = 255;
-
-                    if ((Math.Abs(x - m_texture_dimensions.x / 2) < m_cube_dimensions.x) && (Math.Abs(layer_idx - m_texture_dimensions.y / 2) < m_cube_dimensions.y) && (Math.Abs(z - m_texture_dimensions.z / 2) < m_cube_dimensions.z))
-                    {
-                        value = 0;
-                    }
-                    
-                    var pixel_idx = layer_idx * m_texture_dimensions.z * m_texture_dimensions.x + z * m_texture_dimensions.x + x;
-                    m_texture_data[pixel_idx] = value;
-                }
-            }
-        }
-        */
-
     }
 
     void LateUpdate()
@@ -101,7 +63,10 @@ public class SdfTest : MonoBehaviour
 
 
         m_material.SetTexture("_LiquidTex", m_texture);
-        m_material.SetVector("_WorldSizeInMeters", m_world_size_in_meters);
+
+        var world_size_in_meters = new Vector3((float)m_world_size_in_cells.x * m_cell_size_in_meters.x, (float)m_world_size_in_cells.y * m_cell_size_in_meters.y, (float)m_world_size_in_cells.z * m_cell_size_in_meters.z);
+
+        m_material.SetVector("_WorldSizeInMeters", world_size_in_meters);
 
         m_mesh.Clear();
         m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
@@ -158,7 +123,8 @@ public class SdfTest : MonoBehaviour
         m_mesh.SetVertexBufferData(vertices, 0, 0, vert_count, 0, m_mesh_update_flags);
         m_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
 
-        Graphics.DrawMesh(m_mesh, Matrix4x4.identity, m_material, 0, null, 0);
+        var transform = Matrix4x4.TRS(m_cell_size_in_meters, Quaternion.identity, Vector3.one);
+        Graphics.DrawMesh(m_mesh, transform, m_material, 0, null, 0);
     }
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
