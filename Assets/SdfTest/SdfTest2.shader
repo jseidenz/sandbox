@@ -16,6 +16,7 @@
             struct RaymarchResult
             {
                 bool m_hit_surface;
+                float m_distance;
             };
             struct v2f {
                 float4 pos : SV_POSITION;
@@ -50,11 +51,12 @@
                 return distance;
             }
 
-            RaymarchResult Raycast(float3 pos, float3 dir)
+            RaymarchResult RayMarch(float3 pos, float3 dir)
             {
                 #define MIN_DISTANCE 0.01
                 #define STEPS 128                
 
+                float3 original_pos = pos;
                 for (int i = 0; i < STEPS; i++)
                 {
                     float distance = SphereDistance(pos);
@@ -62,6 +64,7 @@
                     {
                         RaymarchResult result;
                         result.m_hit_surface = true;
+                        result.m_distance = length(pos - original_pos);
                         return result;
                     }
 
@@ -81,11 +84,12 @@
                 //return float4(radius.xxx, 1);
 
                 float3 camera_dir = normalize(i.world_pos.xyz -_WorldSpaceCameraPos.xyz);
-                if (Raycast(i.world_pos.xyz, camera_dir).m_hit_surface)
+                RaymarchResult result = RayMarch(i.world_pos.xyz, camera_dir);
+                if (result.m_hit_surface)
                 {
                     float3 light_dir = normalize(float3(1, 1, 0));
                     float3 normal = normalize(i.normal);
-                    return dot(light_dir, normal) * 0.5 + 0.5;
+                    return result.m_distance;// dot(light_dir, normal) * 0.5 + 0.5;
                 }
                 else
                 {
