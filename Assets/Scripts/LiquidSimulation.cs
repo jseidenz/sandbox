@@ -304,6 +304,11 @@ public class LiquidSimulation
             m_texture.Apply();
             Profiler.EndSample();
         }
+
+        Shader.SetGlobalTexture("_LiquidTex", m_texture);
+
+        var world_size_in_meters = new Vector3(m_cell_size_in_meters.x * (float)m_dimensions_in_cells.x, m_cell_size_in_meters.y * (float)m_dimensions_in_cells.y, m_cell_size_in_meters.z * (float)m_dimensions_in_cells.z);
+        Shader.SetGlobalVector("_WorldSizeInMeters", world_size_in_meters);
     }
 
     public bool FlowAndTryToFinish(ref float remaining_liquid, float min_density_to_allow_flow, int cell_idx, int target_cell_idx, float[] delta_layer, float[] target_layer, float[] target_delta_layer, float[] target_solid_layer, int x, int layer_idx, int z, int target_x, int target_z, bool is_bottom_cell, ref Vector3Int min_dirty_idx, ref Vector3Int max_dirty_idx, ref Vector3Int target_min_dirty_idx, ref Vector3Int target_max_dirty_idx)
