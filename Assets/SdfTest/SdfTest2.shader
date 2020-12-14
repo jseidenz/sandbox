@@ -52,9 +52,6 @@
             {
 
                 float3 world_uv = world_pos / _WorldSizeInMeters;
-                //if (world_uv.x > 1 || world_uv.x < 0) return STEP_SIZE;
-                //if (world_uv.y > 1 || world_uv.y < 0) return STEP_SIZE;
-                //if (world_uv.z > 1 || world_uv.z < 0) return STEP_SIZE;
                 float distance = tex3D(_LiquidTex, world_uv).r;
                 distance = distance * m_step_size;
                 return distance;
@@ -102,8 +99,6 @@
                 //float3 world_uv = (i.world_pos.xyz / _WorldSizeInMeters.xyz) * 0.5 + 0.5;
                 //float radius = tex3D(_LiquidTex, world_uv).r;
                 //return float4(radius.xxx, 1);
-
-                return float4(1,0,0,1);
 
                 float3 camera_dir = normalize(i.world_pos.xyz -_WorldSpaceCameraPos.xyz);
                 RaymarchResult result = RayMarch(i.world_pos.xyz, camera_dir);
