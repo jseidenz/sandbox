@@ -11,6 +11,9 @@ public class LiquidSimulation
     const float FLOW_SPEED = 0.1f;
 
     const float SIMULATION_TICK_RATE = 1f / 30f;
+    public Texture3D m_texture;
+    byte[] m_texture_data;
+
     struct DensityChange
     {
         public Vector3 m_position;
@@ -69,6 +72,13 @@ public class LiquidSimulation
             m_min_dirty_cell_per_layer[i] = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
             m_max_dirty_cell_per_layer[i] = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
         }
+
+        m_texture = new Texture3D(m_dimensions_in_cells.x, m_dimensions_in_cells.y, m_dimensions_in_cells.z, TextureFormat.R8, false);
+        m_texture.filterMode = FilterMode.Bilinear;
+        m_texture.wrapMode = TextureWrapMode.Clamp;
+
+
+        m_texture_data = new byte[m_dimensions_in_cells.x * m_dimensions_in_cells.y * m_dimensions_in_cells.z];
     }
 
     public void AddDensity(Vector3 world_pos, float amount)
@@ -260,6 +270,7 @@ public class LiquidSimulation
             m_max_dirty_cell_per_layer[layer_idx + 1] = Vector3Int.Max(max_upper_dirty_idx, m_max_dirty_cell_per_layer[layer_idx + 1]);
         }
 
+        bool is_dirty = false;
         for (int layer_idx = 0; layer_idx < m_delta_layers.Length; ++layer_idx)
         {
             var layer = m_layers[layer_idx];
@@ -271,18 +282,27 @@ public class LiquidSimulation
                 {
                     var cell_idx = z * m_dimensions_in_cells.z + x;
 
-                    var liquid = layer[cell_idx] + delta_layer[cell_idx];
-                    /*
-                    if (liquid < MIN_VALUE)
+                    var delta = delta_layer[cell_idx];
+                    if(delta != 0)
                     {
-                        liquid = 0;
-                    }
-                    */
+                        var liquid = layer[cell_idx] + delta;
+                        layer[cell_idx] = liquid;
+                        delta_layer[cell_idx] = 0;
 
-                    layer[cell_idx] = liquid;
-                    delta_layer[cell_idx] = 0;
+                        is_dirty = true;
+                    }
                 }
             }
+        }
+
+        if(is_dirty)
+        {
+            Profiler.BeginSample("SetPixelData");
+            m_texture.SetPixelData(m_texture_data, 0, 0);
+            Profiler.EndSample();
+            Profiler.BeginSample("Apply");
+            m_texture.Apply();
+            Profiler.EndSample();
         }
     }
 
