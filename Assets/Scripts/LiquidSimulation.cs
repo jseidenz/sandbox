@@ -295,7 +295,13 @@ public class LiquidSimulation
 
                         float clamped_density = 1f - Mathf.Clamp01(liquid);
 
-                        byte density_byte = (byte)(clamped_density * 255f);
+                        var density_byte = (byte)255;
+                        if(clamped_density < 1f)
+                        {
+                            density_byte = 0;
+                        }
+
+                        //byte density_byte = (byte)(clamped_density * 255f);
                         var pixel_idx = z * m_dimensions_in_cells.y * m_dimensions_in_cells.x + layer_idx * m_dimensions_in_cells.x + x;
                         m_texture_data[pixel_idx] = density_byte;
 

@@ -46,9 +46,9 @@
                 #define STEP_SIZE 0.02
 
                 float3 world_uv = world_pos / _WorldSizeInMeters;
-                if (world_uv.x > 1 || world_uv.x < 0) return STEP_SIZE;
-                if (world_uv.y > 1 || world_uv.y < 0) return STEP_SIZE;
-                if (world_uv.z > 1 || world_uv.z < 0) return STEP_SIZE;
+                //if (world_uv.x > 1 || world_uv.x < 0) return STEP_SIZE;
+                //if (world_uv.y > 1 || world_uv.y < 0) return STEP_SIZE;
+                //if (world_uv.z > 1 || world_uv.z < 0) return STEP_SIZE;
                 float distance = tex3D(_LiquidTex, world_uv).r;
                 distance = distance * STEP_SIZE;
                 return distance;
@@ -56,7 +56,7 @@
 
             RaymarchResult RayMarch(float3 pos, float3 dir)
             {
-                #define MIN_DISTANCE 0.01
+                #define MIN_DISTANCE 0.02
                 #define STEPS 128                
 
                 float3 original_pos = pos;
