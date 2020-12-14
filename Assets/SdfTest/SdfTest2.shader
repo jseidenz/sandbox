@@ -46,7 +46,7 @@
 
             bool Raycast(float3 pos, float3 dir)
             {
-                #define STEPS 64
+                #define STEPS 128
                 #define STEP_SIZE 0.02
 
                 for (int i = 0; i < STEPS; i++)
