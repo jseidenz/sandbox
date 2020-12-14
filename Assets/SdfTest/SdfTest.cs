@@ -18,17 +18,58 @@ public class SdfTest : MonoBehaviour
     Mesh m_mesh;
     [SerializeField] Material m_material;
     [SerializeField] float m_radius;
+    [SerializeField] float m_iso_dist;
+    [SerializeField] int m_corner_idx;
+    [SerializeField] Vector3Int m_texture_dimensions;
+    public Texture3D m_texture;
+    byte[] m_texture_data;
 
     void Awake()
     {
         m_mesh = new Mesh();
         m_mesh.name = "SdfMesh";
         m_mesh.MarkDynamic();
+        m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, TextureFormat.R8, false);
+        m_texture_data = new byte[m_texture_dimensions.x * m_texture_dimensions.y * m_texture_dimensions.z];
+
+        var densities = new HeightMapGenerator().GenerateHeightMap(m_texture_dimensions.x, m_texture_dimensions.z, 4f);
+
+        float one_layer_height_in_density_space = (float)m_texture_dimensions.y;
+
+        for (int layer_idx = 0; layer_idx < m_texture_dimensions.y; ++layer_idx)
+        {
+            float iso_level = layer_idx / (float)m_texture_dimensions.y;
+
+            for (int z = 0; z < m_texture_dimensions.z; ++z)
+            {
+                for (int x = 0; x < m_texture_dimensions.x; ++x)
+                {
+                    var density_cell_idx = z * m_texture_dimensions.x + x;
+
+                    float input_density = densities[density_cell_idx];
+                    float deltaed_density = input_density - iso_level;
+                    float normalized_density = deltaed_density * one_layer_height_in_density_space;
+                    float clamped_density = Mathf.Clamp01(normalized_density);
+
+                    byte density_byte = (byte)(clamped_density * 255f);
+                    var pixel_idx = layer_idx * m_texture_dimensions.z * m_texture_dimensions.x + z * m_texture_dimensions.x + x;
+                    m_texture_data[pixel_idx] = density_byte;
+                }
+            }
+        }
 
     }
 
     void LateUpdate()
     {
+        Profiler.BeginSample("SetPixelData");
+        m_texture.SetPixelData(m_texture_data, 0, 0);
+        Profiler.EndSample();
+        Profiler.BeginSample("Apply");
+        m_texture.Apply();
+        Profiler.EndSample();
+
+
         m_mesh.Clear();
         m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
 
@@ -54,7 +95,12 @@ public class SdfTest : MonoBehaviour
 
         for (int i = 0; i < vert_count; ++i)
         {
-            vertices[i].m_uv0 = new Vector2(m_radius, 0);
+            float radius = m_radius;
+            if(m_corner_idx == i)
+            {
+                radius += m_iso_dist;
+            }
+            vertices[i].m_uv0 = new Vector2(radius, 0);
         }
 
 

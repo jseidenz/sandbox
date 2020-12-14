@@ -151,6 +151,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_material: {fileID: 2100000, guid: f864312a436c4344a85ba23ee7ebf488, type: 2}
+  m_radius: 0.5
+  m_iso_dist: 0.25
+  m_corner_idx: 0
+  m_texture_dimensions: {x: 316, y: 64, z: 316}
+  m_texture: {fileID: 0}
 --- !u!4 &77360627
 Transform:
   m_ObjectHideFlags: 0
