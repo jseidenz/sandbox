@@ -49,15 +49,13 @@
                 return o;
             }
 
-            float SphereDistance(float3 world_pos)
+            float SphereDistance(float3 field_pos)
             {
-
-                float3 world_uv = world_pos / _WorldSizeInMeters;
-                float distance = tex3D(_LiquidTex, world_uv).r;
-                distance = distance * m_step_size;
+                float3 field_uv = field_pos;
+                float distance = tex3D(_LiquidTex, field_uv).r;
                 return distance;
-                /*
 
+                /*
                 float3 world_uv = world_pos / _WorldSizeInMeters;
 
                 float distance = tex3D(_LiquidTex, world_uv).r;
@@ -107,7 +105,7 @@
                         return result;
                     }
 
-                    pos += dir * distance;
+                    pos += dir * m_step_size;
                 }
 
 
@@ -122,8 +120,11 @@
                 //float radius = tex3D(_LiquidTex, world_uv).r;
                 //return float4(radius.xxx, 1);
 
-                float3 camera_dir = normalize(i.world_pos.xyz -_WorldSpaceCameraPos.xyz);
-                RaymarchResult result = RayMarch(i.world_pos.xyz, camera_dir);
+                float3 camera_field_pos = _WorldSpaceCameraPos.xyz / _WorldSizeInMeters;
+                float3 field_pos = i.world_pos.xyz / _WorldSizeInMeters;
+
+                float3 camera_dir = normalize(field_pos - camera_field_pos);
+                RaymarchResult result = RayMarch(field_pos, camera_dir);
                 if (result.m_hit_surface)
                 {
                     return float4(0.5, 0.5, 0.5, 1);
