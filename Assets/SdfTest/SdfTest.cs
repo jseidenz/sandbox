@@ -57,7 +57,7 @@ public class SdfTest : MonoBehaviour
                     float clamped_density = 1f - Mathf.Clamp01(normalized_density);
 
                     byte density_byte = (byte)(clamped_density * 255f);
-                    var pixel_idx = layer_idx * m_texture_dimensions.z * m_texture_dimensions.x + z * m_texture_dimensions.x + x;
+                    var pixel_idx = z * m_texture_dimensions.z * m_texture_dimensions.x + layer_idx * m_texture_dimensions.x + x;
                     m_texture_data[pixel_idx] = density_byte;
                 }
             }

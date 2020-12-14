@@ -45,7 +45,10 @@
             {
                 #define STEP_SIZE 0.02
 
-                float3 world_uv = world_pos / _WorldSizeInMeters;
+                float3 world_uv = (world_pos / _WorldSizeInMeters) * 0.5 + 0.5;
+                if (world_uv.x > 1 || world_uv.x < 0) return STEP_SIZE;
+                if (world_uv.y > 1 || world_uv.y < 0) return STEP_SIZE;
+                if (world_uv.z > 1 || world_uv.z < 0) return STEP_SIZE;
                 float distance = tex3D(_LiquidTex, world_uv).r;
                 distance = distance * STEP_SIZE;
                 return distance;
@@ -89,10 +92,11 @@
                 {
                     float3 light_dir = normalize(float3(1, 1, 0));
                     float3 normal = normalize(i.normal);
-                    return result.m_distance;// dot(light_dir, normal) * 0.5 + 0.5;
+                    return result.m_distance / 4;// dot(light_dir, normal) * 0.5 + 0.5;
                 }
                 else
                 {
+                    discard;
                     return float4(1, 0, 0, 1);
                 }
             }
