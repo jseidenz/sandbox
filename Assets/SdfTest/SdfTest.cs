@@ -106,16 +106,15 @@ public class SdfTest : MonoBehaviour
 
         var vertices = new Vertex[vert_count];
 
-        const float cube_size = 1f;
         int vert_idx = 0;
-        vertices[vert_idx++].m_position = new Vector3(-cube_size, -cube_size, -cube_size);
-        vertices[vert_idx++].m_position = new Vector3(+cube_size, -cube_size, -cube_size);
-        vertices[vert_idx++].m_position = new Vector3(+cube_size, +cube_size, -cube_size);
-        vertices[vert_idx++].m_position = new Vector3(-cube_size, +cube_size, -cube_size);
-        vertices[vert_idx++].m_position = new Vector3(-cube_size, +cube_size, +cube_size);
-        vertices[vert_idx++].m_position = new Vector3(+cube_size, +cube_size, +cube_size);
-        vertices[vert_idx++].m_position = new Vector3(+cube_size, -cube_size, +cube_size);
-        vertices[vert_idx++].m_position = new Vector3(-cube_size, -cube_size, +cube_size);
+        vertices[vert_idx++].m_position = new Vector3(0, 0, 0);
+        vertices[vert_idx++].m_position = new Vector3(1, 0, 0);
+        vertices[vert_idx++].m_position = new Vector3(1, 1, 0);
+        vertices[vert_idx++].m_position = new Vector3(0, 1, 0);
+        vertices[vert_idx++].m_position = new Vector3(0, 1, 1);
+        vertices[vert_idx++].m_position = new Vector3(1, 1, 1);
+        vertices[vert_idx++].m_position = new Vector3(1, 0, 1);
+        vertices[vert_idx++].m_position = new Vector3(0, 0, 1);
 
         for(int i = 0; i < vert_count; ++i)
         {

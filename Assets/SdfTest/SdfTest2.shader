@@ -45,7 +45,7 @@
             {
                 #define STEP_SIZE 0.02
 
-                float3 world_uv = (world_pos / _WorldSizeInMeters) * 0.5 + 0.5;
+                float3 world_uv = world_pos / _WorldSizeInMeters;
                 if (world_uv.x > 1 || world_uv.x < 0) return STEP_SIZE;
                 if (world_uv.y > 1 || world_uv.y < 0) return STEP_SIZE;
                 if (world_uv.z > 1 || world_uv.z < 0) return STEP_SIZE;
