@@ -21,6 +21,7 @@ public class SdfTest : MonoBehaviour
     [SerializeField] float m_iso_dist;
     [SerializeField] int m_corner_idx;
     [SerializeField] Vector3Int m_texture_dimensions;
+    [SerializeField] Vector3 m_world_size_in_meters;
     public Texture3D m_texture;
     byte[] m_texture_data;
 
@@ -58,6 +59,8 @@ public class SdfTest : MonoBehaviour
             }
         }
 
+        m_material.SetTexture("_LiquidTex", m_texture);
+
     }
 
     void LateUpdate()
@@ -69,6 +72,7 @@ public class SdfTest : MonoBehaviour
         m_texture.Apply();
         Profiler.EndSample();
 
+        m_material.SetVector("_WorldSizeInMeters", m_world_size_in_meters);
 
         m_mesh.Clear();
         m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
