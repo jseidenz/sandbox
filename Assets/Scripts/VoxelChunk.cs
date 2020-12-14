@@ -227,10 +227,7 @@ public class VoxelChunk
         public float m_near_z;
         public float m_far_z;
         public float m_bot_y;
-        public float m_left_near_top_y;
-        public float m_left_far_top_y;
-        public float m_right_near_top_y;
-        public float m_right_far_top_y;
+        public float m_top_y;
         public float m_left_near_density;
         public float m_right_near_density;
         public float m_left_far_density;
@@ -249,14 +246,14 @@ public class VoxelChunk
 
         public ushort LeftNear()
         {
-            var pos = new Vector3(m_left_x, m_left_near_top_y, m_near_z);
+            var pos = new Vector3(m_left_x, m_top_y, m_near_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
             return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx, m_normal);
         }
 
         public ushort RightNear()
         {
-            var pos = new Vector3(m_right_x, m_right_near_top_y, m_near_z);
+            var pos = new Vector3(m_right_x, m_top_y, m_near_z);
             if(m_chunk_relative_cell_idx < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
@@ -270,7 +267,7 @@ public class VoxelChunk
 
         public ushort LeftFar()
         {
-            var pos = new Vector3(m_left_x, m_left_far_top_y, m_far_z);
+            var pos = new Vector3(m_left_x, m_top_y, m_far_z);
             if (m_chunk_relative_y < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
@@ -284,7 +281,7 @@ public class VoxelChunk
 
         public ushort RightFar()
         {
-            var pos = new Vector3(m_right_x, m_right_far_top_y, m_far_z);
+            var pos = new Vector3(m_right_x, m_top_y, m_far_z);
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels + 1;
@@ -298,14 +295,14 @@ public class VoxelChunk
 
         public ushort LeftEdge()
         {
-            var pos = new Vector3(m_left_x, InterpolatePosition(m_left_near_top_y, m_left_far_top_y, m_left_near_density, m_left_far_density), InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
+            var pos = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
             return m_vertex_table.CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx, m_normal);
         }
 
         public ushort RightEdge()
         {
-            var pos = new Vector3(m_right_x, InterpolatePosition(m_right_near_top_y, m_right_far_top_y, m_right_near_density, m_right_far_density), InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
+            var pos = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
@@ -319,14 +316,14 @@ public class VoxelChunk
 
         public ushort NearEdge()
         {
-            var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), InterpolatePosition(m_left_near_top_y, m_right_near_top_y, m_left_near_density, m_right_near_density), m_near_z);
+            var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
             return m_vertex_table.CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx, m_normal);
         }
 
         public ushort FarEdge()
         {
-            var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), InterpolatePosition(m_left_far_top_y, m_right_far_top_y, m_left_far_density, m_right_far_density), m_far_z);
+            var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
             return m_vertex_table.CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx, m_normal);
         }
@@ -475,11 +472,6 @@ public class VoxelChunk
             var left_x = (float)x * m_voxel_size_in_meters.x;
             var right_x = left_x + m_voxel_size_in_meters.x;
 
-            var left_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_near_density);
-            var left_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_far_density);
-            var right_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_near_density);
-            var right_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_far_density);
-
             var marcher = new MeshMarcher
             {
                 m_left_x = left_x,
@@ -487,10 +479,7 @@ public class VoxelChunk
                 m_near_z = near_z,
                 m_far_z = far_z,
                 m_bot_y = m_bot_y,
-                m_left_near_top_y = m_top_y + left_near_top_y_delta,
-                m_left_far_top_y = m_top_y + left_far_top_y_delta,
-                m_right_near_top_y = m_top_y + right_near_top_y_delta,
-                m_right_far_top_y = m_top_y + right_far_top_y_delta,
+                m_top_y = m_top_y,
                 m_left_near_density = left_near_density,
                 m_right_near_density = right_near_density,
                 m_left_far_density = left_far_density,
