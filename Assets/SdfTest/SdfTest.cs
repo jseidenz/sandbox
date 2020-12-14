@@ -47,7 +47,7 @@ public class SdfTest : MonoBehaviour
 
         for(int i = 0; i < vert_count; ++i)
         {
-            vertices[i].m_normal = Vector3.up;
+            vertices[i].m_normal = vertices[i].m_position.normalized;
         }
 
 
