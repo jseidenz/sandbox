@@ -42,7 +42,7 @@ public class SdfTest : MonoBehaviour
         for(int i = 0; i < m_texture_data.Length; ++i)
         {
             var value = (byte)255;
-            if(i == 14)
+            if(i == 13)
             {
                 value = 0;
             }
@@ -76,14 +76,15 @@ public class SdfTest : MonoBehaviour
         var vertices = new Vertex[vert_count];
 
         int vert_idx = 0;
+        Vector3 cube_size = m_cell_size_in_meters;
         vertices[vert_idx++].m_position = new Vector3(0, 0, 0);
-        vertices[vert_idx++].m_position = new Vector3(1, 0, 0);
-        vertices[vert_idx++].m_position = new Vector3(1, 1, 0);
-        vertices[vert_idx++].m_position = new Vector3(0, 1, 0);
-        vertices[vert_idx++].m_position = new Vector3(0, 1, 1);
-        vertices[vert_idx++].m_position = new Vector3(1, 1, 1);
-        vertices[vert_idx++].m_position = new Vector3(1, 0, 1);
-        vertices[vert_idx++].m_position = new Vector3(0, 0, 1);
+        vertices[vert_idx++].m_position = new Vector3(cube_size.x, 0, 0);
+        vertices[vert_idx++].m_position = new Vector3(cube_size.x, cube_size.y, 0);
+        vertices[vert_idx++].m_position = new Vector3(0, cube_size.y, 0);
+        vertices[vert_idx++].m_position = new Vector3(0, cube_size.y, cube_size.z);
+        vertices[vert_idx++].m_position = new Vector3(cube_size.x, cube_size.y, cube_size.z);
+        vertices[vert_idx++].m_position = new Vector3(cube_size.x, 0, cube_size.z);
+        vertices[vert_idx++].m_position = new Vector3(0, 0, cube_size.z);
 
         for(int i = 0; i < vert_count; ++i)
         {
