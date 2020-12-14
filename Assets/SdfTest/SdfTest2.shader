@@ -13,7 +13,10 @@
 
             sampler3D _LiquidTex;
             float3 _WorldSizeInMeters;
-
+            struct RaymarchResult
+            {
+                bool m_hit_surface;
+            };
             struct v2f {
                 float4 pos : SV_POSITION;
                 float3 normal : TEXCOORD0;
@@ -47,7 +50,7 @@
                 return distance;
             }
 
-            bool Raycast(float3 pos, float3 dir)
+            RaymarchResult Raycast(float3 pos, float3 dir)
             {
                 #define MIN_DISTANCE 0.01
                 #define STEPS 128                
@@ -57,13 +60,18 @@
                     float distance = SphereDistance(pos);
                     if (distance < MIN_DISTANCE)
                     {
-                        return true;
+                        RaymarchResult result;
+                        result.m_hit_surface = true;
+                        return result;
                     }
 
                     pos += dir * distance;
                 }
 
-                return false;
+
+                RaymarchResult result;
+                result.m_hit_surface = false;
+                return result;
             }
 
             fixed4 frag(v2f i) : SV_Target
@@ -73,7 +81,7 @@
                 //return float4(radius.xxx, 1);
 
                 float3 camera_dir = normalize(i.world_pos.xyz -_WorldSpaceCameraPos.xyz);
-                if (Raycast(i.world_pos.xyz, camera_dir))
+                if (Raycast(i.world_pos.xyz, camera_dir).m_hit_surface)
                 {
                     float3 light_dir = normalize(float3(1, 1, 0));
                     float3 normal = normalize(i.normal);
