@@ -124,7 +124,8 @@ public class SdfTest : MonoBehaviour
         m_mesh.SetVertexBufferData(vertices, 0, 0, vert_count, 0, m_mesh_update_flags);
         m_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
 
-        var transform = Matrix4x4.TRS(m_cell_size_in_meters, Quaternion.identity, Vector3.one);
+        var offset = m_sdf_tuning.m_offset * Vector3.one;
+        var transform = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
         Graphics.DrawMesh(m_mesh, transform, m_material, 0, null, 0);
     }
 

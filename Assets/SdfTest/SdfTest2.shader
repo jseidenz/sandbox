@@ -13,6 +13,7 @@
 
             float m_step_size;
             float m_min_distance;
+            float m_cell_radius;
 
 
             sampler3D _LiquidTex;
@@ -55,6 +56,27 @@
                 float distance = tex3D(_LiquidTex, world_uv).r;
                 distance = distance * m_step_size;
                 return distance;
+                /*
+
+                float3 world_uv = world_pos / _WorldSizeInMeters;
+
+                float distance = tex3D(_LiquidTex, world_uv).r;
+                distance = distance * m_step_size;
+
+                float3 center = float3(((int)(world_pos.x / m_cell_radius)) * m_cell_radius + m_cell_radius, ((int)(world_pos.y / m_cell_radius)) * m_cell_radius + m_cell_radius, ((int)(world_pos.z / m_cell_radius))* m_cell_radius + m_cell_radius);
+                float3 delta = float3(world_pos.x - center.x, world_pos.y - center.y, world_pos.z - center.z);
+                return length(delta);
+                float radius_mult = max(length(delta) / m_cell_radius, 1);
+                distance = distance * radius_mult;
+
+                return distance;
+                
+                float3 center = float3((int)world_pos.x + m_cell_radius, (int)world_pos.y + m_cell_radius, (int)world_pos.z + m_cell_radius);
+                float3 delta = float3(world_pos.x - center.x, world_pos.y - center.y, world_pos.z - center.z);
+                float density = tex3D(_LiquidTex, world_uv).r;                
+                float distance = max((length(delta) / m_cell_radius), 1)  * density;
+                return distance;
+                */
             }
 
             float3 CalcNormal(float3 world_pos)
@@ -104,6 +126,7 @@
                 RaymarchResult result = RayMarch(i.world_pos.xyz, camera_dir);
                 if (result.m_hit_surface)
                 {
+                    return float4(0.5, 0.5, 0.5, 1);
                     float3 light_dir = normalize(float3(1, 1, 0));
                     float3 normal = result.m_normal;
                     return result.m_distance / 4;

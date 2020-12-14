@@ -11,6 +11,7 @@ public class SdfTuning : ScriptableObject
     public float m_min_distance;
     public float m_step_size;
     public float m_cell_radius;
+    public float m_offset;
 
     public void ApplyParameters(Material material)
     {
