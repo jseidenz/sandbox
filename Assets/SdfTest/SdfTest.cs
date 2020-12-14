@@ -37,7 +37,6 @@ public class SdfTest : MonoBehaviour
 
         m_texture_data = new byte[m_texture_dimensions.x * m_texture_dimensions.y * m_texture_dimensions.z];
 
-        /*
         var densities = new HeightMapGenerator().GenerateHeightMap(m_texture_dimensions.x, m_texture_dimensions.z, 4f);
 
         float one_layer_height_in_density_space = (float)m_texture_dimensions.y;
@@ -55,7 +54,7 @@ public class SdfTest : MonoBehaviour
                     float input_density = densities[density_cell_idx];
                     float deltaed_density = input_density - iso_level;
                     float normalized_density = deltaed_density * one_layer_height_in_density_space;
-                    float clamped_density = Mathf.Clamp01(normalized_density);
+                    float clamped_density = 1f - Mathf.Clamp01(normalized_density);
 
                     byte density_byte = (byte)(clamped_density * 255f);
                     var pixel_idx = layer_idx * m_texture_dimensions.z * m_texture_dimensions.x + z * m_texture_dimensions.x + x;
@@ -63,8 +62,8 @@ public class SdfTest : MonoBehaviour
                 }
             }
         }
-        */
 
+        /*
         for (int layer_idx = 0; layer_idx < m_texture_dimensions.y; ++layer_idx)
         {
             for (int z = 0; z < m_texture_dimensions.z; ++z)
@@ -83,6 +82,7 @@ public class SdfTest : MonoBehaviour
                 }
             }
         }
+        */
 
     }
 
