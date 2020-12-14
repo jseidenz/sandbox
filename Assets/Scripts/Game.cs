@@ -28,6 +28,7 @@ public class Game : MonoBehaviour
     [SerializeField] public float m_min_density_to_allow_flow;
     [SerializeField] Camera m_camera;
     [SerializeField] Vector3 m_camera_offset;
+    [SerializeField] bool m_draw_solid_meshes;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -284,7 +285,10 @@ public class Game : MonoBehaviour
 
         float dt = Time.deltaTime;
 
-        m_solid_mesher.Render(dt);
+        if (m_draw_solid_meshes)
+        {
+            m_solid_mesher.Render(dt);
+        }
         m_liquid_mesher.Render(dt);
     }
 
