@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8fdf8b6e9322b14f83e0c1094e3dcc3, type: 3}
   m_Name: SdfTuning
   m_EditorClassIdentifier: 
-  m_min_distance: 0.6
-  m_step_size: 0.025
+  m_min_distance: 0.5
+  m_step_size: 0.2
   m_cell_radius: 0.3
   m_offset: 0.6
