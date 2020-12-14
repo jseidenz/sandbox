@@ -79,6 +79,10 @@ public class LiquidSimulation
 
 
         m_texture_data = new byte[m_dimensions_in_cells.x * m_dimensions_in_cells.y * m_dimensions_in_cells.z];
+        for(int i = 0; i < m_texture_data.Length; ++i)
+        {
+            m_texture_data[i] = 255;
+        }
     }
 
     public void AddDensity(Vector3 world_pos, float amount)
