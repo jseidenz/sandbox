@@ -289,6 +289,12 @@ public class LiquidSimulation
                         layer[cell_idx] = liquid;
                         delta_layer[cell_idx] = 0;
 
+                        float clamped_density = 1f - Mathf.Clamp01(liquid);
+
+                        byte density_byte = (byte)(clamped_density * 255f);
+                        var pixel_idx = z * m_dimensions_in_cells.y * m_dimensions_in_cells.x + layer_idx * m_dimensions_in_cells.x + x;
+                        m_texture_data[pixel_idx] = density_byte;
+
                         is_dirty = true;
                     }
                 }
