@@ -17,6 +17,7 @@
             {
                 bool m_hit_surface;
                 float m_distance;
+                float3 m_normal;
             };
             struct v2f {
                 float4 pos : SV_POSITION;
@@ -54,6 +55,17 @@
                 return distance;
             }
 
+            float3 CalcNormal(float3 world_pos)
+            {
+                const float eps = 0.05;
+                float3 world_uv = world_pos / _WorldSizeInMeters;
+
+                float delta_x = SphereDistance(world_pos + float3(eps, 0, 0)) - SphereDistance(world_pos - float3(eps, 0, 0));
+                float delta_y = SphereDistance(world_pos + float3(0, eps, 0)) - SphereDistance(world_pos - float3(0, eps, 0));
+                float delta_z = SphereDistance(world_pos + float3(0, 0, eps)) - SphereDistance(world_pos - float3(0, 0, eps));
+                return normalize(float3(delta_x, delta_y, delta_z));
+            }
+
             RaymarchResult RayMarch(float3 pos, float3 dir)
             {
                 #define MIN_DISTANCE 0.02
@@ -68,6 +80,7 @@
                         RaymarchResult result;
                         result.m_hit_surface = true;
                         result.m_distance = length(pos - original_pos);
+                        result.m_normal = CalcNormal(pos);
                         return result;
                     }
 
@@ -91,8 +104,8 @@
                 if (result.m_hit_surface)
                 {
                     float3 light_dir = normalize(float3(1, 1, 0));
-                    float3 normal = normalize(i.normal);
-                    return result.m_distance / 4;// dot(light_dir, normal) * 0.5 + 0.5;
+                    float3 normal = result.m_normal;
+                    return dot(light_dir, normal) * 0.5 + 0.5;
                 }
                 else
                 {
