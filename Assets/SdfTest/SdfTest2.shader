@@ -37,26 +37,30 @@
                 return o;
             }
 
-            bool SphereHit(float3 world_pos)
+            float SphereDistance(float3 world_pos)
             {
+                #define STEP_SIZE 0.02
+
                 float3 world_uv = world_pos / _WorldSizeInMeters;
-                float radius = tex3D(_LiquidTex, world_uv).r;
-                return radius < 0.01;
+                float distance = tex3D(_LiquidTex, world_uv).r;
+                distance = distance * STEP_SIZE;
+                return distance;
             }
 
             bool Raycast(float3 pos, float3 dir)
             {
-                #define STEPS 128
-                #define STEP_SIZE 0.02
+                #define MIN_DISTANCE 0.01
+                #define STEPS 128                
 
                 for (int i = 0; i < STEPS; i++)
                 {
-                    if (SphereHit(pos))
+                    float distance = SphereDistance(pos);
+                    if (distance < MIN_DISTANCE)
                     {
                         return true;
                     }
 
-                    pos += dir * STEP_SIZE;
+                    pos += dir * distance;
                 }
 
                 return false;
