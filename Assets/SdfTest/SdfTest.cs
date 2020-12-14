@@ -22,6 +22,7 @@ public class SdfTest : MonoBehaviour
     [SerializeField] int m_corner_idx;
     [SerializeField] Vector3Int m_texture_dimensions;
     [SerializeField] Vector3 m_world_size_in_meters;
+    [SerializeField] Vector3Int m_cube_dimensions;
     public Texture3D m_texture;
     byte[] m_texture_data;
 
@@ -31,8 +32,12 @@ public class SdfTest : MonoBehaviour
         m_mesh.name = "SdfMesh";
         m_mesh.MarkDynamic();
         m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, TextureFormat.R8, false);
+        m_texture.filterMode = FilterMode.Bilinear;
+        m_texture.wrapMode = TextureWrapMode.Clamp;
+
         m_texture_data = new byte[m_texture_dimensions.x * m_texture_dimensions.y * m_texture_dimensions.z];
 
+        /*
         var densities = new HeightMapGenerator().GenerateHeightMap(m_texture_dimensions.x, m_texture_dimensions.z, 4f);
 
         float one_layer_height_in_density_space = (float)m_texture_dimensions.y;
@@ -55,6 +60,26 @@ public class SdfTest : MonoBehaviour
                     byte density_byte = (byte)(clamped_density * 255f);
                     var pixel_idx = layer_idx * m_texture_dimensions.z * m_texture_dimensions.x + z * m_texture_dimensions.x + x;
                     m_texture_data[pixel_idx] = density_byte;
+                }
+            }
+        }
+        */
+
+        for (int layer_idx = 0; layer_idx < m_texture_dimensions.y; ++layer_idx)
+        {
+            for (int z = 0; z < m_texture_dimensions.z; ++z)
+            {
+                for (int x = 0; x < m_texture_dimensions.x; ++x)
+                {
+                    byte value = 255;
+
+                    if ((Math.Abs(x - m_texture_dimensions.x / 2) < m_cube_dimensions.x) && (Math.Abs(layer_idx - m_texture_dimensions.y / 2) < m_cube_dimensions.y) && (Math.Abs(z - m_texture_dimensions.z / 2) < m_cube_dimensions.z))
+                    {
+                        value = 0;
+                    }
+                    
+                    var pixel_idx = layer_idx * m_texture_dimensions.z * m_texture_dimensions.x + z * m_texture_dimensions.x + x;
+                    m_texture_data[pixel_idx] = value;
                 }
             }
         }
