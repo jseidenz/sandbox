@@ -58,7 +58,7 @@ public class Game : MonoBehaviour
 
 
         m_solid_brush = SolidLayeredBrush.LoadBrush("SolidMaterials");
-        var liquid_brush = new LiquidLayeredBrush(Resources.Load<Material>("LiquidMaterials/Liquid.mat"));
+        var liquid_brush = new LiquidLayeredBrush(Resources.Load<Material>("LiquidMaterials/Liquid"));
 
         m_solid_mesher = CreateSolidMesher(solid_layers, m_solid_brush);
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers(), liquid_brush);
