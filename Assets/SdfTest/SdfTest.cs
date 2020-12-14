@@ -12,10 +12,12 @@ public class SdfTest : MonoBehaviour
     {
         public Vector3 m_position;
         public Vector3 m_normal;
+        public Vector2 m_uv0;
     }
 
     Mesh m_mesh;
     [SerializeField] Material m_material;
+    [SerializeField] float m_radius;
 
     void Awake()
     {
@@ -50,6 +52,11 @@ public class SdfTest : MonoBehaviour
             vertices[i].m_normal = vertices[i].m_position.normalized;
         }
 
+        for (int i = 0; i < vert_count; ++i)
+        {
+            vertices[i].m_uv0 = new Vector2(m_radius, 0);
+        }
+
 
         var triangles = new ushort[]
         {
@@ -79,7 +86,8 @@ public class SdfTest : MonoBehaviour
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
         new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
+        new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3),
+        new VertexAttributeDescriptor(VertexAttribute.TexCoord0, VertexAttributeFormat.Float32, 2),
     };
 
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
