@@ -76,12 +76,6 @@ public class Mesher
 
     public void Render(float dt)
     {
-#if UNITY_EDITOR
-        Profiler.BeginSample("RefreshLookupTable");
-        m_brush.RefreshLookupTable();
-        Profiler.EndSample();
-#endif
-
         Profiler.BeginSample("Render");
         for (int y = 0; y < m_layers.Length; ++y)
         {

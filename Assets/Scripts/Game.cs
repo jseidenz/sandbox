@@ -34,6 +34,7 @@ public class Game : MonoBehaviour
     Mesher m_solid_mesher;
     Mesher m_liquid_mesher;
     WorldGenerator m_world_generator;
+    SolidLayeredBrush m_solid_brush;
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
@@ -56,16 +57,16 @@ public class Game : MonoBehaviour
         m_liquid_simulation.SetSimulationEnabled(m_liquid_sim_enabled_on_startup);
 
 
-        var solid_brush = LayeredBrush.LoadBrush("SolidMaterials");
-        var liquid_brush = LayeredBrush.LoadBrush("LiquidMaterials");
+        m_solid_brush = SolidLayeredBrush.LoadBrush("SolidMaterials");
+        var liquid_brush = new LiquidLayeredBrush(Resources.Load<Material>("LiquidMaterials/Liquid.mat"));
 
-        m_solid_mesher = CreateSolidMesher(solid_layers, solid_brush);
+        m_solid_mesher = CreateSolidMesher(solid_layers, m_solid_brush);
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers(), liquid_brush);
 
         m_solid_mesher.BindCamera(m_camera);
         m_liquid_mesher.BindCamera(m_camera);
 
-        CreateGroundPlane(solid_brush);
+        CreateGroundPlane(m_solid_brush);
 
         m_water = GameObject.Instantiate(m_water);
 
@@ -274,6 +275,13 @@ public class Game : MonoBehaviour
 
     void LateUpdate()
     {
+
+#if UNITY_EDITOR
+        Profiler.BeginSample("RefreshLookupTable");
+        m_solid_brush.RefreshLookupTable();
+        Profiler.EndSample();
+#endif
+
         float dt = Time.deltaTime;
 
         m_solid_mesher.Render(dt);

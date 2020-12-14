@@ -1,4 +1,4 @@
-﻿Shader "SftTest2" 
+﻿Shader "SdfTest2" 
 {
     SubShader
     {
