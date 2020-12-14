@@ -41,7 +41,7 @@
             {
                 float3 world_uv = world_pos / _WorldSizeInMeters;
                 float radius = tex3D(_LiquidTex, world_uv).r;
-                return radius < 0.5;
+                return radius < 0.01;
             }
 
             bool Raycast(float3 pos, float3 dir)
