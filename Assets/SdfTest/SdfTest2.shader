@@ -11,6 +11,10 @@
             #pragma fragment frag
             #include "UnityCG.cginc"
 
+            float m_step_size;
+            float m_min_distance;
+
+
             sampler3D _LiquidTex;
             float3 _WorldSizeInMeters;
             struct RaymarchResult
@@ -22,8 +26,9 @@
             struct v2f {
                 float4 pos : SV_POSITION;
                 float3 normal : TEXCOORD0;
-                float3 world_pos : TEXCOORD1;
+                float3 world_pos : TEXCOORD1;                
                 float2 uv : TEXCOORD2;
+                float3 view_dir : TEXCOORD3;
             };
 
             struct appdata {
@@ -39,19 +44,19 @@
                 o.normal = v.normal;
                 o.world_pos = mul(unity_ObjectToWorld, v.vertex);
                 o.uv = v.uv;
+                o.view_dir = normalize(o.world_pos.xyz - _WorldSpaceCameraPos.xyz);
                 return o;
             }
 
             float SphereDistance(float3 world_pos)
             {
-                #define STEP_SIZE 0.02
 
                 float3 world_uv = world_pos / _WorldSizeInMeters;
                 //if (world_uv.x > 1 || world_uv.x < 0) return STEP_SIZE;
                 //if (world_uv.y > 1 || world_uv.y < 0) return STEP_SIZE;
                 //if (world_uv.z > 1 || world_uv.z < 0) return STEP_SIZE;
                 float distance = tex3D(_LiquidTex, world_uv).r;
-                distance = distance * STEP_SIZE;
+                distance = distance * m_step_size;
                 return distance;
             }
 
@@ -68,14 +73,13 @@
 
             RaymarchResult RayMarch(float3 pos, float3 dir)
             {
-                #define MIN_DISTANCE 0.02
-                #define STEPS 128                
+                #define STEPS 64                
 
                 float3 original_pos = pos;
                 for (int i = 0; i < STEPS; i++)
                 {
                     float distance = SphereDistance(pos);
-                    if (distance < MIN_DISTANCE)
+                    if (distance < m_min_distance)
                     {
                         RaymarchResult result;
                         result.m_hit_surface = true;
@@ -105,7 +109,8 @@
                 {
                     float3 light_dir = normalize(float3(1, 1, 0));
                     float3 normal = result.m_normal;
-                    return dot(light_dir, normal) * 0.5 + 0.5;
+                    return result.m_distance / 4;
+                    //return dot(light_dir, normal) * 0.5 + 0.5;
                 }
                 else
                 {

@@ -157,6 +157,7 @@ MonoBehaviour:
   m_texture_dimensions: {x: 128, y: 128, z: 128}
   m_world_size_in_meters: {x: 1, y: 1, z: 1}
   m_cube_dimensions: {x: 32, y: 32, z: 32}
+  m_sdf_tuning: {fileID: 11400000, guid: 0bc904b4a174a6849880f0f5103c0e1f, type: 2}
   m_texture: {fileID: 0}
 --- !u!4 &77360627
 Transform:
