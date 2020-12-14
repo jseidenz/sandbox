@@ -59,8 +59,6 @@ public class SdfTest : MonoBehaviour
             }
         }
 
-        m_material.SetTexture("_LiquidTex", m_texture);
-
     }
 
     void LateUpdate()
@@ -72,6 +70,8 @@ public class SdfTest : MonoBehaviour
         m_texture.Apply();
         Profiler.EndSample();
 
+
+        m_material.SetTexture("_LiquidTex", m_texture);
         m_material.SetVector("_WorldSizeInMeters", m_world_size_in_meters);
 
         m_mesh.Clear();

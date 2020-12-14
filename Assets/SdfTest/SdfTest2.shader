@@ -40,8 +40,12 @@
             bool SphereHit(float3 world_pos)
             {
                 float3 world_uv = world_pos / _WorldSizeInMeters;
-                float radius = tex3D(_LiquidTex, world_uv);
-                return radius > 0.5f;
+                float radius = tex3D(_LiquidTex, world_uv).r;
+                if (radius > 0.49f && radius < 0.51f)
+                {
+                    return true;
+                }
+                return false;
             }
 
             bool Raycast(float3 pos, float3 dir)
@@ -64,6 +68,10 @@
 
             fixed4 frag(v2f i) : SV_Target
             {
+                //float3 world_uv = (i.world_pos.xyz / _WorldSizeInMeters.xyz) * 0.5 + 0.5;
+                //float radius = tex3D(_LiquidTex, world_uv).r;
+                //return float4(radius.xxx, 1);
+
                 float3 camera_dir = normalize(i.world_pos.xyz -_WorldSpaceCameraPos.xyz);
                 if (Raycast(i.world_pos.xyz, camera_dir))
                 {
@@ -73,6 +81,7 @@
                 }
                 else
                 {
+                    discard;
                     return float4(1, 0, 0, 1);
                 }
             }

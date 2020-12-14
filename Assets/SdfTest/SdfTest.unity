@@ -155,7 +155,7 @@ MonoBehaviour:
   m_iso_dist: 0.25
   m_corner_idx: 0
   m_texture_dimensions: {x: 316, y: 64, z: 316}
-  m_world_size_in_meters: {x: 316, y: 64, z: 316}
+  m_world_size_in_meters: {x: 1, y: 1, z: 1}
   m_texture: {fileID: 0}
 --- !u!4 &77360627
 Transform:
