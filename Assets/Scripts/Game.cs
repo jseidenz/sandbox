@@ -30,6 +30,7 @@ public class Game : MonoBehaviour
     [SerializeField] Vector3 m_camera_offset;
     [SerializeField] bool m_draw_solid_meshes;
     [SerializeField] bool m_use_old_liquid_material;
+    [SerializeField] SdfTuning m_sdf_tuning;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -283,7 +284,7 @@ public class Game : MonoBehaviour
 
     void LateUpdate()
     {
-
+        m_sdf_tuning.ApplyParameters(m_old_liquid_material);
 #if UNITY_EDITOR
         Profiler.BeginSample("RefreshLookupTable");
         m_solid_brush.RefreshLookupTable();

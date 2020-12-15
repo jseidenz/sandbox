@@ -34,7 +34,7 @@ public class SdfTest : MonoBehaviour
         m_mesh.MarkDynamic();
         //m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, TextureFormat.R8, false);
         m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm, UnityEngine.Experimental.Rendering.TextureCreationFlags.None);
-        m_texture.filterMode = FilterMode.Bilinear;
+        m_texture.filterMode = FilterMode.Point;
         m_texture.wrapMode = TextureWrapMode.Clamp;
 
         m_texture_data = new byte[m_texture_dimensions.x * m_texture_dimensions.y * m_texture_dimensions.z];
@@ -42,7 +42,7 @@ public class SdfTest : MonoBehaviour
         for(int i = 0; i < m_texture_data.Length; ++i)
         {
             var value = (byte)0;
-            if(i == 13 || i == 14)
+            if(i == 13)
             {
                 value = 255;
             }

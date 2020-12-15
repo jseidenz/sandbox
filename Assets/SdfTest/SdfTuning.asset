@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: SdfTuning
   m_EditorClassIdentifier: 
   m_min_distance: 0.04
-  m_step_size: 0.02
+  m_step_size: 0.005
   m_cell_radius: 0.3
-  m_offset: 0
-  m_max_density: 0.45
+  m_offset: 0.6
+  m_max_density: {x: 0.45, y: 0.45, z: 0.45}

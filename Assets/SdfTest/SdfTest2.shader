@@ -51,27 +51,10 @@
                 return o;
             }
 
-            float BoxDistance2(float3 field_pos)
-            {
-                float3 field_uv = field_pos / _WorldSizeInCells;
-                float normalized_density = tex3D(_LiquidTex, field_uv).r;
-                float3 density = float3(normalized_density * m_max_density.x, normalized_density * m_max_density.y, normalized_density * m_max_density.z);
-
-
-                float3 center = floor(field_pos) + float3(0.5, 0.5, 0.5);
-                float3 local_pos = field_pos - center;
-                float3 abs_local_pos = abs(local_pos);
-                float3 delta = float3(abs_local_pos.x - density.x, abs_local_pos.y - density.y, abs_local_pos.z - density.z);
-                float3 max_delta = max(delta, float3(0, 0, 0));
-                float max_delta_comp = max(max(delta.x, delta.y), delta.z);
-                float penetration = min(max_delta_comp, 0);
-                return length(max_delta) + penetration;
-            }
-
             float BoxDistance(float3 field_pos)
             {
                 float3 field_uv = field_pos / _WorldSizeInCells;
-                float normalized_density = tex3D(_LiquidTex, field_uv).r;
+                float normalized_density = tex3D(_LiquidTex, field_uv).r - m_min_distance;
                 float3 density = float3(normalized_density * m_max_density.x, normalized_density * m_max_density.y, normalized_density * m_max_density.z);
                 
 
@@ -84,6 +67,29 @@
                 float penetration = min(max_delta_comp, 0);
                 return length(max_delta) + penetration;
             }
+
+            float BoxDistance2(float3 field_pos)
+            {
+                float normalized_density = 1 - m_min_distance;
+                float3 density = float3(normalized_density * m_max_density.x, normalized_density * m_max_density.y, normalized_density * m_max_density.z);
+
+                float3 center = floor(field_pos) + float3(0.5, 0.5, 0.5);
+                float3 local_pos = field_pos - center;
+                float3 abs_local_pos = abs(local_pos);
+                float3 delta = float3(abs_local_pos.x - density.x, abs_local_pos.y - density.y, abs_local_pos.z - density.z);
+                float3 max_delta = max(delta, float3(0, 0, 0));
+                float max_delta_comp = max(max(delta.x, delta.y), delta.z);
+                float penetration = min(max_delta_comp, 0);
+                return length(max_delta) + penetration;
+            }
+
+
+            float CalcDistance(float3 field_pos)
+            {
+                return BoxDistance2(field_pos);
+            }
+
+
 
             float SphereDistance(float3 field_pos)
             {
@@ -125,20 +131,20 @@
             {
                 const float eps = 0.001;
 
-                float delta_x = BoxDistance(world_pos + float3(eps, 0, 0)) - BoxDistance(world_pos - float3(eps, 0, 0));
-                float delta_y = BoxDistance(world_pos + float3(0, eps, 0)) - BoxDistance(world_pos - float3(0, eps, 0));
-                float delta_z = BoxDistance(world_pos + float3(0, 0, eps)) - BoxDistance(world_pos - float3(0, 0, eps));
+                float delta_x = CalcDistance(world_pos + float3(eps, 0, 0)) - BoxDistance(world_pos - float3(eps, 0, 0));
+                float delta_y = CalcDistance(world_pos + float3(0, eps, 0)) - BoxDistance(world_pos - float3(0, eps, 0));
+                float delta_z = CalcDistance(world_pos + float3(0, 0, eps)) - BoxDistance(world_pos - float3(0, 0, eps));
                 return normalize(float3(delta_x, delta_y, delta_z));
             }
 
             RaymarchResult RayMarch(float3 pos, float3 dir)
             {
-                #define STEPS 64                
+                #define STEPS 32                
 
                 float3 original_pos = pos;
                 for (int i = 0; i < STEPS; i++)
                 {
-                    float distance = BoxDistance(pos);
+                    float distance = CalcDistance(pos);
                     if (distance < m_min_distance)
                     {
                         RaymarchResult result;
@@ -178,7 +184,7 @@
                 }
                 else
                 {
-                    //discard;
+                    discard;
                     return float4(1, 0, 0, 1);
                 }
             }

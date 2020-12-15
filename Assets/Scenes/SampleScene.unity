@@ -13172,6 +13172,12 @@ PrefabInstance:
       propertyPath: m_min_density_to_allow_flow
       value: 0.5
       objectReference: {fileID: 0}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_sdf_tuning
+      value: 
+      objectReference: {fileID: 11400000, guid: 0bc904b4a174a6849880f0f5103c0e1f,
+        type: 2}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name
