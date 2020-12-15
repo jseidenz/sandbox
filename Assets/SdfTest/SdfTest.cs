@@ -34,17 +34,17 @@ public class SdfTest : MonoBehaviour
         m_mesh.MarkDynamic();
         //m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, TextureFormat.R8, false);
         m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm, UnityEngine.Experimental.Rendering.TextureCreationFlags.None);
-        m_texture.filterMode = FilterMode.Point;
+        m_texture.filterMode = FilterMode.Bilinear;
         m_texture.wrapMode = TextureWrapMode.Clamp;
 
         m_texture_data = new byte[m_texture_dimensions.x * m_texture_dimensions.y * m_texture_dimensions.z];
         
         for(int i = 0; i < m_texture_data.Length; ++i)
         {
-            var value = (byte)255;
-            if(i == 13)
+            var value = (byte)0;
+            if(i == 13 || i == 14)
             {
-                value = 0;
+                value = 255;
             }
             m_texture_data[i] = value;
         }
@@ -67,6 +67,7 @@ public class SdfTest : MonoBehaviour
         var world_size_in_meters = new Vector3((float)m_world_size_in_cells.x * m_cell_size_in_meters.x, (float)m_world_size_in_cells.y * m_cell_size_in_meters.y, (float)m_world_size_in_cells.z * m_cell_size_in_meters.z);
 
         m_material.SetVector("_WorldSizeInMeters", world_size_in_meters);
+        m_material.SetVector("_WorldSizeInCells", new Vector3(m_world_size_in_cells.x, m_world_size_in_cells.y, m_world_size_in_cells.z));
 
         m_mesh.Clear();
         m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
@@ -90,17 +91,6 @@ public class SdfTest : MonoBehaviour
         {
             vertices[i].m_normal = vertices[i].m_position.normalized;
         }
-
-        for (int i = 0; i < vert_count; ++i)
-        {
-            float radius = m_radius;
-            if(m_corner_idx == i)
-            {
-                radius += m_iso_dist;
-            }
-            vertices[i].m_uv0 = new Vector2(radius, 0);
-        }
-
 
         var triangles = new ushort[]
         {

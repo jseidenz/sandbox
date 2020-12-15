@@ -14,10 +14,12 @@
             float m_step_size;
             float m_min_distance;
             float m_cell_radius;
+            float3 m_max_density;
 
 
             sampler3D _LiquidTex;
             float3 _WorldSizeInMeters;
+            float3 _WorldSizeInCells;
             struct RaymarchResult
             {
                 bool m_hit_surface;
@@ -51,13 +53,19 @@
 
             float BoxDistance(float3 field_pos)
             {
+                float3 field_uv = field_pos / _WorldSizeInCells;
+                float normalized_density = tex3D(_LiquidTex, field_uv).r;
+                float3 density = float3(normalized_density * m_max_density.x, normalized_density * m_max_density.y, normalized_density * m_max_density.z);
+                
+
                 float3 center = floor(field_pos) + float3(0.5, 0.5, 0.5);
                 float3 local_pos = field_pos - center;                
                 float3 abs_local_pos = abs(local_pos);                
-                float density = 0.1;
-                float3 delta = float3(abs_local_pos.x - density, abs_local_pos.y - density, abs_local_pos.z - density);
+                float3 delta = float3(abs_local_pos.x - density.x, abs_local_pos.y - density.y, abs_local_pos.z - density.z);
                 float3 max_delta = max(delta, float3(0, 0, 0));
-                return length(max_delta);
+                float max_delta_comp = max(max(delta.x, delta.y), delta.z);
+                float penetration = min(max_delta_comp, 0);
+                return length(max_delta) + penetration;
             }
 
             float SphereDistance(float3 field_pos)
@@ -98,12 +106,11 @@
 
             float3 CalcNormal(float3 world_pos)
             {
-                const float eps = 0.05;
-                float3 world_uv = world_pos / _WorldSizeInMeters;
+                const float eps = 0.001;
 
-                float delta_x = SphereDistance(world_pos + float3(eps, 0, 0)) - SphereDistance(world_pos - float3(eps, 0, 0));
-                float delta_y = SphereDistance(world_pos + float3(0, eps, 0)) - SphereDistance(world_pos - float3(0, eps, 0));
-                float delta_z = SphereDistance(world_pos + float3(0, 0, eps)) - SphereDistance(world_pos - float3(0, 0, eps));
+                float delta_x = BoxDistance(world_pos + float3(eps, 0, 0)) - BoxDistance(world_pos - float3(eps, 0, 0));
+                float delta_y = BoxDistance(world_pos + float3(0, eps, 0)) - BoxDistance(world_pos - float3(0, eps, 0));
+                float delta_z = BoxDistance(world_pos + float3(0, 0, eps)) - BoxDistance(world_pos - float3(0, 0, eps));
                 return normalize(float3(delta_x, delta_y, delta_z));
             }
 
@@ -146,11 +153,11 @@
                 RaymarchResult result = RayMarch(field_pos, camera_dir);
                 if (result.m_hit_surface)
                 {
-                    return float4(0.5, 0.5, 0.5, 1);
+                    //return float4(0.5, 0.5, 0.5, 1);
                     float3 light_dir = normalize(float3(1, 1, 0));
                     float3 normal = result.m_normal;
-                    return result.m_distance / 4;
-                    //return dot(light_dir, normal) * 0.5 + 0.5;
+                    return dot(light_dir, normal) * 0.5 + 0.5;
+                    //return result.m_distance / 4;
                 }
                 else
                 {

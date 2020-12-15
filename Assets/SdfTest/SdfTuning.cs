@@ -12,11 +12,13 @@ public class SdfTuning : ScriptableObject
     public float m_step_size;
     public float m_cell_radius;
     public float m_offset;
+    public Vector3 m_max_density;
 
     public void ApplyParameters(Material material)
     {
         material.SetFloat("m_min_distance", m_min_distance);
         material.SetFloat("m_step_size", m_step_size);
         material.SetFloat("m_cell_radius", m_cell_radius);
+        material.SetVector("m_max_density", m_max_density);
     }
 }
