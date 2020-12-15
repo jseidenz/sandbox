@@ -49,11 +49,30 @@
                 return o;
             }
 
+            float BoxDistance(float3 field_pos)
+            {
+                float3 center = floor(field_pos) + float3(0.5, 0.5, 0.5);
+                float3 local_pos = field_pos - center;                
+                float3 abs_local_pos = abs(local_pos);                
+                float density = 0.1;
+                float3 delta = float3(abs_local_pos.x - density, abs_local_pos.y - density, abs_local_pos.z - density);
+                float3 max_delta = max(delta, float3(0, 0, 0));
+                return length(max_delta);
+            }
+
             float SphereDistance(float3 field_pos)
             {
-                float3 field_uv = field_pos;
+                float3 field_uv = field_pos / (_WorldSizeInMeters / (m_cell_radius * 2));
                 float distance = tex3D(_LiquidTex, field_uv).r;
-                return distance;
+
+                float3 corner = floor(field_pos);
+                float3 center = corner + float3(0.5, 0.5, 0.5);
+
+                float3 delta = field_pos - center;
+                return 1 - (1 - (length(delta) - 0.5)) * (1 - distance);
+                return length(delta)-0.6;
+                
+                //return distance;
 
                 /*
                 float3 world_uv = world_pos / _WorldSizeInMeters;
@@ -95,7 +114,7 @@
                 float3 original_pos = pos;
                 for (int i = 0; i < STEPS; i++)
                 {
-                    float distance = SphereDistance(pos);
+                    float distance = BoxDistance(pos);
                     if (distance < m_min_distance)
                     {
                         RaymarchResult result;
@@ -120,8 +139,8 @@
                 //float radius = tex3D(_LiquidTex, world_uv).r;
                 //return float4(radius.xxx, 1);
 
-                float3 camera_field_pos = _WorldSpaceCameraPos.xyz / _WorldSizeInMeters;
-                float3 field_pos = i.world_pos.xyz / _WorldSizeInMeters;
+                float3 camera_field_pos = _WorldSpaceCameraPos.xyz / (m_cell_radius * 2);
+                float3 field_pos = i.world_pos.xyz / (m_cell_radius * 2);
 
                 float3 camera_dir = normalize(field_pos - camera_field_pos);
                 RaymarchResult result = RayMarch(field_pos, camera_dir);
