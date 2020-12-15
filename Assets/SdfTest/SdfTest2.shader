@@ -51,6 +51,23 @@
                 return o;
             }
 
+            float BoxDistance2(float3 field_pos)
+            {
+                float3 field_uv = field_pos / _WorldSizeInCells;
+                float normalized_density = tex3D(_LiquidTex, field_uv).r;
+                float3 density = float3(normalized_density * m_max_density.x, normalized_density * m_max_density.y, normalized_density * m_max_density.z);
+
+
+                float3 center = floor(field_pos) + float3(0.5, 0.5, 0.5);
+                float3 local_pos = field_pos - center;
+                float3 abs_local_pos = abs(local_pos);
+                float3 delta = float3(abs_local_pos.x - density.x, abs_local_pos.y - density.y, abs_local_pos.z - density.z);
+                float3 max_delta = max(delta, float3(0, 0, 0));
+                float max_delta_comp = max(max(delta.x, delta.y), delta.z);
+                float penetration = min(max_delta_comp, 0);
+                return length(max_delta) + penetration;
+            }
+
             float BoxDistance(float3 field_pos)
             {
                 float3 field_uv = field_pos / _WorldSizeInCells;
