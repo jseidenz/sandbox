@@ -18,7 +18,7 @@ public class VoxelChunk
         {
             m_vertex_id_to_vertex_idx.Clear();
         }
-        public ushort CreateVertexEntry(VertexLocation location, Vector3 position, int chunk_relative_cell_idx, Vector3 normal)
+        public ushort CreateVertexEntry(VertexLocation location, Vector3 position, int chunk_relative_cell_idx)
         {
             var shifted_cell_number = ((uint)chunk_relative_cell_idx) << 16;
             var shifted_location = (uint)location;
@@ -33,8 +33,7 @@ public class VoxelChunk
                 {
                     m_vertex_location = location,
                     m_vertex_idx = vertex_idx,
-                    m_position = position,
-                    m_normal = normal
+                    m_position = position
                 };
             }
 
@@ -48,6 +47,7 @@ public class VoxelChunk
         {
             var scratch_buffer = new ScratchBuffer();
 
+            scratch_buffer.m_positions = new Vector3[ushort.MaxValue];
             scratch_buffer.m_vertices = new Vertex[ushort.MaxValue];
             scratch_buffer.m_triangles = new System.UInt16[ushort.MaxValue * 24];
             scratch_buffer.m_edges = new Edge[ushort.MaxValue];
@@ -64,6 +64,7 @@ public class VoxelChunk
             m_edge_map.Clear();
         }
 
+        public Vector3[] m_positions;
         public Vertex[] m_vertices;
         public System.UInt16[] m_triangles;
         public Edge[] m_edges;
@@ -97,7 +98,6 @@ public class VoxelChunk
         public VertexLocation m_vertex_location;
         public ushort m_vertex_idx;
         public Vector3 m_position;
-        public Vector3 m_normal;
     }
 
     public struct DensitySample
@@ -252,14 +252,13 @@ public class VoxelChunk
         public ushort m_chunk_relative_cell_idx;
         public int m_chunk_relative_x;
         public int m_chunk_relative_y;
-        public Vector3 m_normal;
         public VertexTable m_vertex_table;
 
         public ushort LeftNear()
         {
             var pos = new Vector3(m_left_x, m_top_y, m_near_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
-            return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx, m_normal);
+            return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort RightNear()
@@ -268,11 +267,11 @@ public class VoxelChunk
             if(m_chunk_relative_cell_idx < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
-                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, pos, m_chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.RightNearTop, pos, m_chunk_relative_cell_idx);
             }
         }
 
@@ -282,11 +281,11 @@ public class VoxelChunk
             if (m_chunk_relative_y < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
-                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, pos, m_chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftFarTop, pos, m_chunk_relative_cell_idx);
             }
         }
 
@@ -296,11 +295,11 @@ public class VoxelChunk
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels + 1;
-                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftNearTop, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, pos, m_chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.RightFarTop, pos, m_chunk_relative_cell_idx);
             }
         }
 
@@ -308,7 +307,7 @@ public class VoxelChunk
         {
             var pos = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
-            return m_vertex_table.CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx, m_normal);
+            return m_vertex_table.CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort RightEdge()
@@ -317,11 +316,11 @@ public class VoxelChunk
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
-                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.LeftTop, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateVertexEntry(VertexLocation.RightTop, pos, m_chunk_relative_cell_idx, m_normal);
+                return m_vertex_table.CreateVertexEntry(VertexLocation.RightTop, pos, m_chunk_relative_cell_idx);
             }
         }
 
@@ -329,14 +328,14 @@ public class VoxelChunk
         {
             var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
-            return m_vertex_table.CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx, m_normal);
+            return m_vertex_table.CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx);
         }
 
         public ushort FarEdge()
         {
             var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
-            return m_vertex_table.CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx, m_normal);
+            return m_vertex_table.CreateVertexEntry(VertexLocation.NearTop, pos, chunk_relative_cell_idx);
         }
 
         public float AverageDensity()
@@ -502,7 +501,6 @@ public class VoxelChunk
                 m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
                 m_chunk_relative_x = chunk_relative_x,
                 m_chunk_relative_y = chunk_relative_y,
-                m_normal = Vector3.up,
                 m_vertex_table = scratch_buffer.m_vertex_table
             };
 
@@ -733,8 +731,7 @@ public class VoxelChunk
 
             vertices[entry.m_vertex_idx] = new Vertex
             {
-                m_position = entry.m_position,
-                m_normal = entry.m_normal
+                m_position = entry.m_position
             };
         }
 
