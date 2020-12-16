@@ -186,12 +186,6 @@ public class BevelTest : MonoBehaviour
             var edge = edges[i];
             var ev0 = cube_vertices[edge.m_vertex_idx_a];
             var ev1 = cube_vertices[edge.m_vertex_idx_b];
-            var ev2 = ev0;
-            var ev3 = ev1;
-            ev2.m_position = ev2.m_position + ev2.m_normal * m_bevel_tuning.m_extrusion_distance;
-            ev3.m_position = ev3.m_position + ev3.m_normal * m_bevel_tuning.m_extrusion_distance;
-            ev2.m_position.y += m_bevel_tuning.m_extrusion_vertical_offset;
-            ev3.m_position.y += m_bevel_tuning.m_extrusion_vertical_offset;
 
             var left_points = new List<Vector3>();
             var right_points = new List<Vector3>();
@@ -288,14 +282,15 @@ public class BevelTest : MonoBehaviour
         int existing_point_count = points.Count;
         var end = points[points.Count - 1];
 
-        for (int i = 0; i < existing_point_count - 1; i++)
+        for (int i = 1; i < existing_point_count - 1; i++)
         {
-            var p0 = points[i + 0];
-            var p1 = points[i + 1];
-            points.Add(p0 + (p1 - p0) * 0.25f);
-            points.Add(p0 + (p1 - p0) * 0.75f);
+            var p_prev = points[i - 1];
+            var p_curr = points[i + 0];
+            var p_next = points[i + 1];
+            points.Add(p_curr + (p_prev - p_curr) * 0.25f);
+            points.Add(p_curr + (p_next - p_curr) * 0.25f);
         }
-        
+
         points.RemoveRange(1, existing_point_count - 1);
         points.Add(end);
     }
