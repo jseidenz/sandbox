@@ -54,7 +54,6 @@ public class VoxelChunk
             scratch_buffer.m_accumulated_normals = new Vector3[ushort.MaxValue];
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
-            scratch_buffer.m_edge_map = new Dictionary<ushort, EdgeConnections>();
             scratch_buffer.m_vertex_id_to_connecting_edge_idx = new Dictionary<ushort, int>();
             scratch_buffer.m_edge_connections = new EdgeConnections[ushort.MaxValue];
             scratch_buffer.m_edge_face_infos = new EdgeFaceInfo[ushort.MaxValue];
@@ -64,7 +63,6 @@ public class VoxelChunk
         public void Clear()
         {
             m_vertex_table.Clear();
-            m_edge_map.Clear();
             m_vertex_id_to_connecting_edge_idx.Clear();
         }
 
@@ -74,7 +72,6 @@ public class VoxelChunk
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
         public Vector3[] m_accumulated_normals;
-        public Dictionary<ushort, EdgeConnections> m_edge_map;
         public Dictionary<ushort, int> m_vertex_id_to_connecting_edge_idx;
         public EdgeConnections[] m_edge_connections;
         public EdgeFaceInfo[] m_edge_face_infos;
@@ -757,7 +754,6 @@ public class VoxelChunk
             scratch_buffer.m_triangles, 
             scratch_buffer.m_edges,
             scratch_buffer.m_accumulated_normals,
-            scratch_buffer.m_edge_map,
             scratch_buffer.m_vertex_id_to_connecting_edge_idx,
             scratch_buffer.m_edge_connections,
             scratch_buffer.m_edge_face_infos,            
@@ -774,7 +770,6 @@ public class VoxelChunk
         ushort[] triangles, 
         Edge[] edges,
         Vector3[] accumulated_normals,
-        Dictionary<ushort, EdgeConnections> edge_map,
         Dictionary<ushort, int> vertex_id_to_connecting_edge_idx,
         EdgeConnections[] edge_connections,
         EdgeFaceInfo[] edge_face_infos,
@@ -795,7 +790,7 @@ public class VoxelChunk
         {
             var edge = edges[i];
 #if UNITY_EDITOR
-            if (edge_map.ContainsKey(edge.m_vertex_idx_a))
+            if (vertex_id_to_connecting_edge_idx.ContainsKey(edge.m_vertex_idx_a))
             {
                 throw new System.Exception($"Error edge already exists {edge.m_vertex_idx_a}");
             }
@@ -843,14 +838,7 @@ public class VoxelChunk
 
             var vert_idx_g = pos_writer.Write(pos_a + bottom_offset);
 
-#if UNITY_EDITOR
-            if (edge_map.ContainsKey(vert_idx_a))
-            {
-                throw new System.Exception($"Error edge already exists {vert_idx_a}");
-            }
-#endif
-
-            edge_map[vert_idx_a] = new EdgeConnections
+            edge_connections[i] = new EdgeConnections
             {
                 m_vertex_idx_a = vert_idx_a,
                 m_vertex_idx_b = vert_idx_b,
@@ -862,11 +850,11 @@ public class VoxelChunk
             };
         }
 
-
-        foreach (var kvp in edge_map)
+        for(int i = 0; i < edge_count; ++i)
         {
-            var start_edge = kvp.Value;
-            if (!edge_map.TryGetValue(start_edge.m_vertex_idx_b, out var end_edge)) continue;
+            var start_edge = edge_connections[i];
+            if (!vertex_id_to_connecting_edge_idx.TryGetValue(start_edge.m_vertex_idx_b, out var end_edge_idx)) continue;
+            var end_edge = edge_connections[end_edge_idx];
 
             triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c);
 
@@ -881,7 +869,6 @@ public class VoxelChunk
 
         triangle_idx = triangle_writer.Count;
         vert_idx = (ushort)pos_writer.Count;
-
 
         for(int i = 0; i < vert_idx; ++i)
         {
