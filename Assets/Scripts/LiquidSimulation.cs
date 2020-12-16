@@ -11,8 +11,6 @@ public class LiquidSimulation
     const float FLOW_SPEED = 0.1f;
 
     const float SIMULATION_TICK_RATE = 1f / 30f;
-    public Texture3D m_texture;
-    byte[] m_texture_data;
 
     struct DensityChange
     {
@@ -71,17 +69,6 @@ public class LiquidSimulation
         {
             m_min_dirty_cell_per_layer[i] = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
             m_max_dirty_cell_per_layer[i] = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
-        }
-
-        m_texture = new Texture3D(m_dimensions_in_cells.x, m_dimensions_in_cells.y, m_dimensions_in_cells.z, TextureFormat.R8, false);
-        m_texture.filterMode = FilterMode.Bilinear;
-        m_texture.wrapMode = TextureWrapMode.Clamp;
-
-
-        m_texture_data = new byte[m_dimensions_in_cells.x * m_dimensions_in_cells.y * m_dimensions_in_cells.z];
-        for(int i = 0; i < m_texture_data.Length; ++i)
-        {
-            m_texture_data[i] = 255;
         }
     }
 
@@ -292,39 +279,10 @@ public class LiquidSimulation
                         var liquid = layer[cell_idx] + delta;
                         layer[cell_idx] = liquid;
                         delta_layer[cell_idx] = 0;
-
-                        float clamped_density = 1f - Mathf.Clamp01(liquid);
-
-                        var density_byte = (byte)255;
-                        if(clamped_density < 1f)
-                        {
-                            density_byte = 0;
-                        }
-
-                        //byte density_byte = (byte)(clamped_density * 255f);
-                        var pixel_idx = z * m_dimensions_in_cells.y * m_dimensions_in_cells.x + layer_idx * m_dimensions_in_cells.x + x;
-                        m_texture_data[pixel_idx] = density_byte;
-
-                        is_dirty = true;
                     }
                 }
             }
         }
-
-        if(is_dirty)
-        {
-            Profiler.BeginSample("SetPixelData");
-            m_texture.SetPixelData(m_texture_data, 0, 0);
-            Profiler.EndSample();
-            Profiler.BeginSample("Apply");
-            m_texture.Apply();
-            Profiler.EndSample();
-        }
-
-        Shader.SetGlobalTexture("_LiquidTex", m_texture);
-
-        var world_size_in_meters = new Vector3(m_cell_size_in_meters.x * (float)m_dimensions_in_cells.x, m_cell_size_in_meters.y * (float)m_dimensions_in_cells.y, m_cell_size_in_meters.z * (float)m_dimensions_in_cells.z);
-        Shader.SetGlobalVector("_WorldSizeInMeters", world_size_in_meters);
     }
 
     public bool FlowAndTryToFinish(ref float remaining_liquid, float min_density_to_allow_flow, int cell_idx, int target_cell_idx, float[] delta_layer, float[] target_layer, float[] target_delta_layer, float[] target_solid_layer, int x, int layer_idx, int z, int target_x, int target_z, bool is_bottom_cell, ref Vector3Int min_dirty_idx, ref Vector3Int max_dirty_idx, ref Vector3Int target_min_dirty_idx, ref Vector3Int target_max_dirty_idx)

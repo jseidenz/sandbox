@@ -30,7 +30,6 @@ public class Game : MonoBehaviour
     [SerializeField] Vector3 m_camera_offset;
     [SerializeField] bool m_draw_solid_meshes;
     [SerializeField] bool m_use_old_liquid_material;
-    [SerializeField] SdfTuning m_sdf_tuning;
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -39,8 +38,6 @@ public class Game : MonoBehaviour
     WorldGenerator m_world_generator;
     SolidLayeredBrush m_solid_brush;
     LiquidLayeredBrush m_liquid_brush;
-    Material m_old_liquid_material;
-    Material m_new_liquid_material;
 
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
@@ -63,11 +60,8 @@ public class Game : MonoBehaviour
         var liquid_layers = m_liquid_simulation.GetLayers();
         m_liquid_simulation.SetSimulationEnabled(m_liquid_sim_enabled_on_startup);
 
-
-        m_old_liquid_material = Resources.Load<Material>("LiquidMaterials/Liquid");
-        m_new_liquid_material = Resources.Load<Material>("LiquidMaterials/Liquid2");
         m_solid_brush = SolidLayeredBrush.LoadBrush("SolidMaterials");
-        m_liquid_brush = new LiquidLayeredBrush(m_old_liquid_material);
+        m_liquid_brush = new LiquidLayeredBrush(Resources.Load<Material>("LiquidMaterials/Liquid"));
 
         m_solid_mesher = CreateSolidMesher(solid_layers, m_solid_brush);
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers(), m_liquid_brush);
@@ -284,21 +278,11 @@ public class Game : MonoBehaviour
 
     void LateUpdate()
     {
-        m_sdf_tuning.ApplyParameters(m_old_liquid_material);
 #if UNITY_EDITOR
         Profiler.BeginSample("RefreshLookupTable");
         m_solid_brush.RefreshLookupTable();
         Profiler.EndSample();
 #endif
-
-        if(m_use_old_liquid_material)
-        {
-            m_liquid_brush.SetMaterial(m_old_liquid_material);
-        }
-        else
-        {
-            m_liquid_brush.SetMaterial(m_new_liquid_material);
-        }
 
         float dt = Time.deltaTime;
 
