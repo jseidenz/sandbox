@@ -10,6 +10,7 @@ public class BevelTuning : ScriptableObject
 {
     public float m_extrusion_distance;
     public float m_extrusion_vertical_offset;
+    public int m_subdivision_count;
     public void ApplyParameters(Material material)
     {
 

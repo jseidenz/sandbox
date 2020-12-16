@@ -139,6 +139,21 @@ public class BevelTest : MonoBehaviour
             ev2.m_position.y += m_bevel_tuning.m_extrusion_vertical_offset;
             ev3.m_position.y += m_bevel_tuning.m_extrusion_vertical_offset;
 
+            var left_points = new List<Vector3>();
+            var right_points = new List<Vector3>();
+            left_points.Add(ev0.m_position);
+            left_points.Add(ev2.m_position);
+
+            right_points.Add(ev1.m_position);
+            right_points.Add(ev3.m_position);
+
+
+            for(int j = 0; j < m_bevel_tuning.m_subdivision_count; ++j)
+            {
+                Subdivide(left_points);
+                Subdivide(right_points);
+            }
+
             CreateRectangle(ev0.m_position, ev1.m_position, ev2.m_position, ev3.m_position, rectangle_verts, rectangle_triangles);
         }
 
@@ -194,7 +209,7 @@ public class BevelTest : MonoBehaviour
             points.Add((p_next - p_curr) * 0.25f);
         }
         
-        points.RemoveRange(1, existing_point_count);
+        points.RemoveRange(1, existing_point_count - 1);
         points.Add(end);
     }
 
