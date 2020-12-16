@@ -753,13 +753,11 @@ public class VoxelChunk
     {
         var pos_writer = new PositionWriter(positions, vert_idx);
         var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx);
-        var extrusion_lower_vertical_offset = m_bevel_tuning.m_extrusion_lower_vertical_offset;
-        var extrusion_vertical_offset = m_bevel_tuning.m_extrusion_vertical_offset;
-        var extrusion_distance = m_bevel_tuning.m_extrusion_distance;
-        var upper_vertical_offset = new Vector3(0, extrusion_vertical_offset, 0);
-        var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + extrusion_lower_vertical_offset, 0);
-        var bottom_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
 
+        var extrusion_distance = m_bevel_tuning.m_extrusion_distance;
+        var upper_vertical_offset = new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0);
+        var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0);
+        var bottom_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
 
 
         for (int i = 0; i < edge_count; ++i)
