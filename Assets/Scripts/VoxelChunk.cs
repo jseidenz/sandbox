@@ -55,6 +55,9 @@ public class VoxelChunk
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
             scratch_buffer.m_edge_map = new Dictionary<ushort, EdgeConnections>();
+            scratch_buffer.m_vertex_id_to_connecting_edge_idx = new Dictionary<ushort, int>();
+            scratch_buffer.m_edge_connections = new EdgeConnections[ushort.MaxValue];
+            scratch_buffer.m_edge_face_infos = new EdgeFaceInfo[ushort.MaxValue];
             return scratch_buffer;
         }
 
@@ -62,6 +65,7 @@ public class VoxelChunk
         {
             m_vertex_table.Clear();
             m_edge_map.Clear();
+            m_vertex_id_to_connecting_edge_idx.Clear();
         }
 
         public Vector3[] m_positions;
@@ -71,6 +75,9 @@ public class VoxelChunk
         public VertexTable m_vertex_table;
         public Vector3[] m_accumulated_normals;
         public Dictionary<ushort, EdgeConnections> m_edge_map;
+        public Dictionary<ushort, int> m_vertex_id_to_connecting_edge_idx;
+        public EdgeConnections[] m_edge_connections;
+        public EdgeFaceInfo[] m_edge_face_infos;
         public DensitySample[] m_density_samples;
     }
 
@@ -85,6 +92,13 @@ public class VoxelChunk
     {
         public ushort m_vertex_idx_a;
         public ushort m_vertex_idx_b;
+    }
+
+    public struct EdgeFaceInfo
+    {
+        public ushort m_vertex_idx_a;
+        public ushort m_vertex_idx_b;
+        public Vector3 m_normal;
     }
 
     public struct NormalWeldingInfo
@@ -735,7 +749,20 @@ public class VoxelChunk
         vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
-        FinalizeEdges(scratch_buffer.m_positions, scratch_buffer.m_vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_accumulated_normals, scratch_buffer.m_edge_map, ref vert_count, ref triangle_count, ref edge_idx);
+        FinalizeEdges(
+            scratch_buffer.m_positions, 
+            scratch_buffer.m_vertices, 
+            scratch_buffer.m_triangles, 
+            scratch_buffer.m_edges,
+            scratch_buffer.m_accumulated_normals,
+            scratch_buffer.m_edge_map,
+            scratch_buffer.m_vertex_id_to_connecting_edge_idx,
+            scratch_buffer.m_edge_connections,
+            scratch_buffer.m_edge_face_infos,            
+            ref vert_count, 
+            ref triangle_count, 
+            ref edge_idx
+            );
         Profiler.EndSample();
     }
 
@@ -746,6 +773,9 @@ public class VoxelChunk
         Edge[] edges,
         Vector3[] accumulated_normals,
         Dictionary<ushort, EdgeConnections> edge_map,
+        Dictionary<ushort, int> vertex_id_to_connecting_edge_idx,
+        EdgeConnections[] edge_connections,
+        EdgeFaceInfo[] edge_face_infos,
         ref ushort vert_idx, 
         ref int triangle_idx, 
         ref int edge_count
