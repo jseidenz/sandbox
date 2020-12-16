@@ -16,6 +16,7 @@ public class BevelTest : MonoBehaviour
     }
 
     Mesh m_mesh;
+    Mesh m_mesh2;
     [SerializeField] Material m_material;
     [SerializeField] BevelTuning m_bevel_tuning;
 
@@ -24,6 +25,11 @@ public class BevelTest : MonoBehaviour
         m_mesh = new Mesh();
         m_mesh.name = "BevelMesh";
         m_mesh.MarkDynamic();
+
+
+        m_mesh2 = new Mesh();
+        m_mesh2.name = "BevelEdge";
+        m_mesh2.MarkDynamic();
     }
 
     void LateUpdate()
@@ -31,10 +37,10 @@ public class BevelTest : MonoBehaviour
         m_bevel_tuning.ApplyParameters(m_material);
 
         m_mesh.Clear();
-        m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
+        m_mesh.indexFormat = IndexFormat.UInt16;
 
-        int vert_count = 8;
-
+        m_mesh2.Clear();
+        m_mesh2.indexFormat = IndexFormat.UInt16;
 
         Vector3 cube_size = Vector3.one;
         var corners = new Vector3[]
@@ -88,7 +94,7 @@ public class BevelTest : MonoBehaviour
             var v0 = vertices[idx0];
             var v1 = vertices[idx1];
             var v2 = vertices[idx2];
-            var normal = Vector3.Cross(v2.m_position - v0.m_position, v1.m_position - v0.m_position).normalized;
+            var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position).normalized;
 
             v0.m_normal = normal;
             v1.m_normal = normal;
@@ -99,15 +105,32 @@ public class BevelTest : MonoBehaviour
             vertices[idx2] = v2;
         }
 
-
         m_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
-
         m_mesh.SetVertexBufferData(vertices, 0, 0, vertices.Length, 0, m_mesh_update_flags);
         m_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
-        m_mesh.RecalculateNormals();
-        m_mesh.RecalculateTangents();
+
+        CreateEdgeMesh();
 
         Graphics.DrawMesh(m_mesh, transform.localToWorldMatrix, m_material, 0, null, 0);
+        Graphics.DrawMesh(m_mesh2, transform.localToWorldMatrix, m_material, 0, null, 0);
+        
+    }
+
+    void CreateEdgeMesh()
+    {
+        var edges = new VoxelChunk.Edge[4];
+        edges[0] = new VoxelChunk.Edge { m_vertex_idx_a = 6, m_vertex_idx_b = 7 };
+        edges[1] = new VoxelChunk.Edge { m_vertex_idx_a = 7, m_vertex_idx_b = 8 };
+        edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = 9, m_vertex_idx_b = 10 };
+        edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = 10, m_vertex_idx_b = 11 };
+
+        var vertices = new Vertex[0];
+        var triangles = new ushort[0];
+
+        var edge_mesh = m_mesh2;
+        edge_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
+        edge_mesh.SetVertexBufferData(vertices, 0, 0, vertices.Length, 0, m_mesh_update_flags);
+        edge_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
     }
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
