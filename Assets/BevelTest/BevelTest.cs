@@ -14,7 +14,7 @@ public struct EdgeConnections
     public ushort m_vertex_idx_e;
     public ushort m_vertex_idx_f;
     public ushort m_vertex_idx_g;
-
+    public bool m_is_border_edge;
 }
 
 public class BevelTest : MonoBehaviour

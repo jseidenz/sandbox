@@ -57,6 +57,7 @@ public class VoxelChunk
             scratch_buffer.m_vertex_id_to_connecting_edge_idx = new Dictionary<ushort, int>();
             scratch_buffer.m_edge_connections = new EdgeConnections[ushort.MaxValue];
             scratch_buffer.m_edge_face_infos = new EdgeFaceInfo[ushort.MaxValue];
+            scratch_buffer.m_triangles_to_strip = new List<ushort>();
             return scratch_buffer;
         }
 
@@ -64,6 +65,7 @@ public class VoxelChunk
         {
             m_vertex_table.Clear();
             m_vertex_id_to_connecting_edge_idx.Clear();
+            m_triangles_to_strip.Clear();
         }
 
         public Vector3[] m_positions;
@@ -76,6 +78,7 @@ public class VoxelChunk
         public EdgeConnections[] m_edge_connections;
         public EdgeFaceInfo[] m_edge_face_infos;
         public DensitySample[] m_density_samples;
+        public List<ushort> m_triangles_to_strip;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -89,6 +92,7 @@ public class VoxelChunk
     {
         public ushort m_vertex_idx_a;
         public ushort m_vertex_idx_b;
+        public bool m_is_border;
     }
 
     public struct EdgeFaceInfo
@@ -98,6 +102,7 @@ public class VoxelChunk
         public Vector3 m_pos_a;
         public Vector3 m_pos_b;
         public Vector3 m_normal;
+        public bool m_is_border;
     }
 
     public struct NormalWeldingInfo
@@ -122,6 +127,7 @@ public class VoxelChunk
         public float m_right_far_density;
         public int m_x;
         public int m_y;
+        public bool m_is_border_sample;
     }
 
     [System.Flags]
@@ -368,12 +374,13 @@ public class VoxelChunk
             m_triangles[m_triangle_idx++] = vert_idx_c;
         }
 
-        public void ExtrudeTopToBot(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b)
+        public void ExtrudeTopToBot(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b, bool is_border_sample)
         {
             m_edges[m_edge_idx++] = new Edge
             {
                 m_vertex_idx_a = vert_idx_a,
-                m_vertex_idx_b = vert_idx_b
+                m_vertex_idx_b = vert_idx_b,
+                m_is_border = is_border_sample
             };
         }
     }
@@ -437,6 +444,7 @@ public class VoxelChunk
                     if (is_occluded) continue;
                 }
 
+                bool is_border_sample = x == m_density_grid_x - 1 || x == max_x - 1 || y == m_density_grid_y - 1 || y == max_y - 1;
                 density_samples[sample_count++] = new DensitySample
                 {
                     m_x = x,
@@ -445,7 +453,8 @@ public class VoxelChunk
                     m_left_far_density = left_far_density,
                     m_right_near_density = right_near_density,
                     m_right_far_density = right_far_density,
-                    m_sample_type = sample_type
+                    m_sample_type = sample_type,
+                    m_is_border_sample = is_border_sample
                 };
             }
         }
@@ -471,6 +480,7 @@ public class VoxelChunk
             var right_near_density = density_sample.m_right_near_density;
             var right_far_density = density_sample.m_right_far_density;
             var sample_type = density_sample.m_sample_type;
+            bool is_border_sample = density_sample.m_is_border_sample;
 
             var near_z = (float)y * m_voxel_size_in_meters.z;
             var far_z = near_z + m_voxel_size_in_meters.z;
@@ -515,7 +525,7 @@ public class VoxelChunk
                 var near_edge = marcher.NearEdge();
 
                 marcher.Triangle(left_near, left_edge, near_edge);
-                marcher.ExtrudeTopToBot(near_edge, left_edge);
+                marcher.ExtrudeTopToBot(near_edge, left_edge, is_border_sample);
             }
             else if (sample_type == 2)
             {
@@ -524,7 +534,7 @@ public class VoxelChunk
                 var right_near = marcher.RightNear();
 
                 marcher.Triangle(near_edge, right_edge, right_near);
-                marcher.ExtrudeTopToBot(right_edge, near_edge);
+                marcher.ExtrudeTopToBot(right_edge, near_edge, is_border_sample);
             }
             else if (sample_type == 3)
             {
@@ -535,7 +545,7 @@ public class VoxelChunk
 
                 marcher.Triangle(left_edge, right_near, left_near);
                 marcher.Triangle(left_edge, right_edge, right_near);
-                marcher.ExtrudeTopToBot(right_edge, left_edge);
+                marcher.ExtrudeTopToBot(right_edge, left_edge, is_border_sample);
             }
             else if (sample_type == 4)
             {
@@ -544,7 +554,7 @@ public class VoxelChunk
                 var right_edge = marcher.RightEdge();
 
                 marcher.Triangle(far_edge, right_far, right_edge);
-                marcher.ExtrudeTopToBot(far_edge, right_edge);
+                marcher.ExtrudeTopToBot(far_edge, right_edge, is_border_sample);
             }
             else if (sample_type == 5)
             {
@@ -561,8 +571,8 @@ public class VoxelChunk
                     marcher.Triangle(left_edge, right_edge, near_edge);
                     marcher.Triangle(left_edge, far_edge, right_edge);
                     marcher.Triangle(far_edge, right_far, right_edge);
-                    marcher.ExtrudeTopToBot(far_edge, left_edge);
-                    marcher.ExtrudeTopToBot(near_edge, right_edge);
+                    marcher.ExtrudeTopToBot(far_edge, left_edge, is_border_sample);
+                    marcher.ExtrudeTopToBot(near_edge, right_edge, is_border_sample);
                 }
                 else
                 {
@@ -575,8 +585,8 @@ public class VoxelChunk
 
                     marcher.Triangle(left_near, left_edge, near_edge);
                     marcher.Triangle(far_edge, right_far, right_edge);
-                    marcher.ExtrudeTopToBot(near_edge, left_edge);
-                    marcher.ExtrudeTopToBot(far_edge, right_edge);
+                    marcher.ExtrudeTopToBot(near_edge, left_edge, is_border_sample);
+                    marcher.ExtrudeTopToBot(far_edge, right_edge, is_border_sample);
                 }
             }
             else if (sample_type == 6)
@@ -588,7 +598,7 @@ public class VoxelChunk
 
                 marcher.Triangle(far_edge, right_far, right_near);
                 marcher.Triangle(far_edge, right_near, near_edge);
-                marcher.ExtrudeTopToBot(far_edge, near_edge);
+                marcher.ExtrudeTopToBot(far_edge, near_edge, is_border_sample);
             }
             else if (sample_type == 7)
             {
@@ -601,7 +611,7 @@ public class VoxelChunk
                 marcher.Triangle(left_edge, right_near, left_near);
                 marcher.Triangle(left_edge, far_edge, right_near);
                 marcher.Triangle(far_edge, right_far, right_near);
-                marcher.ExtrudeTopToBot(far_edge, left_edge);
+                marcher.ExtrudeTopToBot(far_edge, left_edge, is_border_sample);
             }
             else if (sample_type == 8)
             {
@@ -610,7 +620,7 @@ public class VoxelChunk
                 var left_edge = marcher.LeftEdge();
 
                 marcher.Triangle(left_far, far_edge, left_edge);
-                marcher.ExtrudeTopToBot(left_edge, far_edge);
+                marcher.ExtrudeTopToBot(left_edge, far_edge, is_border_sample);
             }
             else if (sample_type == 9)
             {
@@ -621,7 +631,7 @@ public class VoxelChunk
 
                 marcher.Triangle(left_far, far_edge, near_edge);
                 marcher.Triangle(left_far, near_edge, left_near);
-                marcher.ExtrudeTopToBot(near_edge, far_edge);
+                marcher.ExtrudeTopToBot(near_edge, far_edge, is_border_sample);
             }
             else if (sample_type == 10)
             {
@@ -638,8 +648,8 @@ public class VoxelChunk
                     marcher.Triangle(left_edge, far_edge, right_edge);
                     marcher.Triangle(left_edge, right_edge, near_edge);
                     marcher.Triangle(near_edge, right_edge, right_near);
-                    marcher.ExtrudeTopToBot(left_edge, near_edge);
-                    marcher.ExtrudeTopToBot(right_edge, far_edge);
+                    marcher.ExtrudeTopToBot(left_edge, near_edge, is_border_sample);
+                    marcher.ExtrudeTopToBot(right_edge, far_edge, is_border_sample);
                 }
                 else
                 {
@@ -652,8 +662,8 @@ public class VoxelChunk
 
                     marcher.Triangle(near_edge, right_edge, right_near);
                     marcher.Triangle(left_far, far_edge, left_edge);
-                    marcher.ExtrudeTopToBot(left_edge, far_edge);
-                    marcher.ExtrudeTopToBot(right_edge, near_edge);
+                    marcher.ExtrudeTopToBot(left_edge, far_edge, is_border_sample);
+                    marcher.ExtrudeTopToBot(right_edge, near_edge, is_border_sample);
 
                 }
             }
@@ -668,7 +678,7 @@ public class VoxelChunk
                 marcher.Triangle(left_far, far_edge, left_near);
                 marcher.Triangle(left_near, far_edge, right_edge);
                 marcher.Triangle(left_near, right_edge, right_near);
-                marcher.ExtrudeTopToBot(right_edge, far_edge);
+                marcher.ExtrudeTopToBot(right_edge, far_edge, is_border_sample);
             }
             else if (sample_type == 12)
             {
@@ -679,7 +689,7 @@ public class VoxelChunk
 
                 marcher.Triangle(left_far, right_far, left_edge);
                 marcher.Triangle(left_edge, right_far, right_edge);
-                marcher.ExtrudeTopToBot(left_edge, right_edge);
+                marcher.ExtrudeTopToBot(left_edge, right_edge, is_border_sample);
             }
             else if (sample_type == 13)
             {
@@ -692,7 +702,7 @@ public class VoxelChunk
                 marcher.Triangle(left_near, left_far, near_edge);
                 marcher.Triangle(left_far, right_edge, near_edge);
                 marcher.Triangle(left_far, right_far, right_edge);
-                marcher.ExtrudeTopToBot(near_edge, right_edge);
+                marcher.ExtrudeTopToBot(near_edge, right_edge, is_border_sample);
             }
             else if (sample_type == 14)
             {
@@ -705,7 +715,7 @@ public class VoxelChunk
                 marcher.Triangle(left_far, right_far, left_edge);
                 marcher.Triangle(left_edge, right_far, near_edge);
                 marcher.Triangle(near_edge, right_far, right_near);
-                marcher.ExtrudeTopToBot(left_edge, near_edge);
+                marcher.ExtrudeTopToBot(left_edge, near_edge, is_border_sample);
 
             }
             else if (sample_type == SAMPLE_TYPE_FULL_SQUARE)
@@ -746,7 +756,8 @@ public class VoxelChunk
             scratch_buffer.m_accumulated_normals,
             scratch_buffer.m_vertex_id_to_connecting_edge_idx,
             scratch_buffer.m_edge_connections,
-            scratch_buffer.m_edge_face_infos,            
+            scratch_buffer.m_edge_face_infos,
+            scratch_buffer.m_triangles_to_strip,
             ref vert_count, 
             ref triangle_count, 
             ref edge_idx
@@ -763,13 +774,14 @@ public class VoxelChunk
         Dictionary<ushort, int> vertex_id_to_connecting_edge_idx,
         EdgeConnections[] edge_connections,
         EdgeFaceInfo[] edge_face_infos,
+        List<ushort> triangles_to_strip,
         ref ushort vert_idx, 
         ref int triangle_idx, 
         ref int edge_count
         )
     {
         var pos_writer = new PositionWriter(positions, vert_idx);
-        var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx);
+        var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx, triangles_to_strip);
 
         var extrusion_distance = m_bevel_tuning.m_extrusion_distance;
         var upper_vertical_offset = new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0);
@@ -798,7 +810,8 @@ public class VoxelChunk
                 m_vertex_idx_b = edge.m_vertex_idx_b,
                 m_pos_a = pos_a,
                 m_pos_b = pos_b,
-                m_normal = normal
+                m_normal = normal,
+                m_is_border = edge.m_is_border
             };
         }
 
@@ -807,6 +820,8 @@ public class VoxelChunk
         for (int i = 0; i < edge_count; ++i)
         {
             var edge_face_info = edge_face_infos[i];
+
+            bool is_border_edge = edge_face_info.m_is_border;
 
             var vert_idx_a = edge_face_info.m_vertex_idx_a;
             var vert_idx_b = edge_face_info.m_vertex_idx_b;
@@ -824,14 +839,14 @@ public class VoxelChunk
             var vert_idx_c = pos_writer.Write(pos_a + horizontal_offset + upper_vertical_offset + left_offset);
             var vert_idx_d = pos_writer.Write(pos_b + horizontal_offset + upper_vertical_offset + right_offset);
 
-            triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
-            triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
+            triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c, is_border_edge);
+            triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d, is_border_edge);
 
             var vert_idx_e = pos_writer.Write(pos_a + horizontal_offset + lower_vertical_offset + left_offset);
             var vert_idx_f = pos_writer.Write(pos_b + horizontal_offset + lower_vertical_offset + right_offset);
 
-            triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
-            triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
+            triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e, is_border_edge);
+            triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f, is_border_edge);
 
             var vert_idx_g = pos_writer.Write(pos_a + bottom_offset);
 
@@ -844,6 +859,7 @@ public class VoxelChunk
                 m_vertex_idx_e = vert_idx_e,
                 m_vertex_idx_f = vert_idx_f,
                 m_vertex_idx_g = vert_idx_g,
+                m_is_border_edge = is_border_edge
             };
         }
 
@@ -851,17 +867,20 @@ public class VoxelChunk
         {
             var start_edge = edge_connections[i];
             if (!vertex_id_to_connecting_edge_idx.TryGetValue(start_edge.m_vertex_idx_b, out var end_edge_idx)) continue;
+
+            bool is_border_edge = start_edge.m_is_border_edge;
+
             var end_edge = edge_connections[end_edge_idx];
 
-            triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c);
+            triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c, is_border_edge);
 
-            triangle_writer.Write(start_edge.m_vertex_idx_d, end_edge.m_vertex_idx_c, start_edge.m_vertex_idx_f);
-            triangle_writer.Write(start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_c, end_edge.m_vertex_idx_e);
+            triangle_writer.Write(start_edge.m_vertex_idx_d, end_edge.m_vertex_idx_c, start_edge.m_vertex_idx_f, is_border_edge);
+            triangle_writer.Write(start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_c, end_edge.m_vertex_idx_e, is_border_edge);
 
-            triangle_writer.Write(start_edge.m_vertex_idx_e, start_edge.m_vertex_idx_f, start_edge.m_vertex_idx_g);
-            triangle_writer.Write(start_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_g);
+            triangle_writer.Write(start_edge.m_vertex_idx_e, start_edge.m_vertex_idx_f, start_edge.m_vertex_idx_g, is_border_edge);
+            triangle_writer.Write(start_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_g, is_border_edge);
 
-            triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e);
+            triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e, is_border_edge);
         }
 
         triangle_idx = triangle_writer.Count;
@@ -896,6 +915,30 @@ public class VoxelChunk
                 m_normal = accumulated_normals[i].normalized
             };
         }
+
+        if (triangles_to_strip.Count > 0)
+        {
+            var next_stripped_triangle_iter = 0;
+            var triangles_stripped = 0;
+            for (int i = 0; i < triangle_idx - triangles_stripped; i += 3)
+            {
+                if (next_stripped_triangle_iter < triangles_to_strip.Count)
+                {
+                    var next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_iter] + triangles_stripped;
+                    if (next_stripped_triangle_idx == i)
+                    {
+                       //triangles_stripped += 3;
+                    }
+                }
+
+                triangles[i + 0] = triangles[i + 0 + triangles_stripped];
+                triangles[i + 1] = triangles[i + 1 + triangles_stripped];
+                triangles[i + 2] = triangles[i + 2 + triangles_stripped];
+            }
+
+            triangle_idx -= triangles_stripped;
+        }
+
     }
 
     public void SetCollisionGenerationEnabled(bool is_enabled)
@@ -965,14 +1008,20 @@ public class VoxelChunk
 
     public struct TriangleWriter
     {
-        public TriangleWriter(ushort[] triangles, ushort triangle_count)
+        public TriangleWriter(ushort[] triangles, ushort triangle_count, List<ushort> triangles_to_strip)
         {
             m_triangles = triangles;
             m_triangle_count = triangle_count;
+            m_triangles_to_strip = triangles_to_strip;
         }
 
-        public void Write(ushort vert_idx0, ushort vert_idx1, ushort vert_idx2)
+        public void Write(ushort vert_idx0, ushort vert_idx1, ushort vert_idx2, bool should_strip)
         {
+            if(should_strip)
+            {
+                m_triangles_to_strip.Add(m_triangle_count);
+            }
+
             m_triangles[m_triangle_count++] = vert_idx0;
             m_triangles[m_triangle_count++] = vert_idx1;
             m_triangles[m_triangle_count++] = vert_idx2;
@@ -984,6 +1033,7 @@ public class VoxelChunk
 
         public ushort[] m_triangles;
         public ushort m_triangle_count;
+        public List<ushort> m_triangles_to_strip;
     }
 
 }
