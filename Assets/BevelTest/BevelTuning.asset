@@ -12,3 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38137c4d9d7a43145888671544d758f4, type: 3}
   m_Name: BevelTuning
   m_EditorClassIdentifier: 
+  m_extrusion_distance: 0.025
+  m_extrusion_vertical_offset: -0.1
+  m_subdivision_count: 1

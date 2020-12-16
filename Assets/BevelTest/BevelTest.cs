@@ -178,6 +178,9 @@ public class BevelTest : MonoBehaviour
         var vert_writer = VertWriter.Start();
         var triangle_writer = TriangleWriter.Start();
 
+
+        var top_verts = new List<ushort>();
+
         for (int i = 0; i < edges.Length; ++i)
         {
             var edge = edges[i];
@@ -206,16 +209,27 @@ public class BevelTest : MonoBehaviour
                 Subdivide(right_points);
             }
 
-            for(int j = 0; j < left_points.Count - 1; ++j)
+            var idx0 = vert_writer.Write(left_points[0]);
+            var idx1 = vert_writer.Write(right_points[0]);
+            top_verts.Add(idx0);
+            top_verts.Add(idx1);
+            for (int j = 1; j < left_points.Count - 1; ++j)
             {
-                var idx0 = vert_writer.Write(left_points[j]);
-                var idx1 = vert_writer.Write(right_points[j]);
                 var idx2 = vert_writer.Write(left_points[j + 1]);
                 var idx3 = vert_writer.Write(right_points[j + 1]);
 
                 triangle_writer.Write(idx0, idx1, idx2);
                 triangle_writer.Write(idx2, idx1, idx3);
+
+                idx0 = idx2;
+                idx1 = idx3;
             }
+
+            var bottom_idx0 = vert_writer.Write(ev0.m_position + ev0.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
+            var bottom_idx1 = vert_writer.Write(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
+
+            triangle_writer.Write(idx0, idx1, bottom_idx0);
+            triangle_writer.Write(bottom_idx0, idx1, bottom_idx1);
         }
 
         var vertices = new Vertex[vert_writer.Count];
@@ -254,6 +268,11 @@ public class BevelTest : MonoBehaviour
             var v = vertices[i];
             v.m_normal = normal_accumulator[i].normalized;
             vertices[i] = v;
+        }
+
+        foreach(var top_vert_idx in top_verts)
+        {
+            vertices[top_vert_idx].m_normal = Vector3.up;
         }
 
 
