@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4515ee7e54bfc24da50445ee0b5b0b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_material: {fileID: 0}
+  m_material: {fileID: 2100000, guid: 03282c669be56424db6204bfdf61844d, type: 2}
   m_radius: 0
   m_iso_dist: 0
   m_corner_idx: 0

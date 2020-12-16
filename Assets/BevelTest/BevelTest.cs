@@ -17,57 +17,18 @@ public class BevelTest : MonoBehaviour
 
     Mesh m_mesh;
     [SerializeField] Material m_material;
-    [SerializeField] float m_radius;
-    [SerializeField] float m_iso_dist;
-    [SerializeField] int m_corner_idx;
-    [SerializeField] Vector3Int m_texture_dimensions;
-    [SerializeField] Vector3Int m_world_size_in_cells;
-    [SerializeField] Vector3 m_cell_size_in_meters;
-    [SerializeField] SdfTuning m_sdf_tuning;
-    public Texture3D m_texture;
-    byte[] m_texture_data;
+    [SerializeField] BevelTuning m_bevel_tuning;
 
     void Awake()
     {
         m_mesh = new Mesh();
-        m_mesh.name = "SdfMesh";
+        m_mesh.name = "BevelMesh";
         m_mesh.MarkDynamic();
-        //m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, TextureFormat.R8, false);
-        m_texture = new Texture3D(m_texture_dimensions.x, m_texture_dimensions.y, m_texture_dimensions.z, UnityEngine.Experimental.Rendering.GraphicsFormat.R8_UNorm, UnityEngine.Experimental.Rendering.TextureCreationFlags.None);
-        m_texture.filterMode = FilterMode.Point;
-        m_texture.wrapMode = TextureWrapMode.Clamp;
-
-        m_texture_data = new byte[m_texture_dimensions.x * m_texture_dimensions.y * m_texture_dimensions.z];
-        
-        for(int i = 0; i < m_texture_data.Length; ++i)
-        {
-            var value = (byte)0;
-            if(i == 13)
-            {
-                value = 255;
-            }
-            m_texture_data[i] = value;
-        }
     }
 
     void LateUpdate()
     {
-        m_sdf_tuning.ApplyParameters(m_material);
-
-        Profiler.BeginSample("SetPixelData");
-        m_texture.SetPixelData(m_texture_data, 0, 0);
-        Profiler.EndSample();
-        Profiler.BeginSample("Apply");
-        m_texture.Apply();
-        Profiler.EndSample();
-
-
-        m_material.SetTexture("_LiquidTex", m_texture);
-
-        var world_size_in_meters = new Vector3((float)m_world_size_in_cells.x * m_cell_size_in_meters.x, (float)m_world_size_in_cells.y * m_cell_size_in_meters.y, (float)m_world_size_in_cells.z * m_cell_size_in_meters.z);
-
-        m_material.SetVector("_WorldSizeInMeters", world_size_in_meters);
-        m_material.SetVector("_WorldSizeInCells", new Vector3(m_world_size_in_cells.x, m_world_size_in_cells.y, m_world_size_in_cells.z));
+        m_bevel_tuning.ApplyParameters(m_material);
 
         m_mesh.Clear();
         m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
@@ -77,7 +38,7 @@ public class BevelTest : MonoBehaviour
         var vertices = new Vertex[vert_count];
 
         int vert_idx = 0;
-        Vector3 cube_size = m_cell_size_in_meters;
+        Vector3 cube_size = Vector3.one;
         vertices[vert_idx++].m_position = new Vector3(0, 0, 0);
         vertices[vert_idx++].m_position = new Vector3(cube_size.x, 0, 0);
         vertices[vert_idx++].m_position = new Vector3(cube_size.x, cube_size.y, 0);
@@ -113,10 +74,10 @@ public class BevelTest : MonoBehaviour
 
         m_mesh.SetVertexBufferData(vertices, 0, 0, vert_count, 0, m_mesh_update_flags);
         m_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
+        m_mesh.RecalculateNormals();
+        m_mesh.RecalculateTangents();
 
-        var offset = m_sdf_tuning.m_offset * Vector3.one;
-        var transform = Matrix4x4.TRS(offset, Quaternion.identity, Vector3.one);
-        Graphics.DrawMesh(m_mesh, transform, m_material, 0, null, 0);
+        Graphics.DrawMesh(m_mesh, transform.localToWorldMatrix, m_material, 0, null, 0);
     }
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
