@@ -787,10 +787,12 @@ public class VoxelChunk
 
             var vert_idx_g = vert_writer.Write(pos_a + new Vector3(0, -m_voxel_size_in_meters.y, 0));
 
+#if UNITY_EDITOR
             if (edge_map.ContainsKey(vert_idx_a))
             {
                 throw new System.Exception($"Error edge already exists {vert_idx_a}");
             }
+#endif
 
             edge_map[vert_idx_a] = new EdgeConnections
             {
