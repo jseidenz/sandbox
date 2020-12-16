@@ -171,6 +171,23 @@ public class BevelTest : MonoBehaviour
         edge_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
     }
 
+    public void Subdivide(List<Vector3> points)
+    {
+        int existing_point_count = points.Count;
+        var end = points[points.Count - 1];
+        for (int i = 1; i < existing_point_count - 1; i++)
+        {
+            var p_prev = points[i - 1];
+            var p_curr = points[i + 0];
+            var p_next = points[i + 1];
+            points.Add((p_prev - p_curr) * 0.25f);
+            points.Add((p_next - p_curr) * 0.25f);
+        }
+        
+        points.RemoveRange(1, existing_point_count);
+        points.Add(end);
+    }
+
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
     {
         new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
