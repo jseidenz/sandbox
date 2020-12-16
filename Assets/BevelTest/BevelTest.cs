@@ -155,7 +155,15 @@ public class BevelTest : MonoBehaviour
                 Subdivide(right_points);
             }
 
-            CreateRectangle(ev0.m_position, ev1.m_position, ev2.m_position, ev3.m_position, rectangle_verts, rectangle_triangles);
+            for(int j = 0; j < left_points.Count - 1; ++j)
+            {
+                var p0 = left_points[j];
+                var p1 = right_points[j];
+                var p2 = left_points[j + 1];
+                var p3 = right_points[j + 1];
+
+                CreateRectangle(p0, p1, p2, p3, rectangle_verts, rectangle_triangles);
+            }
         }
 
         var vertices = new Vertex[rectangle_verts.Count];
