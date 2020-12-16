@@ -383,11 +383,11 @@ public class VoxelChunk
         sample_count = 0;
         has_occlusion_changed = false;
 
-        var max_y = System.Math.Min(m_density_grid_y + m_chunk_dimension_in_voxels, m_layer_height_in_voxels - 1);
-        for (int y = m_density_grid_y; y < max_y; ++y)
+        var max_y = System.Math.Min(m_density_grid_y + m_chunk_dimension_in_voxels + 1, m_layer_height_in_voxels - 1);
+        for (int y = System.Math.Max(m_density_grid_y - 1, 0); y < max_y; ++y)
         {
-            var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels, m_layer_width_in_voxels - 1);
-            for (int x = m_density_grid_x; x < max_x; ++x)
+            var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
+            for (int x = System.Math.Max(m_density_grid_x - 1, 0); x < max_x; ++x)
             {
                 int left_near_cell_idx = y * m_layer_width_in_voxels + x;
 
@@ -478,7 +478,7 @@ public class VoxelChunk
 
             int chunk_relative_x = x - m_density_grid_x;
             int chunk_relative_y = y - m_density_grid_y;
-            int chunk_relative_cell_idx = chunk_relative_y * m_chunk_dimension_in_voxels + chunk_relative_x;
+            int chunk_relative_cell_idx = chunk_relative_y * (m_chunk_dimension_in_voxels + 2) + chunk_relative_x;
 
             var left_x = (float)x * m_voxel_size_in_meters.x;
             var right_x = left_x + m_voxel_size_in_meters.x;
@@ -497,7 +497,7 @@ public class VoxelChunk
                 m_right_far_density = right_far_density,
                 m_iso_level = m_iso_level,
                 m_triangle_idx = triangle_count,
-                m_chunk_dimensions_in_voxels = m_chunk_dimension_in_voxels,
+                m_chunk_dimensions_in_voxels = (m_chunk_dimension_in_voxels + 2),
                 m_triangles = scratch_buffer.m_triangles,
                 m_edge_idx = edge_idx,
                 m_edges = scratch_buffer.m_edges,
@@ -872,7 +872,6 @@ public class VoxelChunk
             accumulated_normals[i] = Vector3.zero;
         }
 
-
         for (int i = 0; i < triangle_idx; i += 3)
         {
             var vert_idx0 = triangles[i + 0];
@@ -889,7 +888,7 @@ public class VoxelChunk
             accumulated_normals[vert_idx2] = accumulated_normals[vert_idx2] + normal;
         }
 
-        for(int i = 0; i < vert_idx; ++i)
+        for (int i = 0; i < vert_idx; ++i)
         {
             vertices[i] = new Vertex
             {
