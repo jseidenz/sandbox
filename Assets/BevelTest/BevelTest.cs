@@ -266,7 +266,7 @@ public class BevelTest : MonoBehaviour
         for(int i = 0; i < vertices.Length; ++i)
         {
             var v = vertices[i];
-            v.m_normal = normal_accumulator[i].normalized;
+            v.m_normal = (normal_accumulator[i]).normalized;
             vertices[i] = v;
         }
 
