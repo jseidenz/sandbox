@@ -197,12 +197,6 @@ public class BevelTest : MonoBehaviour
             right_points.Add(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance);
             right_points.Add(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
 
-            for(int j = 0; j < m_bevel_tuning.m_subdivision_count; ++j)
-            {
-                Subdivide(left_points);
-                Subdivide(right_points);
-            }
-
             var idx0 = vert_writer.Write(left_points[0]);
             var idx1 = vert_writer.Write(right_points[0]);
             top_verts.Add(idx0);
@@ -275,24 +269,6 @@ public class BevelTest : MonoBehaviour
         edge_mesh.SetVertexBufferData(vertices, 0, 0, vertices.Length, 0, m_mesh_update_flags);
         edge_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
         edge_mesh.RecalculateBounds();
-    }
-
-    public void Subdivide(List<Vector3> points)
-    {
-        int existing_point_count = points.Count;
-        var end = points[points.Count - 1];
-
-        for (int i = 1; i < existing_point_count - 1; i++)
-        {
-            var p_prev = points[i - 1];
-            var p_curr = points[i + 0];
-            var p_next = points[i + 1];
-            points.Add(p_curr + (p_prev - p_curr) * 0.25f);
-            points.Add(p_curr + (p_next - p_curr) * 0.25f);
-        }
-
-        points.RemoveRange(1, existing_point_count - 1);
-        points.Add(end);
     }
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
