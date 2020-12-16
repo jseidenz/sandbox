@@ -812,6 +812,8 @@ public class VoxelChunk
             };
         }
 
+        float max_edge_seperation = m_bevel_tuning.m_max_edge_seperation;
+
         for (int i = 0; i < edge_count; ++i)
         {
             var edge_face_info = edge_face_infos[i];
@@ -824,14 +826,19 @@ public class VoxelChunk
             var top_normal = edge_face_info.m_normal;
             var horizontal_offset = top_normal * extrusion_distance;
 
-            var vert_idx_c = pos_writer.Write(pos_a + horizontal_offset + upper_vertical_offset);
-            var vert_idx_d = pos_writer.Write(pos_b + horizontal_offset + upper_vertical_offset);
+            var a_to_b_normalized = (pos_b - pos_a).normalized;
+
+            var left_offset = a_to_b_normalized * max_edge_seperation;
+            var right_offset = a_to_b_normalized * -max_edge_seperation;
+
+            var vert_idx_c = pos_writer.Write(pos_a + horizontal_offset + upper_vertical_offset + left_offset);
+            var vert_idx_d = pos_writer.Write(pos_b + horizontal_offset + upper_vertical_offset + right_offset);
 
             triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
             triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
 
-            var vert_idx_e = pos_writer.Write(pos_a + horizontal_offset + lower_vertical_offset);
-            var vert_idx_f = pos_writer.Write(pos_b + horizontal_offset + lower_vertical_offset);
+            var vert_idx_e = pos_writer.Write(pos_a + horizontal_offset + lower_vertical_offset + left_offset);
+            var vert_idx_f = pos_writer.Write(pos_b + horizontal_offset + lower_vertical_offset + right_offset);
 
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);

@@ -15,3 +15,6 @@ MonoBehaviour:
   m_extrusion_distance: 0.05
   m_extrusion_vertical_offset: -0.08
   m_extrusion_lower_vertical_offset: 0.08
+  m_max_edge_seperation: 0.05
+  m_debug_horizontal_left_offset: 0
+  m_debug_horizontal_right_offset: 0

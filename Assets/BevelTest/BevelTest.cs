@@ -197,6 +197,8 @@ public class BevelTest : MonoBehaviour
 
         m_edge_map.Clear();
 
+        
+
         for (int i = 0; i < edges.Length; ++i)
         {
             var original_edge = edges[i];
@@ -209,14 +211,19 @@ public class BevelTest : MonoBehaviour
             var pos_for_normal = pos_a - Vector3.up;
             var top_normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
 
-            var vert_idx_c = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
-            var vert_idx_d = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var a_to_b_normalized = (pos_b - pos_a).normalized;
+
+            var left_offset = a_to_b_normalized * m_bevel_tuning.m_debug_horizontal_left_offset;
+            var right_offset = a_to_b_normalized * m_bevel_tuning.m_debug_horizontal_right_offset;
+
+            var vert_idx_c = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0) + left_offset);
+            var vert_idx_d = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0) + right_offset);
 
             triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
             triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
 
-            var vert_idx_e = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
-            var vert_idx_f = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+            var vert_idx_e = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0) + left_offset);
+            var vert_idx_f = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0) + right_offset);
 
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
