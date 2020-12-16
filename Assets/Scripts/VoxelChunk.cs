@@ -751,10 +751,17 @@ public class VoxelChunk
         ref int edge_count
         )
     {
-
-        Profiler.BeginSample("EdgesV2");
         var pos_writer = new PositionWriter(positions, vert_idx);
         var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx);
+        var extrusion_lower_vertical_offset = m_bevel_tuning.m_extrusion_lower_vertical_offset;
+        var extrusion_vertical_offset = m_bevel_tuning.m_extrusion_vertical_offset;
+        var extrusion_distance = m_bevel_tuning.m_extrusion_distance;
+        var upper_vertical_offset = new Vector3(0, extrusion_vertical_offset, 0);
+        var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + extrusion_lower_vertical_offset, 0);
+        var bottom_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
+
+
+
         for (int i = 0; i < edge_count; ++i)
         {
             var original_edge = edges[i];
@@ -766,20 +773,21 @@ public class VoxelChunk
             var pos_b = pos_writer.m_positions[vert_idx_b];
             var pos_for_normal = pos_a - Vector3.up;
             var top_normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
+            var horizontal_offset = top_normal * extrusion_distance;
 
-            var vert_idx_c = pos_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
-            var vert_idx_d = pos_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var vert_idx_c = pos_writer.Write(pos_a + horizontal_offset + upper_vertical_offset);
+            var vert_idx_d = pos_writer.Write(pos_b + horizontal_offset + upper_vertical_offset);
 
             triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
             triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
 
-            var vert_idx_e = pos_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
-            var vert_idx_f = pos_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+            var vert_idx_e = pos_writer.Write(pos_a + horizontal_offset + lower_vertical_offset);
+            var vert_idx_f = pos_writer.Write(pos_b + horizontal_offset + lower_vertical_offset);
 
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
 
-            var vert_idx_g = pos_writer.Write(pos_a + new Vector3(0, -m_voxel_size_in_meters.y, 0));
+            var vert_idx_g = pos_writer.Write(pos_a + bottom_offset);
 
 #if UNITY_EDITOR
             if (edge_map.ContainsKey(vert_idx_a))
@@ -851,8 +859,6 @@ public class VoxelChunk
                 m_normal = accumulated_normals[i].normalized
             };
         }
-
-        Profiler.EndSample();
     }
 
     public void SetCollisionGenerationEnabled(bool is_enabled)
