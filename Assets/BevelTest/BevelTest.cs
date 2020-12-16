@@ -206,18 +206,12 @@ public class BevelTest : MonoBehaviour
                 Subdivide(right_points);
             }
 
-
             for(int j = 0; j < left_points.Count - 1; ++j)
             {
-                var p0 = left_points[j];
-                var p1 = right_points[j];
-                var p2 = left_points[j + 1];
-                var p3 = right_points[j + 1];
-
-                var idx0 = vert_writer.Write(p0);
-                var idx1 = vert_writer.Write(p1);
-                var idx2 = vert_writer.Write(p2);
-                var idx3 = vert_writer.Write(p3);
+                var idx0 = vert_writer.Write(left_points[j]);
+                var idx1 = vert_writer.Write(right_points[j]);
+                var idx2 = vert_writer.Write(left_points[j + 1]);
+                var idx3 = vert_writer.Write(right_points[j + 1]);
 
                 triangle_writer.Write(idx0, idx1, idx2);
                 triangle_writer.Write(idx2, idx1, idx3);
