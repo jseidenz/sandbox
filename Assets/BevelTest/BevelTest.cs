@@ -32,6 +32,47 @@ public class BevelTest : MonoBehaviour
         m_mesh2.MarkDynamic();
     }
 
+    public struct VertWriter
+    {
+        public void Write(Vector3 point)
+        {
+
+        }
+
+        public static VertWriter Start()
+        {
+            var writer = new VertWriter();
+            writer.m_positions = new List<Vector3>();
+            return writer;
+        }
+
+        public List<Vector3> m_positions;
+    }
+
+    public struct TriangleWriter
+    {
+        public void Write(ushort vert_idx)
+        {
+            m_triangles.Add(vert_idx);
+        }
+
+        public void Write(ushort vert_idx0, ushort vert_idx1, ushort vert_idx2)
+        {
+            m_triangles.Add(vert_idx0);
+            m_triangles.Add(vert_idx1);
+            m_triangles.Add(vert_idx2);
+        }
+
+        public static TriangleWriter Start()
+        {
+            var writer = new TriangleWriter();
+            writer.m_triangles = new List<ushort>();
+            return writer;
+        }
+
+        public List<ushort> m_triangles;
+    }
+
     void LateUpdate()
     {
         m_bevel_tuning.ApplyParameters(m_material);
@@ -222,6 +263,16 @@ public class BevelTest : MonoBehaviour
         
         points.RemoveRange(1, existing_point_count - 1);
         points.Add(end);
+    }
+
+    public void CreateRectangle(ushort idx0, ushort idx1, ushort idx2, ushort idx3, List<ushort> indices)
+    {
+        indices.Add(idx0);
+        indices.Add(idx1);
+        indices.Add(idx2);
+        indices.Add(idx2);
+        indices.Add(idx1);
+        indices.Add(idx3);
     }
 
     public void CreateRectangle(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, List<Vertex> vertices, List<ushort> indices)
