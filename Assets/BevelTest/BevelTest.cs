@@ -19,6 +19,8 @@ public class BevelTest : MonoBehaviour
     Mesh m_mesh2;
     [SerializeField] Material m_material;
     [SerializeField] BevelTuning m_bevel_tuning;
+    [SerializeField] int m_idx0;
+    [SerializeField] int m_idx1;
 
     void Awake()
     {
@@ -109,23 +111,59 @@ public class BevelTest : MonoBehaviour
         m_mesh.SetVertexBufferData(vertices, 0, 0, vertices.Length, 0, m_mesh_update_flags);
         m_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
 
-        CreateEdgeMesh();
+        CreateEdgeMesh(vertices);
 
         Graphics.DrawMesh(m_mesh, transform.localToWorldMatrix, m_material, 0, null, 0);
         Graphics.DrawMesh(m_mesh2, transform.localToWorldMatrix, m_material, 0, null, 0);
         
     }
 
-    void CreateEdgeMesh()
+    void CreateEdgeMesh(Vertex[] cube_vertices)
     {
         var edges = new VoxelChunk.Edge[4];
-        edges[0] = new VoxelChunk.Edge { m_vertex_idx_a = 6, m_vertex_idx_b = 7 };
-        edges[1] = new VoxelChunk.Edge { m_vertex_idx_a = 7, m_vertex_idx_b = 8 };
-        edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = 9, m_vertex_idx_b = 10 };
-        edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = 10, m_vertex_idx_b = 11 };
+        edges[0] = new VoxelChunk.Edge { m_vertex_idx_a = 4, m_vertex_idx_b = 5 };
+        edges[1] = new VoxelChunk.Edge { m_vertex_idx_a = 13, m_vertex_idx_b = 14 };
+        edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = 22, m_vertex_idx_b = 23 };
+        edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = 24, m_vertex_idx_b = 25 };
 
-        var vertices = new Vertex[0];
-        var triangles = new ushort[0];
+        var vertices = new Vertex[edges.Length * 3];
+        for (int i = 0; i < edges.Length; ++i)
+        {
+            var edge = edges[i];
+            var ev0 = cube_vertices[edge.m_vertex_idx_a];
+            var ev1 = cube_vertices[edge.m_vertex_idx_b];
+            var ev2 = ev0;
+            ev2.m_position = ev2.m_position + ev2.m_normal;
+            vertices[i * 3 + 0] = ev0;
+            vertices[i * 3 + 1] = ev1;
+            vertices[i * 3 + 2] = ev2;
+        }
+
+        var triangles = new ushort[vertices.Length];
+        for(int i = 0; i < triangles.Length; ++i)
+        {
+            triangles[i] = (ushort)i;
+        }
+
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            var idx0 = triangles[i + 0];
+            var idx1 = triangles[i + 1];
+            var idx2 = triangles[i + 2];
+
+            var v0 = vertices[idx0];
+            var v1 = vertices[idx1];
+            var v2 = vertices[idx2];
+            var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position).normalized;
+
+            v0.m_normal = normal;
+            v1.m_normal = normal;
+            v2.m_normal = normal;
+
+            vertices[idx0] = v0;
+            vertices[idx1] = v1;
+            vertices[idx2] = v2;
+        }
 
         var edge_mesh = m_mesh2;
         edge_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
