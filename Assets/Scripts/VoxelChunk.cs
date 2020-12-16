@@ -75,8 +75,8 @@ public class VoxelChunk
 
     public struct Edge
     {
-        public System.UInt16 m_vertex_idx_a;
-        public System.UInt16 m_vertex_idx_b;
+        public ushort m_vertex_idx_a;
+        public ushort m_vertex_idx_b;
     }
 
     public struct NormalWeldingInfo
