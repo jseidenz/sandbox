@@ -19,8 +19,6 @@ public class BevelTest : MonoBehaviour
     Mesh m_mesh2;
     [SerializeField] Material m_material;
     [SerializeField] BevelTuning m_bevel_tuning;
-    [SerializeField] int m_idx0;
-    [SerializeField] int m_idx1;
 
     void Awake()
     {
@@ -136,29 +134,25 @@ public class BevelTest : MonoBehaviour
             var ev1 = cube_vertices[edge.m_vertex_idx_b];
             var ev2 = ev0;
             var ev3 = ev1;
-            ev2.m_position = ev2.m_position + ev2.m_normal;
-            ev3.m_position = ev3.m_position + ev3.m_normal;
+            ev2.m_position = ev2.m_position + ev2.m_normal * m_bevel_tuning.m_extrusion_distance;
+            ev3.m_position = ev3.m_position + ev3.m_normal * m_bevel_tuning.m_extrusion_distance;
+            ev2.m_position.y += m_bevel_tuning.m_extrusion_vertical_offset;
+            ev3.m_position.y += m_bevel_tuning.m_extrusion_vertical_offset;
 
-            CreateRectangle(ev2.m_position, ev1.m_position, rectangle_verts, rectangle_triangles);
+            CreateRectangle(ev0.m_position, ev1.m_position, ev2.m_position, ev3.m_position, rectangle_verts, rectangle_triangles);
         }
 
-        var vertices = new Vertex[edges.Length * 3];
-        for (int i = 0; i < edges.Length; ++i)
+        var vertices = new Vertex[rectangle_verts.Count];
+        for(int i = 0; i < rectangle_verts.Count; ++i)
         {
-            var edge = edges[i];
-            var ev0 = cube_vertices[edge.m_vertex_idx_a];
-            var ev1 = cube_vertices[edge.m_vertex_idx_b];
-            var ev2 = ev0;
-            ev2.m_position = ev2.m_position + ev2.m_normal;
-            vertices[i * 3 + 0] = ev0;
-            vertices[i * 3 + 1] = ev1;
-            vertices[i * 3 + 2] = ev2;
+            vertices[i] = rectangle_verts[i];
         }
 
-        var triangles = new ushort[vertices.Length];
-        for(int i = 0; i < triangles.Length; ++i)
+
+        var triangles = new ushort[rectangle_triangles.Count];
+        for (int i = 0; i < rectangle_triangles.Count; ++i)
         {
-            triangles[i] = (ushort)i;
+            triangles[i] = rectangle_triangles[i];
         }
 
         for (int i = 0; i < triangles.Length; i += 3)
@@ -204,34 +198,34 @@ public class BevelTest : MonoBehaviour
         points.Add(end);
     }
 
-    public void CreateRectangle(Vector3 bottom_left, Vector3 top_right, List<Vertex> vertices, List<ushort> indices)
+    public void CreateRectangle(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, List<Vertex> vertices, List<ushort> indices)
     {
         var starting_vert_idx = (ushort)vertices.Count;
         vertices.Add(new Vertex
         {
-            m_position = bottom_left
+            m_position = p0
         });
 
         vertices.Add(new Vertex
         {
-            m_position = bottom_left + new Vector3(top_right.x, 0, 0)
+            m_position = p1
         });
 
         vertices.Add(new Vertex
         {
-            m_position = bottom_left + new Vector3(top_right.x, 0, 0)
+            m_position = p2
         });
 
         vertices.Add(new Vertex
         {
-            m_position = bottom_left + new Vector3(top_right.x, 0, 0)
+            m_position = p3
         });
 
         indices.Add((ushort)(starting_vert_idx + 0));
         indices.Add((ushort)(starting_vert_idx + 1));
         indices.Add((ushort)(starting_vert_idx + 2));
-        indices.Add((ushort)(starting_vert_idx + 1));
         indices.Add((ushort)(starting_vert_idx + 2));
+        indices.Add((ushort)(starting_vert_idx + 1));
         indices.Add((ushort)(starting_vert_idx + 3));
     }
 
