@@ -145,8 +145,9 @@ public class VoxelChunk
         float bot_y, 
         float top_y, 
         bool generate_collision,
-        float density_height_weight,
-        Bounds bounds
+        float density_height_weight,        
+        Bounds bounds,
+        BevelTuning bevel_tuning
         )
     {
         m_density_height_weight = density_height_weight;
@@ -160,6 +161,7 @@ public class VoxelChunk
         m_iso_level = iso_level;
         m_voxel_size_in_meters = voxel_size_in_meters;
         m_generate_collision = generate_collision;
+        m_bevel_tuning = bevel_tuning;
 
         m_mesh = new Mesh();
         m_mesh.MarkDynamic();
@@ -817,6 +819,7 @@ public class VoxelChunk
     int m_chunk_dimension_in_voxels;
     bool m_is_empty = true;
     bool m_generate_collision;
+    BevelTuning m_bevel_tuning;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
         | MeshUpdateFlags.DontValidateIndices

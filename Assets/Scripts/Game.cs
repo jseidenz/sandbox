@@ -29,7 +29,8 @@ public class Game : MonoBehaviour
     [SerializeField] Camera m_camera;
     [SerializeField] Vector3 m_camera_offset;
     [SerializeField] bool m_draw_solid_meshes;
-    [SerializeField] bool m_use_old_liquid_material;
+    [SerializeField] BevelTuning m_bevel_tuning;
+    
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -88,7 +89,7 @@ public class Game : MonoBehaviour
     Mesher CreateSolidMesher(float[][] layers, LayeredBrush brush)
     {
         var solid_mesher = new Mesher();
-        solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, true, m_solid_iso_level, 0f, brush);
+        solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, true, m_solid_iso_level, 0f, brush, m_bevel_tuning);
 
         //solid_mesher.enabled = false;
 
@@ -98,7 +99,7 @@ public class Game : MonoBehaviour
     Mesher CreateLiquidMesher(float[][] layers, LayeredBrush brush)
     {
         var liquid_mesher = new Mesher();
-        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, false, m_liquid_iso_level, 1f, brush);
+        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, false, m_liquid_iso_level, 1f, brush, m_bevel_tuning);
 
         return liquid_mesher;
     }

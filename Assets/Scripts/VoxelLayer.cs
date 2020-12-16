@@ -7,7 +7,22 @@ public class VoxelLayer
 {
     static int COLOR_ID = Shader.PropertyToID("_Color");
 
-    public VoxelLayer(string name, float[] density_grid, int layer_idx, int width_in_voxels, int height_in_voxels, int voxel_chunk_dimensions, Vector3 voxel_size_in_meters, float iso_level, float bot_y, float top_y, bool generate_collision, float density_height_weight, VertexAttributeDescriptor[] vertex_attribute_descriptors)
+    public VoxelLayer(
+        string name, 
+        float[] density_grid, 
+        int layer_idx, 
+        int width_in_voxels, 
+        int height_in_voxels, 
+        int voxel_chunk_dimensions, 
+        Vector3 voxel_size_in_meters, 
+        float iso_level, 
+        float bot_y, 
+        float top_y, 
+        bool generate_collision, 
+        float density_height_weight, 
+        VertexAttributeDescriptor[] vertex_attribute_descriptors,
+        BevelTuning bevel_tuning
+        )
     {
         if (width_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={width_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
         if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
@@ -23,6 +38,7 @@ public class VoxelLayer
         m_top_y = top_y;
         m_layer_idx = layer_idx;
         m_vertex_attribute_descriptors = vertex_attribute_descriptors;
+        m_bevel_tuning = bevel_tuning;
 
         m_width_in_chunks = width_in_voxels / voxel_chunk_dimensions;
         m_height_in_chunks = height_in_voxels / voxel_chunk_dimensions;
@@ -33,7 +49,7 @@ public class VoxelLayer
             for(int x = 0; x < m_width_in_chunks; ++x)
             {
                 var bounds = GetChunkBounds(x, y);
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_occlusion_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds);
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_occlusion_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, bevel_tuning);
             }
         }
     }
@@ -240,4 +256,5 @@ public class VoxelLayer
     HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
     HashSet<Vector3Int> m_scratch_dirty_chunk_ids = new HashSet<Vector3Int>();
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors;
+    BevelTuning m_bevel_tuning;
 }
