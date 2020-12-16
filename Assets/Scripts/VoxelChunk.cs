@@ -724,25 +724,23 @@ public class VoxelChunk
 
         var vertex_entry_count = scratch_buffer.m_vertex_table.m_vertex_id_to_vertex_idx.Count;
         var vertex_entries = scratch_buffer.m_vertex_table.m_vertex_entries;
-        var vertices = scratch_buffer.m_vertices;
+        var positions = scratch_buffer.m_positions;
         for (int i = 0; i < vertex_entry_count; ++i)
         {
             var entry = vertex_entries[i];
 
-            vertices[entry.m_vertex_idx] = new Vertex
-            {
-                m_position = entry.m_position
-            };
+            positions[entry.m_vertex_idx] = entry.m_position;
         }
 
         vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
-        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_accumulated_normals, scratch_buffer.m_edge_map, ref vert_count, ref triangle_count, ref edge_idx);
+        FinalizeEdges(scratch_buffer.m_positions, scratch_buffer.m_vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_accumulated_normals, scratch_buffer.m_edge_map, ref vert_count, ref triangle_count, ref edge_idx);
         Profiler.EndSample();
     }
 
     void FinalizeEdges(
+        Vector3[] positions,
         Vertex[] vertices, 
         ushort[] triangles, 
         Edge[] edges,
@@ -755,7 +753,7 @@ public class VoxelChunk
     {
 
         Profiler.BeginSample("EdgesV2");
-        var vert_writer = new VertWriter(vertices, vert_idx);
+        var pos_writer = new PositionWriter(positions, vert_idx);
         var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx);
         for (int i = 0; i < edge_count; ++i)
         {
@@ -764,24 +762,24 @@ public class VoxelChunk
             var vert_idx_a = original_edge.m_vertex_idx_a;
             var vert_idx_b = original_edge.m_vertex_idx_b;
 
-            var pos_a = vertices[vert_idx_a].m_position;
-            var pos_b = vertices[vert_idx_b].m_position;
+            var pos_a = pos_writer.m_positions[vert_idx_a];
+            var pos_b = pos_writer.m_positions[vert_idx_b];
             var pos_for_normal = pos_a - Vector3.up;
             var top_normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
 
-            var vert_idx_c = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
-            var vert_idx_d = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var vert_idx_c = pos_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var vert_idx_d = pos_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
 
             triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
             triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
 
-            var vert_idx_e = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
-            var vert_idx_f = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+            var vert_idx_e = pos_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+            var vert_idx_f = pos_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
 
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
 
-            var vert_idx_g = vert_writer.Write(pos_a + new Vector3(0, -m_voxel_size_in_meters.y, 0));
+            var vert_idx_g = pos_writer.Write(pos_a + new Vector3(0, -m_voxel_size_in_meters.y, 0));
 
 #if UNITY_EDITOR
             if (edge_map.ContainsKey(vert_idx_a))
@@ -820,7 +818,7 @@ public class VoxelChunk
         }
 
         triangle_idx = triangle_writer.Count;
-        vert_idx = (ushort)vert_writer.Count;
+        vert_idx = (ushort)pos_writer.Count;
 
 
         for(int i = 0; i < vert_idx; ++i)
@@ -835,10 +833,10 @@ public class VoxelChunk
             var vert_idx1 = triangles[i + 1];
             var vert_idx2 = triangles[i + 2];
 
-            var v0 = vertices[vert_idx0];
-            var v1 = vertices[vert_idx1];
-            var v2 = vertices[vert_idx2];
-            var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position);
+            var v0 = pos_writer.m_positions[vert_idx0];
+            var v1 = pos_writer.m_positions[vert_idx1];
+            var v2 = pos_writer.m_positions[vert_idx2];
+            var normal = Vector3.Cross(v1 - v0, v2 - v0);
 
             accumulated_normals[vert_idx0] = accumulated_normals[vert_idx0] + normal;
             accumulated_normals[vert_idx1] = accumulated_normals[vert_idx1] + normal;
@@ -847,7 +845,11 @@ public class VoxelChunk
 
         for(int i = 0; i < vert_idx; ++i)
         {
-            vertices[i].m_normal = accumulated_normals[i].normalized;
+            vertices[i] = new Vertex
+            {
+                m_position = positions[i],
+                m_normal = accumulated_normals[i].normalized
+            };
         }
 
         Profiler.EndSample();
@@ -896,25 +898,25 @@ public class VoxelChunk
 #endif
         ;
 
-    struct VertWriter
+    struct PositionWriter
     {
-        public VertWriter(Vertex[] vertices, int vert_count)
+        public PositionWriter(Vector3[] positions, int vert_count)
         {
-            m_vertices = vertices;
+            m_positions = positions;
             m_vert_count = vert_count;
         }
         public ushort Write(Vector3 pos)
         {
             var vert_idx = (ushort)m_vert_count++;
-            m_vertices[vert_idx].m_position = pos;
+            m_positions[vert_idx] = pos;
             return vert_idx;
         }
 
-        public Vector3 this[int idx] { get => m_vertices[idx].m_position; }
+        public Vector3 this[int idx] { get => m_positions[idx]; }
 
         public int Count { get => m_vert_count; }
 
-        public Vertex[] m_vertices;
+        public Vector3[] m_positions;
         public int m_vert_count;
     }
 
