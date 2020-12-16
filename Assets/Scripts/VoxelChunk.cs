@@ -757,38 +757,6 @@ public class VoxelChunk
         ref int edge_count
         )
     {
-        for (int i = 0; i < edge_count; ++i)
-        {
-            var edge = edges[i];
-            var vert_idx_a = edge.m_vertex_idx_a;
-            var vert_idx_b = edge.m_vertex_idx_b;
-
-            var vert_a = vertices[vert_idx_a];
-            var vert_b = vertices[vert_idx_b];
-
-            var vert_c = vert_a;
-            vert_c.m_position.y = m_bot_y;
-
-            var vert_d = vert_b;
-            vert_d.m_position.y = m_bot_y;
-
-            var normal = Vector3.Cross(vert_b.m_position - vert_a.m_position, vert_c.m_position - vert_a.m_position).normalized;
-            vert_c.m_normal = normal;
-            vert_d.m_normal = normal;
-
-            var vert_idx_c = vert_idx;
-            vertices[vert_idx++] = vert_c;
-
-            var vert_idx_d = vert_idx;
-            vertices[vert_idx++] = vert_d;
-
-            triangles[triangle_idx++] = vert_idx_a;
-            triangles[triangle_idx++] = vert_idx_b;
-            triangles[triangle_idx++] = vert_idx_c;
-            triangles[triangle_idx++] = vert_idx_c;
-            triangles[triangle_idx++] = vert_idx_b;
-            triangles[triangle_idx++] = vert_idx_d;
-        }
 
         Profiler.BeginSample("EdgesV2");
         var vert_writer = new VertWriter(vertices, vert_idx);
@@ -811,13 +779,13 @@ public class VoxelChunk
             triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
             triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
 
-            var vert_idx_e = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
-            var vert_idx_f = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+            var vert_idx_e = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+            var vert_idx_f = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
 
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
 
-            var vert_idx_g = vert_writer.Write(pos_a + new Vector3(0, -1, 0));
+            var vert_idx_g = vert_writer.Write(pos_a + new Vector3(0, -m_voxel_size_in_meters.y, 0));
 
             if (edge_map.ContainsKey(vert_idx_a))
             {
@@ -853,11 +821,10 @@ public class VoxelChunk
             triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e);
         }
 
-        //triangle_idx = triangle_writer.Count;
-        //vert_idx = (ushort)vert_writer.Count;
+        triangle_idx = triangle_writer.Count;
+        vert_idx = (ushort)vert_writer.Count;
 
-        /*
-        for (int i = 0; i < triangles.Length; i += 3)
+        for (int i = 0; i < triangle_idx; i += 3)
         {
             var vert_idx0 = triangles[i + 0];
             var vert_idx1 = triangles[i + 1];
@@ -868,18 +835,19 @@ public class VoxelChunk
             var v2 = vertices[vert_idx2];
             var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position);
 
-            normal_accumulator[vert_idx0] = normal_accumulator[vert_idx0] + normal;
-            normal_accumulator[vert_idx1] = normal_accumulator[vert_idx1] + normal;
-            normal_accumulator[vert_idx2] = normal_accumulator[vert_idx2] + normal;
+            normal_accumulator.TryGetValue(vert_idx0, out var normal0);
+            normal_accumulator.TryGetValue(vert_idx1, out var normal1);
+            normal_accumulator.TryGetValue(vert_idx2, out var normal2);
+
+            normal_accumulator[vert_idx0] = normal0 + normal;
+            normal_accumulator[vert_idx1] = normal1 + normal;
+            normal_accumulator[vert_idx2] = normal2 + normal;
         }
 
-        for (ushort i = 0; i < vertices.Length; ++i)
+        foreach(var kvp in normal_accumulator)
         {
-            var v = vertices[i];
-            v.m_normal = (normal_accumulator[i]).normalized;
-            vertices[i] = v;
+            vertices[kvp.Key].m_normal = kvp.Value.normalized;
         }
-        */
 
         Profiler.EndSample();
     }
