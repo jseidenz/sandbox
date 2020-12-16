@@ -853,6 +853,9 @@ public class VoxelChunk
             triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e);
         }
 
+        //triangle_idx = triangle_writer.Count;
+        //vert_idx = (ushort)vert_writer.Count;
+
         /*
         for (int i = 0; i < triangles.Length; i += 3)
         {
