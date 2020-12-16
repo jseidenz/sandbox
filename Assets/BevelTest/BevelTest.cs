@@ -35,25 +35,22 @@ public class BevelTest : MonoBehaviour
 
         int vert_count = 8;
 
-        var vertices = new Vertex[vert_count];
 
-        int vert_idx = 0;
         Vector3 cube_size = Vector3.one;
-        vertices[vert_idx++].m_position = new Vector3(0, 0, 0);
-        vertices[vert_idx++].m_position = new Vector3(cube_size.x, 0, 0);
-        vertices[vert_idx++].m_position = new Vector3(cube_size.x, cube_size.y, 0);
-        vertices[vert_idx++].m_position = new Vector3(0, cube_size.y, 0);
-        vertices[vert_idx++].m_position = new Vector3(0, cube_size.y, cube_size.z);
-        vertices[vert_idx++].m_position = new Vector3(cube_size.x, cube_size.y, cube_size.z);
-        vertices[vert_idx++].m_position = new Vector3(cube_size.x, 0, cube_size.z);
-        vertices[vert_idx++].m_position = new Vector3(0, 0, cube_size.z);
-
-        for(int i = 0; i < vert_count; ++i)
+        var corners = new Vector3[]
         {
-            vertices[i].m_normal = vertices[i].m_position.normalized;
-        }
+            new Vector3(0, 0, 0),
+            new Vector3(cube_size.x, 0, 0),
+            new Vector3(cube_size.x, cube_size.y, 0),
+            new Vector3(0, cube_size.y, 0),
+            new Vector3(0, cube_size.y, cube_size.z),
+            new Vector3(cube_size.x, cube_size.y, cube_size.z),
+            new Vector3(cube_size.x, 0, cube_size.z),
+            new Vector3(0, 0, cube_size.z)
+        };
 
-        var triangles = new ushort[]
+
+        var faces = new ushort[]
         {
             0, 2, 1, //face front
 	        0, 3, 2,
@@ -69,10 +66,43 @@ public class BevelTest : MonoBehaviour
 	        0, 1, 6
         };
 
+        var triangles = new ushort[faces.Length];
+        var vertices = new Vertex[faces.Length];
+        for(int i = 0; i < vertices.Length; ++i)
+        {
+            var pos = corners[faces[i]];
+            vertices[i] = new Vertex
+            {
+                m_position = pos,
+                m_normal = pos.normalized
+            };
+            triangles[i] = (ushort)i;
+        }
 
-        m_mesh.SetVertexBufferParams(vert_count, m_vertex_attribute_descriptors);
+        for(int i = 0; i < triangles.Length; i+=3)
+        {
+            var idx0 = triangles[i + 0];
+            var idx1 = triangles[i + 1];
+            var idx2 = triangles[i + 2];
 
-        m_mesh.SetVertexBufferData(vertices, 0, 0, vert_count, 0, m_mesh_update_flags);
+            var v0 = vertices[idx0];
+            var v1 = vertices[idx1];
+            var v2 = vertices[idx2];
+            var normal = Vector3.Cross(v2.m_position - v0.m_position, v1.m_position - v0.m_position).normalized;
+
+            v0.m_normal = normal;
+            v1.m_normal = normal;
+            v2.m_normal = normal;
+
+            vertices[idx0] = v0;
+            vertices[idx1] = v1;
+            vertices[idx2] = v2;
+        }
+
+
+        m_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
+
+        m_mesh.SetVertexBufferData(vertices, 0, 0, vertices.Length, 0, m_mesh_update_flags);
         m_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
         m_mesh.RecalculateNormals();
         m_mesh.RecalculateTangents();

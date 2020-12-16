@@ -24,7 +24,7 @@ RenderSettings:
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
-  m_AmbientMode: 0
+  m_AmbientMode: 1
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 394532957}
   m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
@@ -151,14 +151,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_material: {fileID: 2100000, guid: 03282c669be56424db6204bfdf61844d, type: 2}
-  m_radius: 0
-  m_iso_dist: 0
-  m_corner_idx: 0
-  m_texture_dimensions: {x: 0, y: 0, z: 0}
-  m_world_size_in_cells: {x: 0, y: 0, z: 0}
-  m_cell_size_in_meters: {x: 0, y: 0, z: 0}
-  m_sdf_tuning: {fileID: 0}
-  m_texture: {fileID: 0}
+  m_bevel_tuning: {fileID: 11400000, guid: 7976e3a3be073c740a5bf73f7e18a21f, type: 2}
 --- !u!4 &77360627
 Transform:
   m_ObjectHideFlags: 0
@@ -211,7 +204,7 @@ Light:
     m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
+    m_Strength: 0.565
     m_Bias: 0.05
     m_NormalBias: 0.4
     m_NearPlane: 0.2
