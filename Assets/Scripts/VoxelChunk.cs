@@ -51,7 +51,7 @@ public class VoxelChunk
             scratch_buffer.m_vertices = new Vertex[ushort.MaxValue];
             scratch_buffer.m_triangles = new System.UInt16[ushort.MaxValue * 24];
             scratch_buffer.m_edges = new Edge[ushort.MaxValue];
-            scratch_buffer.m_normal_accumulator = new Dictionary<ushort, Vector3>();
+            scratch_buffer.m_accumulated_normals = new Vector3[ushort.MaxValue];
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
             scratch_buffer.m_edge_map = new Dictionary<ushort, EdgeConnections>();
@@ -61,7 +61,6 @@ public class VoxelChunk
         public void Clear()
         {
             m_vertex_table.Clear();
-            m_normal_accumulator.Clear();
             m_edge_map.Clear();
         }
 
@@ -69,7 +68,7 @@ public class VoxelChunk
         public System.UInt16[] m_triangles;
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
-        public Dictionary<ushort, Vector3> m_normal_accumulator;
+        public Vector3[] m_accumulated_normals;
         public Dictionary<ushort, EdgeConnections> m_edge_map;
         public DensitySample[] m_density_samples;
     }
@@ -742,7 +741,7 @@ public class VoxelChunk
         vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
-        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_normal_accumulator, scratch_buffer.m_edge_map, ref vert_count, ref triangle_count, ref edge_idx);
+        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_accumulated_normals, scratch_buffer.m_edge_map, ref vert_count, ref triangle_count, ref edge_idx);
         Profiler.EndSample();
     }
 
@@ -750,7 +749,7 @@ public class VoxelChunk
         Vertex[] vertices, 
         ushort[] triangles, 
         Edge[] edges,
-        Dictionary<ushort, Vector3> normal_accumulator,
+        Vector3[] accumulated_normals,
         Dictionary<ushort, EdgeConnections> edge_map,
         ref ushort vert_idx, 
         ref int triangle_idx, 
@@ -826,6 +825,13 @@ public class VoxelChunk
         triangle_idx = triangle_writer.Count;
         vert_idx = (ushort)vert_writer.Count;
 
+
+        for(int i = 0; i < vert_idx; ++i)
+        {
+            accumulated_normals[i] = Vector3.zero;
+        }
+
+
         for (int i = 0; i < triangle_idx; i += 3)
         {
             var vert_idx0 = triangles[i + 0];
@@ -837,18 +843,14 @@ public class VoxelChunk
             var v2 = vertices[vert_idx2];
             var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position);
 
-            normal_accumulator.TryGetValue(vert_idx0, out var normal0);
-            normal_accumulator.TryGetValue(vert_idx1, out var normal1);
-            normal_accumulator.TryGetValue(vert_idx2, out var normal2);
-
-            normal_accumulator[vert_idx0] = normal0 + normal;
-            normal_accumulator[vert_idx1] = normal1 + normal;
-            normal_accumulator[vert_idx2] = normal2 + normal;
+            accumulated_normals[vert_idx0] = accumulated_normals[vert_idx0] + normal;
+            accumulated_normals[vert_idx1] = accumulated_normals[vert_idx1] + normal;
+            accumulated_normals[vert_idx2] = accumulated_normals[vert_idx2] + normal;
         }
 
-        foreach(var kvp in normal_accumulator)
+        for(int i = 0; i < vert_idx; ++i)
         {
-            vertices[kvp.Key].m_normal = kvp.Value.normalized;
+            vertices[i].m_normal = accumulated_normals[i].normalized;
         }
 
         Profiler.EndSample();
