@@ -252,6 +252,14 @@ public class BevelTest : MonoBehaviour
             edge_loop.AddEdge(vert_idx_a, vert_idx_b, vert_idx_c, vert_idx_d, vert_idx_e, vert_idx_f);
         }
 
+        for(int i = 0; i < edge_loop.Count; ++i)
+        {
+            var start_edge = edge_loop.m_edges[i];
+            var end_edge = edge_loop.m_edges[edge_loop.m_edge_map[start_edge.m_vertex_idx_b]];
+
+            triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c);
+        }
+
         var vertices = new Vertex[vert_writer.Count];
         for(int i = 0; i < vert_writer.Count; ++i)
         {
