@@ -108,7 +108,7 @@ public class BevelTest : MonoBehaviour
         m_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
         m_mesh.SetVertexBufferData(vertices, 0, 0, vertices.Length, 0, m_mesh_update_flags);
         m_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
-
+        m_mesh.RecalculateBounds();
         CreateEdgeMesh(vertices);
 
         Graphics.DrawMesh(m_mesh, transform.localToWorldMatrix, m_material, 0, null, 0);
@@ -203,19 +203,21 @@ public class BevelTest : MonoBehaviour
         edge_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
         edge_mesh.SetVertexBufferData(vertices, 0, 0, vertices.Length, 0, m_mesh_update_flags);
         edge_mesh.SetTriangles(triangles, 0, triangles.Length, 0, false);
+        edge_mesh.RecalculateBounds();
     }
 
     public void Subdivide(List<Vector3> points)
     {
         int existing_point_count = points.Count;
         var end = points[points.Count - 1];
+
         for (int i = 1; i < existing_point_count - 1; i++)
         {
             var p_prev = points[i - 1];
             var p_curr = points[i + 0];
             var p_next = points[i + 1];
-            points.Add((p_prev - p_curr) * 0.25f);
-            points.Add((p_next - p_curr) * 0.25f);
+            points.Add(p_curr + (p_prev - p_curr) * 0.25f);
+            points.Add(p_curr + (p_next - p_curr) * 0.25f);
         }
         
         points.RemoveRange(1, existing_point_count - 1);
