@@ -203,46 +203,34 @@ public class BevelTest : MonoBehaviour
         var vert_writer = VertWriter.Start();
         var triangle_writer = TriangleWriter.Start();
 
-
         var top_verts = new List<ushort>();
 
         for (int i = 0; i < edge_loop.Count; ++i)
         {
             var edge = edge_loop.m_edges[i];
-            var ev0 = cube_vertices[edge.m_vertex_idx_a];
-            var ev1 = cube_vertices[edge.m_vertex_idx_b];
 
-            var left_points = new List<Vector3>();
-            var right_points = new List<Vector3>();
-            left_points.Add(ev0.m_position);
-            left_points.Add(ev0.m_position + ev0.m_normal * m_bevel_tuning.m_extrusion_distance);
-            left_points.Add(ev0.m_position + ev0.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
 
-            right_points.Add(ev1.m_position);
-            right_points.Add(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance);
-            right_points.Add(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var top_bevel_vert0 = cube_vertices[edge.m_vertex_idx_a];
+            var top_bevel_vert1 = cube_vertices[edge.m_vertex_idx_b];
 
-            var idx0 = vert_writer.Write(left_points[0]);
-            var idx1 = vert_writer.Write(right_points[0]);
-            top_verts.Add(idx0);
-            top_verts.Add(idx1);
-            for (int j = 1; j < left_points.Count - 1; ++j)
-            {
-                var idx2 = vert_writer.Write(left_points[j + 1]);
-                var idx3 = vert_writer.Write(right_points[j + 1]);
 
-                triangle_writer.Write(idx0, idx1, idx2);
-                triangle_writer.Write(idx2, idx1, idx3);
+            var top_bevel_vert_idx0 = vert_writer.Write(top_bevel_vert0.m_position);
+            var top_bevel_vert_idx1 = vert_writer.Write(top_bevel_vert1.m_position);
 
-                idx0 = idx2;
-                idx1 = idx3;
-            }
+            top_verts.Add(top_bevel_vert_idx0);
+            top_verts.Add(top_bevel_vert_idx1);
 
-            var bottom_idx0 = vert_writer.Write(ev0.m_position + ev0.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
-            var bottom_idx1 = vert_writer.Write(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
+            var bot_bevel_vert_idx0 = vert_writer.Write(top_bevel_vert0.m_position + top_bevel_vert0.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var bot_bevel_vert_idx1 = vert_writer.Write(top_bevel_vert1.m_position + top_bevel_vert1.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
 
-            triangle_writer.Write(idx0, idx1, bottom_idx0);
-            triangle_writer.Write(bottom_idx0, idx1, bottom_idx1);
+            triangle_writer.Write(top_bevel_vert_idx0, top_bevel_vert_idx1, bot_bevel_vert_idx0);
+            triangle_writer.Write(bot_bevel_vert_idx0, top_bevel_vert_idx1, bot_bevel_vert_idx1);
+
+            var bottom_idx0 = vert_writer.Write(top_bevel_vert0.m_position + top_bevel_vert0.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
+            var bottom_idx1 = vert_writer.Write(top_bevel_vert1.m_position + top_bevel_vert1.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
+
+            triangle_writer.Write(bot_bevel_vert_idx0, bot_bevel_vert_idx1, bottom_idx0);
+            triangle_writer.Write(bottom_idx0, bot_bevel_vert_idx1, bottom_idx1);
         }
 
         var vertices = new Vertex[vert_writer.Count];
@@ -283,11 +271,10 @@ public class BevelTest : MonoBehaviour
             vertices[i] = v;
         }
 
-        foreach(var top_vert_idx in top_verts)
+        foreach (var top_vert_idx in top_verts)
         {
             vertices[top_vert_idx].m_normal = Vector3.up;
         }
-
 
         var edge_mesh = m_mesh2;
         edge_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
