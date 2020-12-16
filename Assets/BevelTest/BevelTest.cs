@@ -126,6 +126,22 @@ public class BevelTest : MonoBehaviour
         edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = 22, m_vertex_idx_b = 23 };
         edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = 24, m_vertex_idx_b = 25 };
 
+        var rectangle_verts = new List<Vertex>();
+        var rectangle_triangles = new List<ushort>();
+
+        for (int i = 0; i < edges.Length; ++i)
+        {
+            var edge = edges[i];
+            var ev0 = cube_vertices[edge.m_vertex_idx_a];
+            var ev1 = cube_vertices[edge.m_vertex_idx_b];
+            var ev2 = ev0;
+            var ev3 = ev1;
+            ev2.m_position = ev2.m_position + ev2.m_normal;
+            ev3.m_position = ev3.m_position + ev3.m_normal;
+
+            CreateRectangle(ev2.m_position, ev1.m_position, rectangle_verts, rectangle_triangles);
+        }
+
         var vertices = new Vertex[edges.Length * 3];
         for (int i = 0; i < edges.Length; ++i)
         {
@@ -186,6 +202,37 @@ public class BevelTest : MonoBehaviour
         
         points.RemoveRange(1, existing_point_count);
         points.Add(end);
+    }
+
+    public void CreateRectangle(Vector3 bottom_left, Vector3 top_right, List<Vertex> vertices, List<ushort> indices)
+    {
+        var starting_vert_idx = (ushort)vertices.Count;
+        vertices.Add(new Vertex
+        {
+            m_position = bottom_left
+        });
+
+        vertices.Add(new Vertex
+        {
+            m_position = bottom_left + new Vector3(top_right.x, 0, 0)
+        });
+
+        vertices.Add(new Vertex
+        {
+            m_position = bottom_left + new Vector3(top_right.x, 0, 0)
+        });
+
+        vertices.Add(new Vertex
+        {
+            m_position = bottom_left + new Vector3(top_right.x, 0, 0)
+        });
+
+        indices.Add((ushort)(starting_vert_idx + 0));
+        indices.Add((ushort)(starting_vert_idx + 1));
+        indices.Add((ushort)(starting_vert_idx + 2));
+        indices.Add((ushort)(starting_vert_idx + 1));
+        indices.Add((ushort)(starting_vert_idx + 2));
+        indices.Add((ushort)(starting_vert_idx + 3));
     }
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
