@@ -136,7 +136,7 @@ public class BevelTest : MonoBehaviour
             triangles[i] = (ushort)i;
         }
 
-        for(int i = 0; i < triangles.Length; i+=3)
+        for (int i = 0; i < triangles.Length; i+=3)
         {
             var idx0 = triangles[i + 0];
             var idx1 = triangles[i + 1];
@@ -237,25 +237,31 @@ public class BevelTest : MonoBehaviour
             triangles[i] = triangle_writer[i];
         }
 
+        var normal_accumulator = new Vector3[vert_writer.Count];
+
         for (int i = 0; i < triangles.Length; i += 3)
         {
-            var idx0 = triangles[i + 0];
-            var idx1 = triangles[i + 1];
-            var idx2 = triangles[i + 2];
+            var vert_idx0 = triangles[i + 0];
+            var vert_idx1 = triangles[i + 1];
+            var vert_idx2 = triangles[i + 2];
 
-            var v0 = vertices[idx0];
-            var v1 = vertices[idx1];
-            var v2 = vertices[idx2];
-            var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position).normalized;
+            var v0 = vertices[vert_idx0];
+            var v1 = vertices[vert_idx1];
+            var v2 = vertices[vert_idx2];
+            var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position);
 
-            v0.m_normal = normal;
-            v1.m_normal = normal;
-            v2.m_normal = normal;
-
-            vertices[idx0] = v0;
-            vertices[idx1] = v1;
-            vertices[idx2] = v2;
+            normal_accumulator[vert_idx0] = normal_accumulator[vert_idx0] + normal;
+            normal_accumulator[vert_idx1] = normal_accumulator[vert_idx1] + normal;
+            normal_accumulator[vert_idx2] = normal_accumulator[vert_idx2] + normal;
         }
+
+        for(int i = 0; i < vertices.Length; ++i)
+        {
+            var v = vertices[i];
+            v.m_normal = normal_accumulator[i].normalized;
+            vertices[i] = v;
+        }
+
 
         var edge_mesh = m_mesh2;
         edge_mesh.SetVertexBufferParams(vertices.Length, m_vertex_attribute_descriptors);
