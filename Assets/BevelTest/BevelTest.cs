@@ -34,9 +34,11 @@ public class BevelTest : MonoBehaviour
 
     public struct VertWriter
     {
-        public void Write(Vector3 point)
+        public ushort Write(Vector3 point)
         {
-
+            var vert_idx = (ushort)m_positions.Count;
+            m_positions.Add(point);
+            return vert_idx;
         }
 
         public static VertWriter Start()
@@ -45,6 +47,10 @@ public class BevelTest : MonoBehaviour
             writer.m_positions = new List<Vector3>();
             return writer;
         }
+
+        public Vector3 this[int idx] { get => m_positions[idx]; }
+
+        public int Count { get => m_positions.Count; }
 
         public List<Vector3> m_positions;
     }
@@ -69,6 +75,10 @@ public class BevelTest : MonoBehaviour
             writer.m_triangles = new List<ushort>();
             return writer;
         }
+
+        public ushort this[int idx] { get => m_triangles[idx]; }
+
+        public int Count { get => m_triangles.Count; }
 
         public List<ushort> m_triangles;
     }
@@ -165,8 +175,8 @@ public class BevelTest : MonoBehaviour
         edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = 22, m_vertex_idx_b = 23 };
         edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = 24, m_vertex_idx_b = 25 };
 
-        var rectangle_verts = new List<Vertex>();
-        var rectangle_triangles = new List<ushort>();
+        var vert_writer = VertWriter.Start();
+        var triangle_writer = TriangleWriter.Start();
 
         for (int i = 0; i < edges.Length; ++i)
         {
@@ -196,6 +206,7 @@ public class BevelTest : MonoBehaviour
                 Subdivide(right_points);
             }
 
+
             for(int j = 0; j < left_points.Count - 1; ++j)
             {
                 var p0 = left_points[j];
@@ -203,21 +214,27 @@ public class BevelTest : MonoBehaviour
                 var p2 = left_points[j + 1];
                 var p3 = right_points[j + 1];
 
-                CreateRectangle(p0, p1, p2, p3, rectangle_verts, rectangle_triangles);
+                var idx0 = vert_writer.Write(p0);
+                var idx1 = vert_writer.Write(p1);
+                var idx2 = vert_writer.Write(p2);
+                var idx3 = vert_writer.Write(p3);
+
+                triangle_writer.Write(idx0, idx1, idx2);
+                triangle_writer.Write(idx2, idx1, idx3);
             }
         }
 
-        var vertices = new Vertex[rectangle_verts.Count];
-        for(int i = 0; i < rectangle_verts.Count; ++i)
+        var vertices = new Vertex[vert_writer.Count];
+        for(int i = 0; i < vert_writer.Count; ++i)
         {
-            vertices[i] = rectangle_verts[i];
+            vertices[i] = new Vertex { m_position = vert_writer[i] };                
         }
 
 
-        var triangles = new ushort[rectangle_triangles.Count];
-        for (int i = 0; i < rectangle_triangles.Count; ++i)
+        var triangles = new ushort[triangle_writer.Count];
+        for (int i = 0; i < triangle_writer.Count; ++i)
         {
-            triangles[i] = rectangle_triangles[i];
+            triangles[i] = triangle_writer[i];
         }
 
         for (int i = 0; i < triangles.Length; i += 3)
@@ -263,47 +280,6 @@ public class BevelTest : MonoBehaviour
         
         points.RemoveRange(1, existing_point_count - 1);
         points.Add(end);
-    }
-
-    public void CreateRectangle(ushort idx0, ushort idx1, ushort idx2, ushort idx3, List<ushort> indices)
-    {
-        indices.Add(idx0);
-        indices.Add(idx1);
-        indices.Add(idx2);
-        indices.Add(idx2);
-        indices.Add(idx1);
-        indices.Add(idx3);
-    }
-
-    public void CreateRectangle(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, List<Vertex> vertices, List<ushort> indices)
-    {
-        var starting_vert_idx = (ushort)vertices.Count;
-        vertices.Add(new Vertex
-        {
-            m_position = p0
-        });
-
-        vertices.Add(new Vertex
-        {
-            m_position = p1
-        });
-
-        vertices.Add(new Vertex
-        {
-            m_position = p2
-        });
-
-        vertices.Add(new Vertex
-        {
-            m_position = p3
-        });
-
-        indices.Add((ushort)(starting_vert_idx + 0));
-        indices.Add((ushort)(starting_vert_idx + 1));
-        indices.Add((ushort)(starting_vert_idx + 2));
-        indices.Add((ushort)(starting_vert_idx + 2));
-        indices.Add((ushort)(starting_vert_idx + 1));
-        indices.Add((ushort)(starting_vert_idx + 3));
     }
 
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors = new VertexAttributeDescriptor[]
