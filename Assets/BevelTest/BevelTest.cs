@@ -91,7 +91,7 @@ public class BevelTest : MonoBehaviour
             m_edges = new Edge[max_edge_count];
         }
 
-        public void AddEdge(ushort vert_idx_a, ushort vert_idx_b, ushort vert_idx_c, ushort vert_idx_d, ushort vert_idx_e, ushort vert_idx_f, ushort vert_idx_g, ushort vert_idx_h)
+        public void AddEdge(ushort vert_idx_a, ushort vert_idx_b, ushort vert_idx_c, ushort vert_idx_d, ushort vert_idx_e, ushort vert_idx_f, ushort vert_idx_g)
         {
             var edge_idx = m_edge_count++;
             m_edges[edge_idx] = new Edge
@@ -103,7 +103,6 @@ public class BevelTest : MonoBehaviour
                 m_vertex_idx_e = vert_idx_e,
                 m_vertex_idx_f = vert_idx_f,
                 m_vertex_idx_g = vert_idx_g,
-                m_vertex_idx_h = vert_idx_h,
             };
 
             m_edge_map[vert_idx_a] = edge_idx;
@@ -125,7 +124,6 @@ public class BevelTest : MonoBehaviour
             public ushort m_vertex_idx_e;
             public ushort m_vertex_idx_f;
             public ushort m_vertex_idx_g;
-            public ushort m_vertex_idx_h;
 
         }
     }
@@ -256,12 +254,8 @@ public class BevelTest : MonoBehaviour
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
 
             var vert_idx_g = vert_writer.Write(pos_a + new Vector3(0, -1, 0));
-            var vert_idx_h = vert_writer.Write(pos_b + new Vector3(0, -1, 0));
 
-            triangle_writer.Write(vert_idx_e, vert_idx_f, vert_idx_g);
-            triangle_writer.Write(vert_idx_g, vert_idx_f, vert_idx_h);
-
-            edge_loop.AddEdge(vert_idx_a, vert_idx_b, vert_idx_c, vert_idx_d, vert_idx_e, vert_idx_f, vert_idx_g, vert_idx_h);
+            edge_loop.AddEdge(vert_idx_a, vert_idx_b, vert_idx_c, vert_idx_d, vert_idx_e, vert_idx_f, vert_idx_g);
         }
 
         for(int i = 0; i < edge_loop.Count; ++i)
@@ -270,8 +264,14 @@ public class BevelTest : MonoBehaviour
             var end_edge = edge_loop.m_edges[edge_loop.m_edge_map[start_edge.m_vertex_idx_b]];
 
             triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c);
+
             triangle_writer.Write(start_edge.m_vertex_idx_d, end_edge.m_vertex_idx_c, start_edge.m_vertex_idx_f);
             triangle_writer.Write(start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_c, end_edge.m_vertex_idx_e);
+
+            triangle_writer.Write(start_edge.m_vertex_idx_e, start_edge.m_vertex_idx_f, start_edge.m_vertex_idx_g);
+            triangle_writer.Write(start_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_g);
+
+            triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e);
         }
 
         var vertices = new Vertex[vert_writer.Count];
