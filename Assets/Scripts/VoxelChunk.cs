@@ -383,28 +383,18 @@ public class VoxelChunk
         sample_count = 0;
         has_occlusion_changed = false;
 
-        for (int y = m_density_grid_y; y < m_density_grid_y + m_chunk_dimension_in_voxels; ++y)
+        var max_y = System.Math.Min(m_density_grid_y + m_chunk_dimension_in_voxels, m_layer_height_in_voxels - 1);
+        for (int y = m_density_grid_y; y < max_y; ++y)
         {
-            var top_density_idx_offset = m_layer_width_in_voxels;
-            if (y == m_layer_height_in_voxels - 1)
-            {
-                top_density_idx_offset = 0;
-            }
-
-            for (int x = m_density_grid_x; x < m_density_grid_x + m_chunk_dimension_in_voxels; ++x)
+            var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels, m_layer_width_in_voxels - 1);
+            for (int x = m_density_grid_x; x < max_x; ++x)
             {
                 int left_near_cell_idx = y * m_layer_width_in_voxels + x;
 
-                var right_density_idx_offset = 1;
-                if (x == m_layer_width_in_voxels - 1)
-                {
-                    right_density_idx_offset = 0;
-                }
-
                 var left_near_density = m_layer_density_grid[left_near_cell_idx];
-                var right_near_density = m_layer_density_grid[left_near_cell_idx + right_density_idx_offset];
-                var left_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset];
-                var right_far_density = m_layer_density_grid[left_near_cell_idx + top_density_idx_offset + right_density_idx_offset];
+                var right_near_density = m_layer_density_grid[left_near_cell_idx + 1];
+                var left_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels];
+                var right_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels + 1];
 
                 /*
                 if (left_near_density > 0 || left_far_density > 0 || right_near_density > 0 || left_far_density > 0)
