@@ -98,6 +98,8 @@ public class VoxelChunk
     {
         public ushort m_vertex_idx_a;
         public ushort m_vertex_idx_b;
+        public Vector3 m_pos_a;
+        public Vector3 m_pos_b;
         public Vector3 m_normal;
     }
 
@@ -789,18 +791,42 @@ public class VoxelChunk
         var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0);
         var bottom_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
 
+        for(int i = 0; i < edge_count; ++i)
+        {
+            var edge = edges[i];
+#if UNITY_EDITOR
+            if (edge_map.ContainsKey(edge.m_vertex_idx_a))
+            {
+                throw new System.Exception($"Error edge already exists {edge.m_vertex_idx_a}");
+            }
+#endif
+            var pos_a = pos_writer.m_positions[edge.m_vertex_idx_a];
+            var pos_b = pos_writer.m_positions[edge.m_vertex_idx_b];
+            var pos_for_normal = pos_a - Vector3.up;
+            var normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
+
+            var edge_idx = i;
+            vertex_id_to_connecting_edge_idx[edge.m_vertex_idx_a] = edge_idx;
+            edge_face_infos[i] = new EdgeFaceInfo
+            {
+                m_vertex_idx_a = edge.m_vertex_idx_a,
+                m_vertex_idx_b = edge.m_vertex_idx_b,
+                m_pos_a = pos_a,
+                m_pos_b = pos_b,
+                m_normal = normal
+            };
+        }
 
         for (int i = 0; i < edge_count; ++i)
         {
-            var original_edge = edges[i];
+            var edge_face_info = edge_face_infos[i];
 
-            var vert_idx_a = original_edge.m_vertex_idx_a;
-            var vert_idx_b = original_edge.m_vertex_idx_b;
+            var vert_idx_a = edge_face_info.m_vertex_idx_a;
+            var vert_idx_b = edge_face_info.m_vertex_idx_b;
 
-            var pos_a = pos_writer.m_positions[vert_idx_a];
-            var pos_b = pos_writer.m_positions[vert_idx_b];
-            var pos_for_normal = pos_a - Vector3.up;
-            var top_normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
+            var pos_a = edge_face_info.m_pos_a;
+            var pos_b = edge_face_info.m_pos_b;
+            var top_normal = edge_face_info.m_normal;
             var horizontal_offset = top_normal * extrusion_distance;
 
             var vert_idx_c = pos_writer.Write(pos_a + horizontal_offset + upper_vertical_offset);
