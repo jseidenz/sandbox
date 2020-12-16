@@ -142,11 +142,12 @@ public class BevelTest : MonoBehaviour
             var left_points = new List<Vector3>();
             var right_points = new List<Vector3>();
             left_points.Add(ev0.m_position);
-            left_points.Add(ev2.m_position);
+            left_points.Add(ev0.m_position + ev0.m_normal * m_bevel_tuning.m_extrusion_distance);
+            left_points.Add(ev0.m_position + ev0.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
 
             right_points.Add(ev1.m_position);
-            right_points.Add(ev3.m_position);
-
+            right_points.Add(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance);
+            right_points.Add(ev1.m_position + ev1.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
 
             for(int j = 0; j < m_bevel_tuning.m_subdivision_count; ++j)
             {
