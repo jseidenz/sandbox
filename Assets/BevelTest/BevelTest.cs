@@ -152,16 +152,8 @@ public class BevelTest : MonoBehaviour
 
         var faces = new ushort[]
         {
-            0, 2, 1, //face front
-	        0, 3, 2,
             2, 3, 4, //face top
 	        2, 4, 5,
-            1, 2, 5, //face right
-	        1, 5, 6,
-            0, 7, 4, //face left
-	        0, 4, 3,
-            5, 4, 7, //face back
-	        5, 7, 6,
             0, 6, 7, //face bottom
 	        0, 1, 6
         };
@@ -218,33 +210,43 @@ public class BevelTest : MonoBehaviour
 
         var top_verts = new List<ushort>();
 
+        var top_corners = new ushort[4];
+        top_corners[0] = vert_writer.Write(new Vector3(0, 1, 0));
+        top_corners[1] = vert_writer.Write(new Vector3(1, 1, 0));
+        top_corners[2] = vert_writer.Write(new Vector3(0, 1, 1));
+        top_corners[3] = vert_writer.Write(new Vector3(1, 1, 1));
+
+        foreach(var top_corner_vert_idx in top_corners)
+        {
+            top_verts.Add(top_corner_vert_idx);
+        }
+
         var edges = new VoxelChunk.Edge[4];
-        edges[0] = new VoxelChunk.Edge { m_vertex_idx_a = 4, m_vertex_idx_b = 5 };
-        edges[1] = new VoxelChunk.Edge { m_vertex_idx_a = 13, m_vertex_idx_b = 14 };
-        edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = 22, m_vertex_idx_b = 23 };
-        edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = 24, m_vertex_idx_b = 25 };
+        edges[0] = new VoxelChunk.Edge { m_vertex_idx_a = top_corners[0], m_vertex_idx_b = top_corners[1] };
+        edges[1] = new VoxelChunk.Edge { m_vertex_idx_a = top_corners[1], m_vertex_idx_b = top_corners[3] };
+        edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = top_corners[3], m_vertex_idx_b = top_corners[2] };
+        edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = top_corners[2], m_vertex_idx_b = top_corners[0] };
 
         for (int i = 0; i < edges.Length; ++i)
         {
             var original_edge = edges[i];
 
-            var vert_a = cube_vertices[original_edge.m_vertex_idx_a];
-            var vert_b = cube_vertices[original_edge.m_vertex_idx_b];
+            var vert_idx_a = original_edge.m_vertex_idx_a;
+            var vert_idx_b = original_edge.m_vertex_idx_b;
 
-            var vert_idx_a = vert_writer.Write(vert_a.m_position);
-            var vert_idx_b = vert_writer.Write(vert_b.m_position);
+            var pos_a = vert_writer.m_positions[vert_idx_a];
+            var pos_b = vert_writer.m_positions[vert_idx_b];
+            var pos_for_normal = pos_a - Vector3.up;
+            var top_normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
 
-            top_verts.Add(vert_idx_a);
-            top_verts.Add(vert_idx_b);
-
-            var vert_idx_c = vert_writer.Write(vert_a.m_position + vert_a.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
-            var vert_idx_d = vert_writer.Write(vert_b.m_position + vert_b.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var vert_idx_c = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var vert_idx_d = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
 
             triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
             triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
 
-            var vert_idx_e = vert_writer.Write(vert_a.m_position + vert_a.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
-            var vert_idx_f = vert_writer.Write(vert_b.m_position + vert_b.m_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
+            var vert_idx_e = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
+            var vert_idx_f = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1, 0));
 
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
@@ -258,6 +260,8 @@ public class BevelTest : MonoBehaviour
             var end_edge = edge_loop.m_edges[edge_loop.m_edge_map[start_edge.m_vertex_idx_b]];
 
             triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c);
+            triangle_writer.Write(start_edge.m_vertex_idx_d, end_edge.m_vertex_idx_c, start_edge.m_vertex_idx_f);
+            triangle_writer.Write(start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_c, end_edge.m_vertex_idx_e);
         }
 
         var vertices = new Vertex[vert_writer.Count];
