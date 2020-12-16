@@ -83,6 +83,32 @@ public class BevelTest : MonoBehaviour
         public List<ushort> m_triangles;
     }
 
+    public class EdgeLoop
+    {
+        public EdgeLoop(int max_edge_count, int max_vert_count)
+        {
+            m_edge_map = new ushort[max_vert_count];
+            m_edges = new VoxelChunk.Edge[max_edge_count];
+        }
+
+        public void AddEdge(ushort vert_idx0, ushort vert_idx1)
+        {
+            m_edges[m_edge_count++] = new VoxelChunk.Edge
+            {
+                m_vertex_idx_a = vert_idx0,
+                m_vertex_idx_b = vert_idx1
+            };
+            m_edge_map[vert_idx0] = vert_idx1;
+        }
+
+
+        public int Count { get => m_edge_count; }
+
+        public int m_edge_count;
+        public ushort[] m_edge_map;
+        public VoxelChunk.Edge[] m_edges;
+    }
+
     void LateUpdate()
     {
         m_bevel_tuning.ApplyParameters(m_material);
@@ -163,17 +189,16 @@ public class BevelTest : MonoBehaviour
         CreateEdgeMesh(vertices);
 
         Graphics.DrawMesh(m_mesh, transform.localToWorldMatrix, m_material, 0, null, 0);
-        Graphics.DrawMesh(m_mesh2, transform.localToWorldMatrix, m_material, 0, null, 0);
-        
+        Graphics.DrawMesh(m_mesh2, transform.localToWorldMatrix, m_material, 0, null, 0);        
     }
 
     void CreateEdgeMesh(Vertex[] cube_vertices)
     {
-        var edges = new VoxelChunk.Edge[4];
-        edges[0] = new VoxelChunk.Edge { m_vertex_idx_a = 4, m_vertex_idx_b = 5 };
-        edges[1] = new VoxelChunk.Edge { m_vertex_idx_a = 13, m_vertex_idx_b = 14 };
-        edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = 22, m_vertex_idx_b = 23 };
-        edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = 24, m_vertex_idx_b = 25 };
+        var edge_loop = new EdgeLoop(4, 4 * 32);
+        edge_loop.AddEdge(4, 5);
+        edge_loop.AddEdge(13, 14);
+        edge_loop.AddEdge(22, 23);
+        edge_loop.AddEdge(24, 25);
 
         var vert_writer = VertWriter.Start();
         var triangle_writer = TriangleWriter.Start();
@@ -181,9 +206,9 @@ public class BevelTest : MonoBehaviour
 
         var top_verts = new List<ushort>();
 
-        for (int i = 0; i < edges.Length; ++i)
+        for (int i = 0; i < edge_loop.Count; ++i)
         {
-            var edge = edges[i];
+            var edge = edge_loop.m_edges[i];
             var ev0 = cube_vertices[edge.m_vertex_idx_a];
             var ev1 = cube_vertices[edge.m_vertex_idx_b];
 
