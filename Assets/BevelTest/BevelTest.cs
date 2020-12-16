@@ -17,6 +17,7 @@ public class BevelTest : MonoBehaviour
 
     Mesh m_mesh;
     Mesh m_mesh2;
+    Dictionary<ushort, EdgeConnections> m_edge_map = new Dictionary<ushort, EdgeConnections>();
     [SerializeField] Material m_material;
     [SerializeField] BevelTuning m_bevel_tuning;
 
@@ -194,7 +195,7 @@ public class BevelTest : MonoBehaviour
         edges[2] = new VoxelChunk.Edge { m_vertex_idx_a = top_corners[3], m_vertex_idx_b = top_corners[2] };
         edges[3] = new VoxelChunk.Edge { m_vertex_idx_a = top_corners[2], m_vertex_idx_b = top_corners[0] };
 
-        var edge_map = new Dictionary<ushort, EdgeConnections>();
+        m_edge_map.Clear();
 
         for (int i = 0; i < edges.Length; ++i)
         {
@@ -222,12 +223,12 @@ public class BevelTest : MonoBehaviour
 
             var vert_idx_g = vert_writer.Write(pos_a + new Vector3(0, -1, 0));
 
-            if(edge_map.ContainsKey(vert_idx_a))
+            if(m_edge_map.ContainsKey(vert_idx_a))
             {
                 throw new Exception($"Error edge already exists {vert_idx_a}");
             }
 
-            edge_map[vert_idx_a] = new EdgeConnections
+            m_edge_map[vert_idx_a] = new EdgeConnections
             {
                 m_vertex_idx_a = vert_idx_a,
                 m_vertex_idx_b = vert_idx_b,
@@ -239,10 +240,10 @@ public class BevelTest : MonoBehaviour
             };
         }
 
-        foreach(var kvp in edge_map)
+        foreach(var kvp in m_edge_map)
         {
             var start_edge = kvp.Value;
-            var end_edge = edge_map[start_edge.m_vertex_idx_b];
+            var end_edge = m_edge_map[start_edge.m_vertex_idx_b];
 
             triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c);
 
