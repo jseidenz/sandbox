@@ -54,15 +54,23 @@ public class VoxelChunk
             scratch_buffer.m_vertex_id_to_accumulated_normal = new Dictionary<ushort, Vector3>();
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
+            scratch_buffer.m_edge_map = new Dictionary<ushort, EdgeConnections>();
             return scratch_buffer;
         }
 
+        public void Clear()
+        {
+            m_vertex_table.Clear();
+            m_vertex_id_to_accumulated_normal.Clear();
+            m_edge_map.Clear();
+        }
 
         public Vertex[] m_vertices;
         public System.UInt16[] m_triangles;
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
         public Dictionary<ushort, Vector3> m_vertex_id_to_accumulated_normal;
+        public Dictionary<ushort, EdgeConnections> m_edge_map;
         public DensitySample[] m_density_samples;
     }
 
@@ -188,6 +196,8 @@ public class VoxelChunk
 
     public bool March(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
+        scratch_buffer.Clear();
+
         Profiler.BeginSample("GatherDensitySamples");
         var density_samples = scratch_buffer.m_density_samples;
         GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count, out var has_occlusion_changed);
@@ -448,8 +458,6 @@ public class VoxelChunk
 
         triangle_count = 0;
         int edge_idx = 0;
-
-        scratch_buffer.m_vertex_table.Clear();
 
         Profiler.BeginSample("GenerateTriangles");
         for (int density_sample_idx = 0; density_sample_idx < density_sample_count; ++density_sample_idx)
@@ -734,7 +742,6 @@ public class VoxelChunk
         vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
-        scratch_buffer.m_vertex_id_to_accumulated_normal.Clear();
         FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vertex_id_to_accumulated_normal, ref vert_count, ref triangle_count, ref edge_idx);
         Profiler.EndSample();
     }

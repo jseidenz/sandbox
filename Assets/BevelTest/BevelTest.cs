@@ -5,6 +5,18 @@ using System.Runtime.InteropServices;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 
+public struct EdgeConnections
+{
+    public ushort m_vertex_idx_a;
+    public ushort m_vertex_idx_b;
+    public ushort m_vertex_idx_c;
+    public ushort m_vertex_idx_d;
+    public ushort m_vertex_idx_e;
+    public ushort m_vertex_idx_f;
+    public ushort m_vertex_idx_g;
+
+}
+
 public class BevelTest : MonoBehaviour
 {
     [StructLayout(LayoutKind.Sequential)]
@@ -82,18 +94,6 @@ public class BevelTest : MonoBehaviour
         public int Count { get => m_triangles.Count; }
 
         public List<ushort> m_triangles;
-    }
-
-    public struct EdgeConnections
-    {
-        public ushort m_vertex_idx_a;
-        public ushort m_vertex_idx_b;
-        public ushort m_vertex_idx_c;
-        public ushort m_vertex_idx_d;
-        public ushort m_vertex_idx_e;
-        public ushort m_vertex_idx_f;
-        public ushort m_vertex_idx_g;
-
     }
 
     void LateUpdate()
