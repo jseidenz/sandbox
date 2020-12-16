@@ -51,7 +51,7 @@ public class VoxelChunk
             scratch_buffer.m_vertices = new Vertex[ushort.MaxValue];
             scratch_buffer.m_triangles = new System.UInt16[ushort.MaxValue * 24];
             scratch_buffer.m_edges = new Edge[ushort.MaxValue];
-            scratch_buffer.m_vertex_id_to_accumulated_normal = new Dictionary<ushort, Vector3>();
+            scratch_buffer.m_normal_accumulator = new Dictionary<ushort, Vector3>();
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
             scratch_buffer.m_edge_map = new Dictionary<ushort, EdgeConnections>();
@@ -61,7 +61,7 @@ public class VoxelChunk
         public void Clear()
         {
             m_vertex_table.Clear();
-            m_vertex_id_to_accumulated_normal.Clear();
+            m_normal_accumulator.Clear();
             m_edge_map.Clear();
         }
 
@@ -69,7 +69,7 @@ public class VoxelChunk
         public System.UInt16[] m_triangles;
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
-        public Dictionary<ushort, Vector3> m_vertex_id_to_accumulated_normal;
+        public Dictionary<ushort, Vector3> m_normal_accumulator;
         public Dictionary<ushort, EdgeConnections> m_edge_map;
         public DensitySample[] m_density_samples;
     }
@@ -742,7 +742,7 @@ public class VoxelChunk
         vert_count = (ushort)vertex_entry_count;
 
         Profiler.BeginSample("FinalizeEdges");
-        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_vertex_id_to_accumulated_normal, ref vert_count, ref triangle_count, ref edge_idx);
+        FinalizeEdges(vertices, scratch_buffer.m_triangles, scratch_buffer.m_edges, scratch_buffer.m_normal_accumulator, scratch_buffer.m_edge_map, ref vert_count, ref triangle_count, ref edge_idx);
         Profiler.EndSample();
     }
 
@@ -750,7 +750,8 @@ public class VoxelChunk
         Vertex[] vertices, 
         ushort[] triangles, 
         Edge[] edges,
-        Dictionary<ushort, Vector3> vertex_id_to_accumulated_normal,
+        Dictionary<ushort, Vector3> normal_accumulator,
+        Dictionary<ushort, EdgeConnections> edge_map,
         ref ushort vert_idx, 
         ref int triangle_idx, 
         ref int edge_count
@@ -788,6 +789,96 @@ public class VoxelChunk
             triangles[triangle_idx++] = vert_idx_b;
             triangles[triangle_idx++] = vert_idx_d;
         }
+
+        Profiler.BeginSample("EdgesV2");
+        var vert_writer = new VertWriter(vertices, vert_idx);
+        var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx);
+        for (int i = 0; i < edge_count; ++i)
+        {
+            var original_edge = edges[i];
+
+            var vert_idx_a = original_edge.m_vertex_idx_a;
+            var vert_idx_b = original_edge.m_vertex_idx_b;
+
+            var pos_a = vertices[vert_idx_a].m_position;
+            var pos_b = vertices[vert_idx_b].m_position;
+            var pos_for_normal = pos_a - Vector3.up;
+            var top_normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
+
+            var vert_idx_c = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+            var vert_idx_d = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0));
+
+            triangle_writer.Write(vert_idx_a, vert_idx_b, vert_idx_c);
+            triangle_writer.Write(vert_idx_c, vert_idx_b, vert_idx_d);
+
+            var vert_idx_e = vert_writer.Write(pos_a + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+            var vert_idx_f = vert_writer.Write(pos_b + top_normal * m_bevel_tuning.m_extrusion_distance + new Vector3(0, -1 + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0));
+
+            triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e);
+            triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f);
+
+            var vert_idx_g = vert_writer.Write(pos_a + new Vector3(0, -1, 0));
+
+            if (edge_map.ContainsKey(vert_idx_a))
+            {
+                throw new System.Exception($"Error edge already exists {vert_idx_a}");
+            }
+
+            edge_map[vert_idx_a] = new EdgeConnections
+            {
+                m_vertex_idx_a = vert_idx_a,
+                m_vertex_idx_b = vert_idx_b,
+                m_vertex_idx_c = vert_idx_c,
+                m_vertex_idx_d = vert_idx_d,
+                m_vertex_idx_e = vert_idx_e,
+                m_vertex_idx_f = vert_idx_f,
+                m_vertex_idx_g = vert_idx_g,
+            };
+        }
+
+
+        foreach (var kvp in edge_map)
+        {
+            var start_edge = kvp.Value;
+            if (!edge_map.TryGetValue(start_edge.m_vertex_idx_b, out var end_edge)) continue;
+
+            triangle_writer.Write(start_edge.m_vertex_idx_d, start_edge.m_vertex_idx_b, end_edge.m_vertex_idx_c);
+
+            triangle_writer.Write(start_edge.m_vertex_idx_d, end_edge.m_vertex_idx_c, start_edge.m_vertex_idx_f);
+            triangle_writer.Write(start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_c, end_edge.m_vertex_idx_e);
+
+            triangle_writer.Write(start_edge.m_vertex_idx_e, start_edge.m_vertex_idx_f, start_edge.m_vertex_idx_g);
+            triangle_writer.Write(start_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_g);
+
+            triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e);
+        }
+
+        /*
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            var vert_idx0 = triangles[i + 0];
+            var vert_idx1 = triangles[i + 1];
+            var vert_idx2 = triangles[i + 2];
+
+            var v0 = vertices[vert_idx0];
+            var v1 = vertices[vert_idx1];
+            var v2 = vertices[vert_idx2];
+            var normal = Vector3.Cross(v1.m_position - v0.m_position, v2.m_position - v0.m_position);
+
+            normal_accumulator[vert_idx0] = normal_accumulator[vert_idx0] + normal;
+            normal_accumulator[vert_idx1] = normal_accumulator[vert_idx1] + normal;
+            normal_accumulator[vert_idx2] = normal_accumulator[vert_idx2] + normal;
+        }
+
+        for (ushort i = 0; i < vertices.Length; ++i)
+        {
+            var v = vertices[i];
+            v.m_normal = (normal_accumulator[i]).normalized;
+            vertices[i] = v;
+        }
+        */
+
+        Profiler.EndSample();
     }
 
     public void SetCollisionGenerationEnabled(bool is_enabled)
@@ -832,4 +923,50 @@ public class VoxelChunk
         | MeshUpdateFlags.DontValidateIndices
 #endif
         ;
+
+    struct VertWriter
+    {
+        public VertWriter(Vertex[] vertices, int vert_count)
+        {
+            m_vertices = vertices;
+            m_vert_count = vert_count;
+        }
+        public ushort Write(Vector3 pos)
+        {
+            var vert_idx = (ushort)m_vert_count++;
+            m_vertices[vert_idx].m_position = pos;
+            return vert_idx;
+        }
+
+        public Vector3 this[int idx] { get => m_vertices[idx].m_position; }
+
+        public int Count { get => m_vert_count; }
+
+        public Vertex[] m_vertices;
+        public int m_vert_count;
+    }
+
+    public struct TriangleWriter
+    {
+        public TriangleWriter(ushort[] triangles, ushort triangle_count)
+        {
+            m_triangles = triangles;
+            m_triangle_count = triangle_count;
+        }
+
+        public void Write(ushort vert_idx0, ushort vert_idx1, ushort vert_idx2)
+        {
+            m_triangles[m_triangle_count++] = vert_idx0;
+            m_triangles[m_triangle_count++] = vert_idx1;
+            m_triangles[m_triangle_count++] = vert_idx2;
+        }
+
+        public ushort this[int idx] { get => m_triangles[idx]; }
+
+        public int Count { get => m_triangle_count; }
+
+        public ushort[] m_triangles;
+        public ushort m_triangle_count;
+    }
+
 }
