@@ -12,7 +12,7 @@ public class Mesher
     int m_grid_depth_in_voxels;
     Vector3 m_voxel_size_in_meters;
     VoxelLayer[] m_layers;
-    bool[] m_empty_occlusion_grid;
+    byte[] m_empty_sample_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
     LayeredBrush m_brush;
@@ -45,7 +45,7 @@ public class Mesher
         m_grid_height_in_voxels = grid_height_in_voxels;
         m_grid_depth_in_voxels = grid_depth_in_voxels;
 
-        m_empty_occlusion_grid = new bool[m_grid_width_in_voxels * m_grid_depth_in_voxels];
+        m_empty_sample_grid = new byte[m_grid_width_in_voxels * m_grid_depth_in_voxels];
         m_voxel_chunk_scratch_buffer = VoxelChunk.ScratchBuffer.CreateScratchBuffer();
         m_layers = new VoxelLayer[m_grid_height_in_voxels];
         m_brush = brush;
@@ -62,20 +62,20 @@ public class Mesher
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
         {
-            var layer_above_occlusion_grid = m_empty_occlusion_grid;
-            var layer_below_occlusion_grid = m_empty_occlusion_grid;
+            var layer_above_occlusion_grid = m_empty_sample_grid;
+            var layer_below_occlusion_grid = m_empty_sample_grid;
 
             if(y > 0)
             {
-                layer_below_occlusion_grid = m_layers[y - 1].GetOcclusionGrid();
+                layer_below_occlusion_grid = m_layers[y - 1].GetSampleGrid();
             }
 
             if(y < m_grid_height_in_voxels - 2)
             {
-                layer_above_occlusion_grid = m_layers[y + 1].GetOcclusionGrid();
+                layer_above_occlusion_grid = m_layers[y + 1].GetSampleGrid();
             }
 
-            m_layers[y].SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
+            m_layers[y].SetAboveAndBelowSampleGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
         }
     }
 

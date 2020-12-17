@@ -168,7 +168,7 @@ public class VoxelChunk
         int layer_width_in_voxels, 
         int layer_height_in_voxels, 
         float[] layer_density_grid, 
-        bool[] layer_occlusion_grid, 
+        byte[] layer_sample_grid, 
         Vector3 voxel_size_in_meters, 
         float iso_level, 
         float bot_y, 
@@ -184,7 +184,7 @@ public class VoxelChunk
         m_density_grid_y = density_grid_y;
         m_chunk_dimension_in_voxels = dimensions_in_voxels;
         m_layer_density_grid = layer_density_grid;
-        m_layer_occlusion_grid = layer_occlusion_grid;
+        m_layer_sample_grid = layer_sample_grid;
         m_layer_width_in_voxels = layer_width_in_voxels;
         m_layer_height_in_voxels = layer_height_in_voxels;
         m_iso_level = iso_level;
@@ -209,10 +209,10 @@ public class VoxelChunk
         m_top_y = top_y;
     }
 
-    public void SetAboveAndBelowOcclusionGrids(bool[] layer_above_occlusion_grid, bool[] layer_below_occlusion_grid)
+    public void SetAboveAndBelowSampleGrids(byte[] layer_above_sample_grid, byte[] layer_below_sample_grid)
     {
-        m_layer_above_occlusion_grid = layer_above_occlusion_grid;
-        m_layer_below_occlusion_grid = layer_below_occlusion_grid;
+        m_layer_above_sample_grid = layer_above_sample_grid;
+        m_layer_below_sample_grid = layer_below_sample_grid;
     }
 
     public bool March(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
@@ -431,11 +431,13 @@ public class VoxelChunk
                 if (sample_type != SAMPLE_TYPE_FULL_SQUARE)
                 {
                     var is_occluding = false;
-                    if (m_layer_occlusion_grid[left_near_cell_idx] != is_occluding)
+                    var was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
+                    if (was_occluding != is_occluding)
                     {
                         has_occlusion_changed = true;
-                        m_layer_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
+
+                    m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
 
                     if (sample_type == SAMPLE_TYPE_EMTPY)
                     {
@@ -445,13 +447,15 @@ public class VoxelChunk
                 else
                 {
                     var is_occluding = true;
-                    if (m_layer_occlusion_grid[left_near_cell_idx] != is_occluding)
+                    bool was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
+                    if (was_occluding != is_occluding)
                     {
                         has_occlusion_changed = true;
-                        m_layer_occlusion_grid[left_near_cell_idx] = is_occluding;
                     }
 
-                    bool is_occluded = m_layer_above_occlusion_grid[left_near_cell_idx];
+                    m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
+
+                    bool is_occluded = m_layer_above_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
                     if (is_occluded) continue;
                 }
 
@@ -1028,10 +1032,10 @@ public class VoxelChunk
         }
     }
 
-    bool[] m_layer_above_occlusion_grid;
-    bool[] m_layer_below_occlusion_grid;
+    byte[] m_layer_above_sample_grid;
+    byte[] m_layer_below_sample_grid;
     float[] m_layer_density_grid;
-    bool[] m_layer_occlusion_grid;
+    byte[] m_layer_sample_grid;
     int m_layer_width_in_voxels;
     int m_layer_height_in_voxels;
     Mesh m_mesh;

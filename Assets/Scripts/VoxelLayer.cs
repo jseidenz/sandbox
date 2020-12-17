@@ -28,7 +28,7 @@ public class VoxelLayer
         if (height_in_voxels % voxel_chunk_dimensions != 0) throw new System.Exception($"width_in_voxels={height_in_voxels} is not a multiple of voxel_chunk_dimensions={voxel_chunk_dimensions}");
 
         m_density_grid = density_grid;
-        m_occlusion_grid = new bool[width_in_voxels * height_in_voxels];
+        m_sample_grid = new byte[width_in_voxels * height_in_voxels];
         m_width_in_voxels = width_in_voxels;
         m_height_in_voxels = height_in_voxels;
         m_voxel_size_in_meters = voxel_size_in_meters;
@@ -49,16 +49,16 @@ public class VoxelLayer
             for(int x = 0; x < m_width_in_chunks; ++x)
             {
                 var bounds = GetChunkBounds(x, y);
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_occlusion_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, bevel_tuning);
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_sample_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, bevel_tuning);
             }
         }
     }
 
-    public void SetAboveAndBelowOcclusionGrids(bool[] layer_above_occlusion_grid, bool[] layer_below_occlusion_grid)
+    public void SetAboveAndBelowSampleGrids(byte[] layer_above_occlusion_grid, byte[] layer_below_occlusion_grid)
     {
         foreach(var chunk in m_voxel_chunks)
         {
-            chunk.SetAboveAndBelowOcclusionGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
+            chunk.SetAboveAndBelowSampleGrids(layer_above_occlusion_grid, layer_below_occlusion_grid);
         }
     }
 
@@ -176,9 +176,9 @@ public class VoxelLayer
         }
     }
 
-    public bool[] GetOcclusionGrid()
+    public byte[] GetSampleGrid()
     {
-        return m_occlusion_grid;
+        return m_sample_grid;
     }
 
     public void AddDensity(Vector3 pos, float amount, HashSet<int> dirty_chunk_indices)
@@ -240,7 +240,7 @@ public class VoxelLayer
 
     Color m_color;
     float[] m_density_grid;
-    bool[] m_occlusion_grid;
+    byte[] m_sample_grid;
     int m_width_in_voxels;
     int m_height_in_voxels;
     int m_width_in_chunks;
