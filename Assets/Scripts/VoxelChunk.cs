@@ -977,15 +977,6 @@ public class VoxelChunk
             };
         }
 
-        /*
-        foreach(var triangle_to_strip in triangles_to_strip)
-        {
-            triangles[triangle_to_strip + 0] = 0;
-            triangles[triangle_to_strip + 1] = 0;
-            triangles[triangle_to_strip + 2] = 0;
-        }
-        */
-
         if (triangles_to_strip.Count > 0)
         {
             int triangle_count = triangle_idx;
