@@ -4,6 +4,8 @@ using UnityEngine.Rendering;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
 
+// Need to notify neighbors of occlusion mishaps.
+// Need to mesh bottom.
 public class VoxelChunk
 {
     const int SAMPLE_TYPE_FULL_SQUARE = 15;
@@ -134,6 +136,17 @@ public class VoxelChunk
     }
 
     [System.Flags]
+    public enum DirtyOcclusionRegion : byte
+    {
+        None = 0,
+        Center = 1, 
+        Left = 2,
+        Right = 4,
+        Near = 8,
+        Far = 16
+    }
+
+    [System.Flags]
     public enum VertexLocation : ushort
     {
         Left = 1,
@@ -215,13 +228,13 @@ public class VoxelChunk
         m_layer_below_sample_grid = layer_below_sample_grid;
     }
 
-    public bool March(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
+    public DirtyOcclusionRegion March(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
     {
         scratch_buffer.Clear();
 
         Profiler.BeginSample("GatherDensitySamples");
         var density_samples = scratch_buffer.m_density_samples;
-        GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count, out var has_occlusion_changed);
+        GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count, out DirtyOcclusionRegion dirty_occlusion_regions);
         Profiler.EndSample();
 
         Profiler.BeginSample("March");
@@ -250,7 +263,7 @@ public class VoxelChunk
             Profiler.EndSample();
         }
 
-        return has_occlusion_changed;
+        return dirty_occlusion_regions;
     }
 
     struct MeshMarcher
@@ -394,15 +407,25 @@ public class VoxelChunk
         }
     }
 
-    void GatherDensitySamples(DensitySample[] density_samples, out int sample_count, out bool has_occlusion_changed)
+    void GatherDensitySamples(DensitySample[] density_samples, out int sample_count, out DirtyOcclusionRegion dirty_occlusion_regions)
     {
         sample_count = 0;
-        has_occlusion_changed = false;
+        dirty_occlusion_regions = DirtyOcclusionRegion.None;
 
         var max_y = System.Math.Min(m_density_grid_y + m_chunk_dimension_in_voxels + 1, m_layer_height_in_voxels - 1);
         var start_y = System.Math.Max(m_density_grid_y - 1, 0);
         for (int y = start_y; y < max_y; ++y)
         {
+            var vertical_occlusion_region = DirtyOcclusionRegion.Center;
+            if(y == start_y)
+            {
+                vertical_occlusion_region = DirtyOcclusionRegion.Left;
+            }
+            else if(y == max_y - 1)
+            {
+                vertical_occlusion_region = DirtyOcclusionRegion.Right;
+            }
+
             var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
             var start_x = System.Math.Max(m_density_grid_x - 1, 0);
             for (int x = start_x; x < max_x; ++x)
@@ -434,7 +457,17 @@ public class VoxelChunk
                     var was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
                     if (was_occluding != is_occluding)
                     {
-                        has_occlusion_changed = true;
+                        var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
+                        if(x == start_x)
+                        {
+                            horizontal_occlusion_region = DirtyOcclusionRegion.Left;
+                        }
+                        else if(x == max_x - 1)
+                        {
+                            horizontal_occlusion_region = DirtyOcclusionRegion.Right;
+                        }
+
+                        dirty_occlusion_regions = dirty_occlusion_regions | horizontal_occlusion_region | vertical_occlusion_region;
                     }
 
                     m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
@@ -450,7 +483,17 @@ public class VoxelChunk
                     bool was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
                     if (was_occluding != is_occluding)
                     {
-                        has_occlusion_changed = true;
+                        var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
+                        if (x == start_x)
+                        {
+                            horizontal_occlusion_region = DirtyOcclusionRegion.Left;
+                        }
+                        else if (x == max_x - 1)
+                        {
+                            horizontal_occlusion_region = DirtyOcclusionRegion.Right;
+                        }
+
+                        dirty_occlusion_regions = dirty_occlusion_regions | horizontal_occlusion_region | vertical_occlusion_region;
                     }
 
                     m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
