@@ -375,7 +375,7 @@ public class VoxelChunk
         {
             if(is_border_sample)
             {
-                //m_triangles_to_strip.Add(m_triangle_idx);
+                m_triangles_to_strip.Add(m_triangle_idx);
             }
 
             m_triangles[m_triangle_idx++] = vert_idx_a;
@@ -973,49 +973,40 @@ public class VoxelChunk
             };
         }
 
+        /*
         foreach(var triangle_to_strip in triangles_to_strip)
         {
             triangles[triangle_to_strip + 0] = 0;
             triangles[triangle_to_strip + 1] = 0;
             triangles[triangle_to_strip + 2] = 0;
         }
+        */
 
-        /*
         if (triangles_to_strip.Count > 0)
         {
-            var next_stripped_triangle_iter = 0;
-            var triangles_stripped = 0;
-            for (int i = triangles_to_strip[0]; i < triangle_idx - triangles_stripped;)
+            int triangle_count = triangle_idx;
+            var triangle_write_idx = triangles_to_strip[0];
+            var next_stripped_triangle_entry_idx = 0;
+
+            for(int triangle_read_idx = triangle_write_idx; triangle_read_idx < triangle_count; triangle_read_idx += 3)
             {
-                bool is_fully_stripped = false;
-                if (next_stripped_triangle_iter < triangles_to_strip.Count)
+                if(next_stripped_triangle_entry_idx < triangles_to_strip.Count)
                 {
-                    var next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_iter];
-                    while(next_stripped_triangle_idx == (i + triangles_stripped) && !is_fully_stripped)
+                    var next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_entry_idx];
+                    if(triangle_read_idx == next_stripped_triangle_idx)
                     {
-                        next_stripped_triangle_iter++;
-                        triangles_stripped += 3;
-                        is_fully_stripped = next_stripped_triangle_iter >= triangles_to_strip.Count;
-                        if (!is_fully_stripped)
-                        {
-                            next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_iter];
-                        }                        
+                        next_stripped_triangle_entry_idx++;
+                        continue;
                     }
                 }
 
-                if (!is_fully_stripped)
-                {
-                    triangles[i + 0] = triangles[i + 0 + triangles_stripped];
-                    triangles[i + 1] = triangles[i + 1 + triangles_stripped];
-                    triangles[i + 2] = triangles[i + 2 + triangles_stripped];
-                }
-
-                i += 3;
+                triangles[triangle_write_idx++] = triangles[triangle_read_idx + 0];
+                triangles[triangle_write_idx++] = triangles[triangle_read_idx + 1];
+                triangles[triangle_write_idx++] = triangles[triangle_read_idx + 2];
             }
 
-            triangle_idx -= triangles_stripped;
+            triangle_idx = triangle_write_idx;
         }
-        */
 
     }
 
