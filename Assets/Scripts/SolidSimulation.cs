@@ -91,9 +91,9 @@ public class SolidSimulation
                         {
                             layer[cell_idx] = new_density;
 
-                            for (int j = -1; j <= 1; ++j)
+                            for (int j = -2; j <= 2; ++j)
                             {
-                                for (int i = -1; i <= 1; ++i)
+                                for (int i = -2; i <= 2; ++i)
                                 {
                                     var offset_x = Math.Min(Math.Max(x + i, 0), m_dimensions_in_cells.x - 1);
                                     var offset_z = Math.Min(Math.Max(z + j, 0), m_dimensions_in_cells.z - 1);
