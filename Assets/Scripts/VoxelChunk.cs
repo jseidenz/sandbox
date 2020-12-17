@@ -266,7 +266,7 @@ public class VoxelChunk
         public float m_left_far_density;
         public float m_right_far_density;
         public float m_iso_level;
-        public int m_triangle_idx;
+        public ushort m_triangle_idx;
         public int m_chunk_dimensions_in_voxels;
         public System.UInt16[] m_triangles;
         public int m_edge_idx;        
@@ -275,6 +275,7 @@ public class VoxelChunk
         public int m_chunk_relative_x;
         public int m_chunk_relative_y;
         public VertexTable m_vertex_table;
+        public List<ushort> m_triangles_to_strip;
 
         public ushort LeftNear()
         {
@@ -370,8 +371,13 @@ public class VoxelChunk
             return pos_a + (m_iso_level - density_a) * (pos_b - pos_a) / (density_b - density_a);
         }
 
-        public void Triangle(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b, System.UInt16 vert_idx_c)
+        public void Triangle(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b, System.UInt16 vert_idx_c, bool is_border_sample)
         {
+            if(is_border_sample)
+            {
+                //m_triangles_to_strip.Add(m_triangle_idx);
+            }
+
             m_triangles[m_triangle_idx++] = vert_idx_a;
             m_triangles[m_triangle_idx++] = vert_idx_b;
             m_triangles[m_triangle_idx++] = vert_idx_c;
@@ -511,7 +517,7 @@ public class VoxelChunk
                 m_left_far_density = left_far_density,
                 m_right_far_density = right_far_density,
                 m_iso_level = m_iso_level,
-                m_triangle_idx = triangle_count,
+                m_triangle_idx = (ushort)triangle_count,
                 m_chunk_dimensions_in_voxels = (m_chunk_dimension_in_voxels + 2),
                 m_triangles = scratch_buffer.m_triangles,
                 m_edge_idx = edge_idx,
@@ -519,7 +525,8 @@ public class VoxelChunk
                 m_chunk_relative_cell_idx = (ushort)chunk_relative_cell_idx,
                 m_chunk_relative_x = chunk_relative_x,
                 m_chunk_relative_y = chunk_relative_y,
-                m_vertex_table = scratch_buffer.m_vertex_table
+                m_vertex_table = scratch_buffer.m_vertex_table,
+                m_triangles_to_strip = scratch_buffer.m_triangles_to_strip
             };
 
 
@@ -529,7 +536,7 @@ public class VoxelChunk
                 var left_edge = marcher.LeftEdge();
                 var near_edge = marcher.NearEdge();
 
-                marcher.Triangle(left_near, left_edge, near_edge);
+                marcher.Triangle(left_near, left_edge, near_edge, is_border_sample);
                 marcher.ExtrudeTopToBot(near_edge, left_edge, is_border_sample);
             }
             else if (sample_type == 2)
@@ -538,7 +545,7 @@ public class VoxelChunk
                 var right_edge = marcher.RightEdge();
                 var right_near = marcher.RightNear();
 
-                marcher.Triangle(near_edge, right_edge, right_near);
+                marcher.Triangle(near_edge, right_edge, right_near, is_border_sample);
                 marcher.ExtrudeTopToBot(right_edge, near_edge, is_border_sample);
             }
             else if (sample_type == 3)
@@ -548,8 +555,8 @@ public class VoxelChunk
                 var left_near = marcher.LeftNear();
                 var right_edge = marcher.RightEdge();
 
-                marcher.Triangle(left_edge, right_near, left_near);
-                marcher.Triangle(left_edge, right_edge, right_near);
+                marcher.Triangle(left_edge, right_near, left_near, is_border_sample);
+                marcher.Triangle(left_edge, right_edge, right_near, is_border_sample);
                 marcher.ExtrudeTopToBot(right_edge, left_edge, is_border_sample);
             }
             else if (sample_type == 4)
@@ -558,7 +565,7 @@ public class VoxelChunk
                 var right_far = marcher.RightFar();
                 var right_edge = marcher.RightEdge();
 
-                marcher.Triangle(far_edge, right_far, right_edge);
+                marcher.Triangle(far_edge, right_far, right_edge, is_border_sample);
                 marcher.ExtrudeTopToBot(far_edge, right_edge, is_border_sample);
             }
             else if (sample_type == 5)
@@ -572,10 +579,10 @@ public class VoxelChunk
                     var far_edge = marcher.FarEdge();
                     var right_far = marcher.RightFar();
 
-                    marcher.Triangle(left_near, left_edge, near_edge);
-                    marcher.Triangle(left_edge, right_edge, near_edge);
-                    marcher.Triangle(left_edge, far_edge, right_edge);
-                    marcher.Triangle(far_edge, right_far, right_edge);
+                    marcher.Triangle(left_near, left_edge, near_edge, is_border_sample);
+                    marcher.Triangle(left_edge, right_edge, near_edge, is_border_sample);
+                    marcher.Triangle(left_edge, far_edge, right_edge, is_border_sample);
+                    marcher.Triangle(far_edge, right_far, right_edge, is_border_sample);
                     marcher.ExtrudeTopToBot(far_edge, left_edge, is_border_sample);
                     marcher.ExtrudeTopToBot(near_edge, right_edge, is_border_sample);
                 }
@@ -588,8 +595,8 @@ public class VoxelChunk
                     var right_far = marcher.RightFar();
                     var right_edge = marcher.RightEdge();
 
-                    marcher.Triangle(left_near, left_edge, near_edge);
-                    marcher.Triangle(far_edge, right_far, right_edge);
+                    marcher.Triangle(left_near, left_edge, near_edge, is_border_sample);
+                    marcher.Triangle(far_edge, right_far, right_edge, is_border_sample);
                     marcher.ExtrudeTopToBot(near_edge, left_edge, is_border_sample);
                     marcher.ExtrudeTopToBot(far_edge, right_edge, is_border_sample);
                 }
@@ -601,8 +608,8 @@ public class VoxelChunk
                 var right_near = marcher.RightNear();
                 var near_edge = marcher.NearEdge();
 
-                marcher.Triangle(far_edge, right_far, right_near);
-                marcher.Triangle(far_edge, right_near, near_edge);
+                marcher.Triangle(far_edge, right_far, right_near, is_border_sample);
+                marcher.Triangle(far_edge, right_near, near_edge, is_border_sample);
                 marcher.ExtrudeTopToBot(far_edge, near_edge, is_border_sample);
             }
             else if (sample_type == 7)
@@ -613,9 +620,9 @@ public class VoxelChunk
                 var far_edge = marcher.FarEdge();
                 var right_far = marcher.RightFar();
 
-                marcher.Triangle(left_edge, right_near, left_near);
-                marcher.Triangle(left_edge, far_edge, right_near);
-                marcher.Triangle(far_edge, right_far, right_near);
+                marcher.Triangle(left_edge, right_near, left_near, is_border_sample);
+                marcher.Triangle(left_edge, far_edge, right_near, is_border_sample);
+                marcher.Triangle(far_edge, right_far, right_near, is_border_sample);
                 marcher.ExtrudeTopToBot(far_edge, left_edge, is_border_sample);
             }
             else if (sample_type == 8)
@@ -624,7 +631,7 @@ public class VoxelChunk
                 var far_edge = marcher.FarEdge();
                 var left_edge = marcher.LeftEdge();
 
-                marcher.Triangle(left_far, far_edge, left_edge);
+                marcher.Triangle(left_far, far_edge, left_edge, is_border_sample);
                 marcher.ExtrudeTopToBot(left_edge, far_edge, is_border_sample);
             }
             else if (sample_type == 9)
@@ -634,8 +641,8 @@ public class VoxelChunk
                 var near_edge = marcher.NearEdge();
                 var left_near = marcher.LeftNear();
 
-                marcher.Triangle(left_far, far_edge, near_edge);
-                marcher.Triangle(left_far, near_edge, left_near);
+                marcher.Triangle(left_far, far_edge, near_edge, is_border_sample);
+                marcher.Triangle(left_far, near_edge, left_near, is_border_sample);
                 marcher.ExtrudeTopToBot(near_edge, far_edge, is_border_sample);
             }
             else if (sample_type == 10)
@@ -649,10 +656,10 @@ public class VoxelChunk
                     var far_edge = marcher.FarEdge();
                     var right_near = marcher.RightNear();
 
-                    marcher.Triangle(left_far, far_edge, left_edge);
-                    marcher.Triangle(left_edge, far_edge, right_edge);
-                    marcher.Triangle(left_edge, right_edge, near_edge);
-                    marcher.Triangle(near_edge, right_edge, right_near);
+                    marcher.Triangle(left_far, far_edge, left_edge, is_border_sample);
+                    marcher.Triangle(left_edge, far_edge, right_edge, is_border_sample);
+                    marcher.Triangle(left_edge, right_edge, near_edge, is_border_sample);
+                    marcher.Triangle(near_edge, right_edge, right_near, is_border_sample);
                     marcher.ExtrudeTopToBot(left_edge, near_edge, is_border_sample);
                     marcher.ExtrudeTopToBot(right_edge, far_edge, is_border_sample);
                 }
@@ -665,8 +672,8 @@ public class VoxelChunk
                     var far_edge = marcher.FarEdge();
                     var left_far = marcher.LeftFar();
 
-                    marcher.Triangle(near_edge, right_edge, right_near);
-                    marcher.Triangle(left_far, far_edge, left_edge);
+                    marcher.Triangle(near_edge, right_edge, right_near, is_border_sample);
+                    marcher.Triangle(left_far, far_edge, left_edge, is_border_sample);
                     marcher.ExtrudeTopToBot(left_edge, far_edge, is_border_sample);
                     marcher.ExtrudeTopToBot(right_edge, near_edge, is_border_sample);
 
@@ -680,9 +687,9 @@ public class VoxelChunk
                 var right_edge = marcher.RightEdge();
                 var right_near = marcher.RightNear();
 
-                marcher.Triangle(left_far, far_edge, left_near);
-                marcher.Triangle(left_near, far_edge, right_edge);
-                marcher.Triangle(left_near, right_edge, right_near);
+                marcher.Triangle(left_far, far_edge, left_near, is_border_sample);
+                marcher.Triangle(left_near, far_edge, right_edge, is_border_sample);
+                marcher.Triangle(left_near, right_edge, right_near, is_border_sample);
                 marcher.ExtrudeTopToBot(right_edge, far_edge, is_border_sample);
             }
             else if (sample_type == 12)
@@ -692,8 +699,8 @@ public class VoxelChunk
                 var left_edge = marcher.LeftEdge();
                 var right_edge = marcher.RightEdge();
 
-                marcher.Triangle(left_far, right_far, left_edge);
-                marcher.Triangle(left_edge, right_far, right_edge);
+                marcher.Triangle(left_far, right_far, left_edge, is_border_sample);
+                marcher.Triangle(left_edge, right_far, right_edge, is_border_sample);
                 marcher.ExtrudeTopToBot(left_edge, right_edge, is_border_sample);
             }
             else if (sample_type == 13)
@@ -704,9 +711,9 @@ public class VoxelChunk
                 var right_edge = marcher.RightEdge();
                 var right_far = marcher.RightFar();
 
-                marcher.Triangle(left_near, left_far, near_edge);
-                marcher.Triangle(left_far, right_edge, near_edge);
-                marcher.Triangle(left_far, right_far, right_edge);
+                marcher.Triangle(left_near, left_far, near_edge, is_border_sample);
+                marcher.Triangle(left_far, right_edge, near_edge, is_border_sample);
+                marcher.Triangle(left_far, right_far, right_edge, is_border_sample);
                 marcher.ExtrudeTopToBot(near_edge, right_edge, is_border_sample);
             }
             else if (sample_type == 14)
@@ -717,9 +724,9 @@ public class VoxelChunk
                 var near_edge = marcher.NearEdge();
                 var right_near = marcher.RightNear();
 
-                marcher.Triangle(left_far, right_far, left_edge);
-                marcher.Triangle(left_edge, right_far, near_edge);
-                marcher.Triangle(near_edge, right_far, right_near);
+                marcher.Triangle(left_far, right_far, left_edge, is_border_sample);
+                marcher.Triangle(left_edge, right_far, near_edge, is_border_sample);
+                marcher.Triangle(near_edge, right_far, right_near, is_border_sample);
                 marcher.ExtrudeTopToBot(left_edge, near_edge, is_border_sample);
 
             }
@@ -730,8 +737,8 @@ public class VoxelChunk
                 var right_near = marcher.RightNear();
                 var right_far = marcher.RightFar();
 
-                marcher.Triangle(left_near, left_far, right_near);
-                marcher.Triangle(left_far, right_far, right_near);
+                marcher.Triangle(left_near, left_far, right_near, is_border_sample);
+                marcher.Triangle(left_far, right_far, right_near, is_border_sample);
             }
 
             edge_idx = marcher.m_edge_idx;
