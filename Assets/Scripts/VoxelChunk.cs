@@ -846,35 +846,39 @@ public class VoxelChunk
             var top_normal = edge_face_info.m_normal;
             var horizontal_offset = top_normal * extrusion_distance;
 
-            var a_to_b_normalized = (pos_b - pos_a).normalized;
+            var a_to_b_normalized = (pos_b - pos_a);
 
-            float left_offset_multiplier = 0f;
+            float left_offset_multiplier = 1f;
+            /*
             if(vertex_id_to_incoming_edge_idx.TryGetValue(vert_idx_a, out var incoming_edge_idx))
             {
                 var incoming_edge = edge_face_infos[incoming_edge_idx];
                 var edge_face_normals_dp = Vector3.Dot(edge_face_info.m_normal, incoming_edge.m_normal);
-                if(edge_face_normals_dp > 0)
+                //if(edge_face_normals_dp > 0)
                 {
                     left_offset_multiplier = Mathf.Abs(edge_face_normals_dp);
                 }
             }
+            */
 
-            float right_offset_multiplier = 0f;
+            float right_offset_multiplier = 1f;
+            /*
             if (vertex_id_to_outoing_edge_idx.TryGetValue(vert_idx_b, out var outgoing_edge_idx))
             {
                 var outgoing_edge = edge_face_infos[outgoing_edge_idx];
                 var edge_face_normals_dp = Vector3.Dot(edge_face_info.m_normal, outgoing_edge.m_normal);
-                if (edge_face_normals_dp > 0)
+                //if (edge_face_normals_dp > 0)
                 {
                     right_offset_multiplier = Mathf.Abs(edge_face_normals_dp);
                 }
             }
 
-            if (m_bevel_tuning.m_disable_dot_product_check)
+            if (m_bevel_tuning.m_disable_dot_product_check)            
             {
                 left_offset_multiplier = 1f;
                 right_offset_multiplier = 1f;
             }
+            */
 
 
             var left_offset = a_to_b_normalized * max_edge_seperation * left_offset_multiplier;
