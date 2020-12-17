@@ -423,12 +423,18 @@ public class VoxelChunk
                 m_border_triangles.Add(top_bot_vertex_pair_a.m_vertex_idx_a);
                 m_border_triangles.Add(top_bot_vertex_pair_b.m_vertex_idx_a);
                 m_border_triangles.Add(top_bot_vertex_pair_c.m_vertex_idx_a);
+                m_border_triangles.Add(top_bot_vertex_pair_b.m_vertex_idx_b);
+                m_border_triangles.Add(top_bot_vertex_pair_a.m_vertex_idx_b);
+                m_border_triangles.Add(top_bot_vertex_pair_c.m_vertex_idx_b);
             }
             else
             {
                 m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_vertex_idx_a;
                 m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_vertex_idx_a;
                 m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_vertex_idx_a;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_vertex_idx_b;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_vertex_idx_b;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_vertex_idx_b;
             }
         }
 
