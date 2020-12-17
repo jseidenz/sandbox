@@ -794,6 +794,7 @@ public class VoxelChunk
         var upper_vertical_offset = new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0);
         var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0);
         var bottom_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
+        float bottom_exstrusion_distance = m_bevel_tuning.m_bottom_extrusion_distance;
 
         for(int i = 0; i < edge_count; ++i)
         {
@@ -896,7 +897,8 @@ public class VoxelChunk
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e, is_border_edge);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f, is_border_edge);
 
-            var vert_idx_g = pos_writer.Write(pos_a + bottom_offset);
+            var bottom_horizontal_offset = top_normal * bottom_exstrusion_distance;
+            var vert_idx_g = pos_writer.Write(pos_a + bottom_offset + bottom_horizontal_offset);
 
             edge_connections[i] = new EdgeConnections
             {

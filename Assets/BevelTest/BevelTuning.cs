@@ -12,6 +12,7 @@ public class BevelTuning : ScriptableObject
     public float m_extrusion_vertical_offset;
     public float m_extrusion_lower_vertical_offset;
     public float m_max_edge_seperation;
+    public float m_bottom_extrusion_distance;
     public bool m_disable_dot_product_check;
 
     public float m_debug_horizontal_left_offset;

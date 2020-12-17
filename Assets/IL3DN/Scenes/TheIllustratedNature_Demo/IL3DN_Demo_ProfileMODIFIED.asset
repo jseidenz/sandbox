@@ -34,7 +34,7 @@ MonoBehaviour:
     m_Value: 0
   radius:
     m_OverrideState: 1
-    m_Value: 0.5
+    m_Value: 1
     min: 0.25
     max: 5
   maxRadiusPixels:
@@ -49,7 +49,7 @@ MonoBehaviour:
     max: 0.5
   intensity:
     m_OverrideState: 1
-    m_Value: 0.35
+    m_Value: 0.5
     min: 0
     max: 4
   useMultiBounce:
