@@ -53,8 +53,8 @@ public class VoxelChunk
 
             var vertex_pair = new VertexPair
             {
-                m_vertex_idx_a = top_vertex_idx,
-                m_vertex_idx_b = bot_vertex_idx
+                m_top_vertex_idx = top_vertex_idx,
+                m_bot_vertex_idx = bot_vertex_idx
             };
 
             return vertex_pair;
@@ -122,6 +122,7 @@ public class VoxelChunk
     {
         public ushort m_vertex_idx_a;
         public ushort m_vertex_idx_b;
+        public ushort m_vertex_idx_c;
         public Vector3 m_pos_a;
         public Vector3 m_pos_b;
         public Vector3 m_normal;
@@ -192,8 +193,8 @@ public class VoxelChunk
 
     public struct VertexPair
     {
-        public ushort m_vertex_idx_a;
-        public ushort m_vertex_idx_b;
+        public ushort m_top_vertex_idx;
+        public ushort m_bot_vertex_idx;
     }
 
     public VoxelChunk(
@@ -420,21 +421,21 @@ public class VoxelChunk
         {
             if (is_border_sample)
             {
-                m_border_triangles.Add(top_bot_vertex_pair_a.m_vertex_idx_a);
-                m_border_triangles.Add(top_bot_vertex_pair_b.m_vertex_idx_a);
-                m_border_triangles.Add(top_bot_vertex_pair_c.m_vertex_idx_a);
-                m_border_triangles.Add(top_bot_vertex_pair_b.m_vertex_idx_b);
-                m_border_triangles.Add(top_bot_vertex_pair_a.m_vertex_idx_b);
-                m_border_triangles.Add(top_bot_vertex_pair_c.m_vertex_idx_b);
+                m_border_triangles.Add(top_bot_vertex_pair_a.m_top_vertex_idx);
+                m_border_triangles.Add(top_bot_vertex_pair_b.m_top_vertex_idx);
+                m_border_triangles.Add(top_bot_vertex_pair_c.m_top_vertex_idx);
+                m_border_triangles.Add(top_bot_vertex_pair_b.m_bot_vertex_idx);
+                m_border_triangles.Add(top_bot_vertex_pair_a.m_bot_vertex_idx);
+                m_border_triangles.Add(top_bot_vertex_pair_c.m_bot_vertex_idx);
             }
             else
             {
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_vertex_idx_a;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_vertex_idx_a;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_vertex_idx_a;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_vertex_idx_b;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_vertex_idx_b;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_vertex_idx_b;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_top_vertex_idx;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_top_vertex_idx;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_top_vertex_idx;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_bot_vertex_idx;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_bot_vertex_idx;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_bot_vertex_idx;
             }
         }
 
@@ -863,36 +864,36 @@ public class VoxelChunk
         var upper_vertical_offset = new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0);
         var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0);
         var bottom_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
-        float bottom_exstrusion_distance = m_bevel_tuning.m_bottom_extrusion_distance;
 
         for(int i = 0; i < edge_count; ++i)
         {
             var edge = edges[i];
-            var pos_a = pos_writer.m_positions[edge.m_top_bot_vertex_pair_a.m_vertex_idx_a];
-            var pos_b = pos_writer.m_positions[edge.m_top_bot_vertex_pair_b.m_vertex_idx_a];
+            var pos_a = pos_writer.m_positions[edge.m_top_bot_vertex_pair_a.m_top_vertex_idx];
+            var pos_b = pos_writer.m_positions[edge.m_top_bot_vertex_pair_b.m_top_vertex_idx];
             var pos_for_normal = pos_a - Vector3.up;
             var normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
 
             var edge_idx = i;
 
 #if UNITY_EDITOR
-            if (vertex_id_to_outoing_edge_idx.ContainsKey(edge.m_top_bot_vertex_pair_a.m_vertex_idx_a))
+            if (vertex_id_to_outoing_edge_idx.ContainsKey(edge.m_top_bot_vertex_pair_a.m_top_vertex_idx))
             {
                 throw new System.Exception($"Error edge already exists {edge.m_top_bot_vertex_pair_a}");
             }
 
-            if (vertex_id_to_incoming_edge_idx.ContainsKey(edge.m_top_bot_vertex_pair_b.m_vertex_idx_a))
+            if (vertex_id_to_incoming_edge_idx.ContainsKey(edge.m_top_bot_vertex_pair_b.m_top_vertex_idx))
             {
-                throw new System.Exception($"Error edge already exists {edge.m_top_bot_vertex_pair_b.m_vertex_idx_a}");
+                throw new System.Exception($"Error edge already exists {edge.m_top_bot_vertex_pair_b.m_top_vertex_idx}");
             }
 #endif
 
-            vertex_id_to_outoing_edge_idx[edge.m_top_bot_vertex_pair_a.m_vertex_idx_a] = edge_idx;
-            vertex_id_to_incoming_edge_idx[edge.m_top_bot_vertex_pair_b.m_vertex_idx_a] = edge_idx;
+            vertex_id_to_outoing_edge_idx[edge.m_top_bot_vertex_pair_a.m_top_vertex_idx] = edge_idx;
+            vertex_id_to_incoming_edge_idx[edge.m_top_bot_vertex_pair_b.m_top_vertex_idx] = edge_idx;
             edge_face_infos[i] = new EdgeFaceInfo
             {
-                m_vertex_idx_a = edge.m_top_bot_vertex_pair_a.m_vertex_idx_a,
-                m_vertex_idx_b = edge.m_top_bot_vertex_pair_b.m_vertex_idx_a,
+                m_vertex_idx_a = edge.m_top_bot_vertex_pair_a.m_top_vertex_idx,
+                m_vertex_idx_b = edge.m_top_bot_vertex_pair_b.m_top_vertex_idx,
+                m_vertex_idx_c = edge.m_top_bot_vertex_pair_a.m_bot_vertex_idx,
                 m_pos_a = pos_a,
                 m_pos_b = pos_b,
                 m_normal = normal,
@@ -910,6 +911,7 @@ public class VoxelChunk
 
             var vert_idx_a = edge_face_info.m_vertex_idx_a;
             var vert_idx_b = edge_face_info.m_vertex_idx_b;
+            var vert_idx_g = edge_face_info.m_vertex_idx_c;
 
             var pos_a = edge_face_info.m_pos_a;
             var pos_b = edge_face_info.m_pos_b;
@@ -965,9 +967,6 @@ public class VoxelChunk
 
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e, is_border_edge);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f, is_border_edge);
-
-            var bottom_horizontal_offset = top_normal * bottom_exstrusion_distance;
-            var vert_idx_g = pos_writer.Write(pos_a + bottom_offset + bottom_horizontal_offset);
 
             edge_connections[i] = new EdgeConnections
             {
