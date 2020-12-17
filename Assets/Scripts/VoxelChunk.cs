@@ -60,7 +60,7 @@ public class VoxelChunk
             scratch_buffer.m_vertex_id_to_outgoing_edge_idx = new Dictionary<ushort, int>();
             scratch_buffer.m_edge_connections = new EdgeConnections[ushort.MaxValue];
             scratch_buffer.m_edge_face_infos = new EdgeFaceInfo[ushort.MaxValue];
-            scratch_buffer.m_triangles_to_strip = new List<ushort>();
+            scratch_buffer.m_boder_triangles = new List<ushort>();
             return scratch_buffer;
         }
 
@@ -69,7 +69,7 @@ public class VoxelChunk
             m_vertex_table.Clear();
             m_vertex_id_to_incoming_edge_idx.Clear();
             m_vertex_id_to_outgoing_edge_idx.Clear();
-            m_triangles_to_strip.Clear();
+            m_boder_triangles.Clear();
         }
 
         public Vector3[] m_positions;
@@ -83,7 +83,7 @@ public class VoxelChunk
         public EdgeConnections[] m_edge_connections;
         public EdgeFaceInfo[] m_edge_face_infos;
         public DensitySample[] m_density_samples;
-        public List<ushort> m_triangles_to_strip;
+        public List<ushort> m_boder_triangles;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -288,7 +288,7 @@ public class VoxelChunk
         public int m_chunk_relative_x;
         public int m_chunk_relative_y;
         public VertexTable m_vertex_table;
-        public List<ushort> m_triangles_to_strip;
+        public List<ushort> m_border_triangles;
 
         public ushort LeftNear()
         {
@@ -384,19 +384,23 @@ public class VoxelChunk
             return pos_a + (m_iso_level - density_a) * (pos_b - pos_a) / (density_b - density_a);
         }
 
-        public void Triangle(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b, System.UInt16 vert_idx_c, bool is_border_sample)
+        public void Triangle(ushort vert_idx_a, ushort vert_idx_b, ushort vert_idx_c, bool is_border_sample)
         {
-            if(is_border_sample)
+            if (is_border_sample)
             {
-                m_triangles_to_strip.Add(m_triangle_idx);
+                m_border_triangles.Add(vert_idx_a);
+                m_border_triangles.Add(vert_idx_b);
+                m_border_triangles.Add(vert_idx_c);
             }
-
-            m_triangles[m_triangle_idx++] = vert_idx_a;
-            m_triangles[m_triangle_idx++] = vert_idx_b;
-            m_triangles[m_triangle_idx++] = vert_idx_c;
+            else
+            {
+                m_triangles[m_triangle_idx++] = vert_idx_a;
+                m_triangles[m_triangle_idx++] = vert_idx_b;
+                m_triangles[m_triangle_idx++] = vert_idx_c;
+            }
         }
 
-        public void ExtrudeTopToBot(System.UInt16 vert_idx_a, System.UInt16 vert_idx_b, bool is_border_sample)
+        public void ExtrudeTopToBot(ushort vert_idx_a, ushort vert_idx_b, bool is_border_sample)
         {
             m_edges[m_edge_idx++] = new Edge
             {
@@ -546,7 +550,7 @@ public class VoxelChunk
                 m_chunk_relative_x = chunk_relative_x,
                 m_chunk_relative_y = chunk_relative_y,
                 m_vertex_table = scratch_buffer.m_vertex_table,
-                m_triangles_to_strip = scratch_buffer.m_triangles_to_strip
+                m_border_triangles = scratch_buffer.m_boder_triangles
             };
 
 
@@ -790,7 +794,7 @@ public class VoxelChunk
             scratch_buffer.m_vertex_id_to_outgoing_edge_idx,
             scratch_buffer.m_edge_connections,
             scratch_buffer.m_edge_face_infos,
-            scratch_buffer.m_triangles_to_strip,
+            scratch_buffer.m_boder_triangles,
             ref vert_count, 
             ref triangle_count, 
             ref edge_idx
@@ -808,14 +812,14 @@ public class VoxelChunk
         Dictionary<ushort, int> vertex_id_to_outoing_edge_idx,
         EdgeConnections[] edge_connections,
         EdgeFaceInfo[] edge_face_infos,
-        List<ushort> triangles_to_strip,
+        List<ushort> border_triangles,
         ref ushort vert_idx, 
         ref int triangle_idx, 
         ref int edge_count
         )
     {
         var pos_writer = new PositionWriter(positions, vert_idx);
-        var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx, triangles_to_strip);
+        var triangle_writer = new TriangleWriter(triangles, (ushort)triangle_idx, border_triangles);
 
         var extrusion_distance = m_bevel_tuning.m_extrusion_distance;
         var upper_vertical_offset = new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0);
@@ -984,6 +988,22 @@ public class VoxelChunk
             accumulated_normals[vert_idx2] = accumulated_normals[vert_idx2] + normal;
         }
 
+        for(int i = 0; i < border_triangles.Count; i += 3)
+        {
+            var vert_idx0 = border_triangles[i + 0];
+            var vert_idx1 = border_triangles[i + 1];
+            var vert_idx2 = border_triangles[i + 2];
+
+            var v0 = pos_writer.m_positions[vert_idx0];
+            var v1 = pos_writer.m_positions[vert_idx1];
+            var v2 = pos_writer.m_positions[vert_idx2];
+            var normal = Vector3.Cross(v1 - v0, v2 - v0);
+
+            accumulated_normals[vert_idx0] = accumulated_normals[vert_idx0] + normal;
+            accumulated_normals[vert_idx1] = accumulated_normals[vert_idx1] + normal;
+            accumulated_normals[vert_idx2] = accumulated_normals[vert_idx2] + normal;
+        }
+
         for (int i = 0; i < vert_idx; ++i)
         {
             vertices[i] = new Vertex
@@ -992,33 +1012,6 @@ public class VoxelChunk
                 m_normal = accumulated_normals[i].normalized
             };
         }
-
-        if (triangles_to_strip.Count > 0)
-        {
-            int triangle_count = triangle_idx;
-            var triangle_write_idx = triangles_to_strip[0];
-            var next_stripped_triangle_entry_idx = 0;
-
-            for(int triangle_read_idx = triangle_write_idx; triangle_read_idx < triangle_count; triangle_read_idx += 3)
-            {
-                if(next_stripped_triangle_entry_idx < triangles_to_strip.Count)
-                {
-                    var next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_entry_idx];
-                    if(triangle_read_idx == next_stripped_triangle_idx)
-                    {
-                        next_stripped_triangle_entry_idx++;
-                        continue;
-                    }
-                }
-
-                triangles[triangle_write_idx++] = triangles[triangle_read_idx + 0];
-                triangles[triangle_write_idx++] = triangles[triangle_read_idx + 1];
-                triangles[triangle_write_idx++] = triangles[triangle_read_idx + 2];
-            }
-
-            triangle_idx = triangle_write_idx;
-        }
-
     }
 
     public void SetCollisionGenerationEnabled(bool is_enabled)
@@ -1088,23 +1081,27 @@ public class VoxelChunk
 
     public struct TriangleWriter
     {
-        public TriangleWriter(ushort[] triangles, ushort triangle_count, List<ushort> triangles_to_strip)
+        public TriangleWriter(ushort[] triangles, ushort triangle_count, List<ushort> m_border_triangles)
         {
             m_triangles = triangles;
             m_triangle_count = triangle_count;
-            m_triangles_to_strip = triangles_to_strip;
+            this.m_border_triangles = m_border_triangles;
         }
 
-        public void Write(ushort vert_idx0, ushort vert_idx1, ushort vert_idx2, bool should_strip)
+        public void Write(ushort vert_idx0, ushort vert_idx1, ushort vert_idx2, bool is_border_triangle)
         {
-            if(should_strip)
+            if(is_border_triangle)
             {
-                m_triangles_to_strip.Add(m_triangle_count);
+                m_border_triangles.Add(vert_idx0);
+                m_border_triangles.Add(vert_idx1);
+                m_border_triangles.Add(vert_idx2);
             }
-
-            m_triangles[m_triangle_count++] = vert_idx0;
-            m_triangles[m_triangle_count++] = vert_idx1;
-            m_triangles[m_triangle_count++] = vert_idx2;
+            else
+            {
+                m_triangles[m_triangle_count++] = vert_idx0;
+                m_triangles[m_triangle_count++] = vert_idx1;
+                m_triangles[m_triangle_count++] = vert_idx2;
+            }
         }
 
         public ushort this[int idx] { get => m_triangles[idx]; }
@@ -1113,7 +1110,7 @@ public class VoxelChunk
 
         public ushort[] m_triangles;
         public ushort m_triangle_count;
-        public List<ushort> m_triangles_to_strip;
+        public List<ushort> m_border_triangles;
     }
 
 }
