@@ -20,12 +20,9 @@ public class VoxelChunk
         {
             m_vertex_id_to_vertex_idx.Clear();
         }
-        public ushort CreateTopVertexEntry(VertexLocation location, Vector3 position, int chunk_relative_cell_idx)
-        {
-            var shifted_cell_number = ((uint)chunk_relative_cell_idx) << 16;
-            var shifted_location = (uint)(location | VertexLocation.Top);
-            var vertex_id = shifted_cell_number | shifted_location;
 
+        public ushort CreateVertexEntry(uint vertex_id, Vector3 position)
+        {
             if (!m_vertex_id_to_vertex_idx.TryGetValue(vertex_id, out var vertex_idx))
             {
                 vertex_idx = (ushort)m_vertex_id_to_vertex_idx.Count;
@@ -33,13 +30,34 @@ public class VoxelChunk
 
                 m_vertex_entries[vertex_idx] = new VertexEntry
                 {
-                    m_vertex_location = location,
                     m_vertex_idx = vertex_idx,
                     m_position = position
                 };
             }
 
             return vertex_idx;
+        }
+
+        public VertexPair CreateTopAndBottomVertexPair(VertexLocation location, Vector3 position, int chunk_relative_cell_idx)
+        {
+            var shifted_cell_number = ((uint)chunk_relative_cell_idx) << 16;
+            
+            var top_shifted_location = (uint)(location | VertexLocation.Top);
+            var top_vertex_id = shifted_cell_number | top_shifted_location;
+
+            var bot_shifted_location = (uint)(location | VertexLocation.Bot);
+            var bot_vertex_id = shifted_cell_number | bot_shifted_location;
+
+            var top_vertex_idx = CreateVertexEntry(top_vertex_id, position);
+            var bot_vertex_idx = CreateVertexEntry(bot_vertex_id, position);
+
+            var vertex_pair = new VertexPair
+            {
+                m_vertex_idx_a = top_vertex_idx,
+                m_vertex_idx_b = bot_vertex_idx
+            };
+
+            return vertex_pair;
         }
     }
 
@@ -95,8 +113,8 @@ public class VoxelChunk
 
     public struct Edge
     {
-        public ushort m_vertex_idx_a;
-        public ushort m_vertex_idx_b;
+        public VertexPair m_top_bot_vertex_pair_a;
+        public VertexPair m_top_bot_vertex_pair_b;
         public bool m_is_border;
     }
 
@@ -118,7 +136,6 @@ public class VoxelChunk
 
     public struct VertexEntry
     {
-        public VertexLocation m_vertex_location;
         public ushort m_vertex_idx;
         public Vector3 m_position;
     }
@@ -159,6 +176,24 @@ public class VoxelChunk
         RightNear = Right | Near,
         LeftFar = Left | Far,
         RightFar = Right | Far,
+    }
+
+    public struct EdgeConnections
+    {
+        public ushort m_vertex_idx_a;
+        public ushort m_vertex_idx_b;
+        public ushort m_vertex_idx_c;
+        public ushort m_vertex_idx_d;
+        public ushort m_vertex_idx_e;
+        public ushort m_vertex_idx_f;
+        public ushort m_vertex_idx_g;
+        public bool m_is_border_edge;
+    }
+
+    public struct VertexPair
+    {
+        public ushort m_vertex_idx_a;
+        public ushort m_vertex_idx_b;
     }
 
     public VoxelChunk(
@@ -278,88 +313,88 @@ public class VoxelChunk
         public VertexTable m_vertex_table;
         public List<ushort> m_border_triangles;
 
-        public ushort LeftNear()
+        public VertexPair LeftNear()
         {
             var pos = new Vector3(m_left_x, m_top_y, m_near_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
-            return m_vertex_table.CreateTopVertexEntry(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
+            return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
         }
 
-        public ushort RightNear()
+        public VertexPair RightNear()
         {
             var pos = new Vector3(m_right_x, m_top_y, m_near_z);
             if(m_chunk_relative_cell_idx < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.RightNear, pos, m_chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.RightNear, pos, m_chunk_relative_cell_idx);
             }
         }
 
-        public ushort LeftFar()
+        public VertexPair LeftFar()
         {
             var pos = new Vector3(m_left_x, m_top_y, m_far_z);
             if (m_chunk_relative_y < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.LeftFar, pos, m_chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.LeftFar, pos, m_chunk_relative_cell_idx);
             }
         }
 
-        public ushort RightFar()
+        public VertexPair RightFar()
         {
             var pos = new Vector3(m_right_x, m_top_y, m_far_z);
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels + 1;
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.LeftNear, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.RightFar, pos, m_chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.RightFar, pos, m_chunk_relative_cell_idx);
             }
         }
 
-        public ushort LeftEdge()
+        public VertexPair LeftEdge()
         {
             var pos = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
-            return m_vertex_table.CreateTopVertexEntry(VertexLocation.Left, pos, chunk_relative_cell_idx);
+            return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Left, pos, chunk_relative_cell_idx);
         }
 
-        public ushort RightEdge()
+        public VertexPair RightEdge()
         {
             var pos = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.Left, pos, chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Left, pos, chunk_relative_cell_idx);
             }
             else
             {
-                return m_vertex_table.CreateTopVertexEntry(VertexLocation.Right, pos, m_chunk_relative_cell_idx);
+                return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Right, pos, m_chunk_relative_cell_idx);
             }
         }
 
-        public ushort NearEdge()
+        public VertexPair NearEdge()
         {
             var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
-            return m_vertex_table.CreateTopVertexEntry(VertexLocation.Near, pos, chunk_relative_cell_idx);
+            return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Near, pos, chunk_relative_cell_idx);
         }
 
-        public ushort FarEdge()
+        public VertexPair FarEdge()
         {
             var pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
-            return m_vertex_table.CreateTopVertexEntry(VertexLocation.Near, pos, chunk_relative_cell_idx);
+            return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Near, pos, chunk_relative_cell_idx);
         }
 
         public float AverageDensity()
@@ -372,28 +407,28 @@ public class VoxelChunk
             return pos_a + (m_iso_level - density_a) * (pos_b - pos_a) / (density_b - density_a);
         }
 
-        public void Triangle(ushort vert_idx_a, ushort vert_idx_b, ushort vert_idx_c, bool is_border_sample)
+        public void Triangle(VertexPair top_bot_vertex_pair_a, VertexPair top_bot_vertex_pair_b, VertexPair top_bot_vertex_pair_c, bool is_border_sample)
         {
             if (is_border_sample)
             {
-                m_border_triangles.Add(vert_idx_a);
-                m_border_triangles.Add(vert_idx_b);
-                m_border_triangles.Add(vert_idx_c);
+                m_border_triangles.Add(top_bot_vertex_pair_a.m_vertex_idx_a);
+                m_border_triangles.Add(top_bot_vertex_pair_b.m_vertex_idx_a);
+                m_border_triangles.Add(top_bot_vertex_pair_c.m_vertex_idx_a);
             }
             else
             {
-                m_triangles[m_triangle_idx++] = vert_idx_a;
-                m_triangles[m_triangle_idx++] = vert_idx_b;
-                m_triangles[m_triangle_idx++] = vert_idx_c;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_vertex_idx_a;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_vertex_idx_a;
+                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_vertex_idx_a;
             }
         }
 
-        public void ExtrudeTopToBot(ushort vert_idx_a, ushort vert_idx_b, bool is_border_sample)
+        public void ExtrudeTopToBot(VertexPair top_bot_vertex_pair_a, VertexPair top_bot_vertex_pair_b, bool is_border_sample)
         {
             m_edges[m_edge_idx++] = new Edge
             {
-                m_vertex_idx_a = vert_idx_a,
-                m_vertex_idx_b = vert_idx_b,
+                m_top_bot_vertex_pair_a = top_bot_vertex_pair_a,
+                m_top_bot_vertex_pair_b = top_bot_vertex_pair_b,
                 m_is_border = is_border_sample
             };
         }
@@ -818,31 +853,31 @@ public class VoxelChunk
         for(int i = 0; i < edge_count; ++i)
         {
             var edge = edges[i];
-            var pos_a = pos_writer.m_positions[edge.m_vertex_idx_a];
-            var pos_b = pos_writer.m_positions[edge.m_vertex_idx_b];
+            var pos_a = pos_writer.m_positions[edge.m_top_bot_vertex_pair_a.m_vertex_idx_a];
+            var pos_b = pos_writer.m_positions[edge.m_top_bot_vertex_pair_b.m_vertex_idx_a];
             var pos_for_normal = pos_a - Vector3.up;
             var normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
 
             var edge_idx = i;
 
 #if UNITY_EDITOR
-            if (vertex_id_to_outoing_edge_idx.ContainsKey(edge.m_vertex_idx_a))
+            if (vertex_id_to_outoing_edge_idx.ContainsKey(edge.m_top_bot_vertex_pair_a.m_vertex_idx_a))
             {
-                throw new System.Exception($"Error edge already exists {edge.m_vertex_idx_a}");
+                throw new System.Exception($"Error edge already exists {edge.m_top_bot_vertex_pair_a}");
             }
 
-            if (vertex_id_to_incoming_edge_idx.ContainsKey(edge.m_vertex_idx_b))
+            if (vertex_id_to_incoming_edge_idx.ContainsKey(edge.m_top_bot_vertex_pair_b.m_vertex_idx_a))
             {
-                throw new System.Exception($"Error edge already exists {edge.m_vertex_idx_b}");
+                throw new System.Exception($"Error edge already exists {edge.m_top_bot_vertex_pair_b.m_vertex_idx_a}");
             }
 #endif
 
-            vertex_id_to_outoing_edge_idx[edge.m_vertex_idx_a] = edge_idx;
-            vertex_id_to_incoming_edge_idx[edge.m_vertex_idx_b] = edge_idx;
+            vertex_id_to_outoing_edge_idx[edge.m_top_bot_vertex_pair_a.m_vertex_idx_a] = edge_idx;
+            vertex_id_to_incoming_edge_idx[edge.m_top_bot_vertex_pair_b.m_vertex_idx_a] = edge_idx;
             edge_face_infos[i] = new EdgeFaceInfo
             {
-                m_vertex_idx_a = edge.m_vertex_idx_a,
-                m_vertex_idx_b = edge.m_vertex_idx_b,
+                m_vertex_idx_a = edge.m_top_bot_vertex_pair_a.m_vertex_idx_a,
+                m_vertex_idx_b = edge.m_top_bot_vertex_pair_b.m_vertex_idx_a,
                 m_pos_a = pos_a,
                 m_pos_b = pos_b,
                 m_normal = normal,
