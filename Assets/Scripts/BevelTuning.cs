@@ -11,5 +11,6 @@ public class BevelTuning : ScriptableObject
     public float m_extrusion_distance;
     public float m_extrusion_vertical_offset;
     public float m_extrusion_lower_vertical_offset;
+    public float m_extrusion_bottom_vertical_offset;
     public float m_max_edge_seperation;
 }

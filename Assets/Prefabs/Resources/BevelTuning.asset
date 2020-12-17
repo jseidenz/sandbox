@@ -14,5 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_extrusion_distance: 0.05
   m_extrusion_vertical_offset: -0.08
-  m_extrusion_lower_vertical_offset: -0.01
+  m_extrusion_lower_vertical_offset: 0.04
+  m_extrusion_bottom_vertical_offset: -0.1
   m_max_edge_seperation: 0.25

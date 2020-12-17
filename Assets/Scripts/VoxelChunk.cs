@@ -573,7 +573,7 @@ public class VoxelChunk
                 m_right_x = right_x,
                 m_near_z = near_z,
                 m_far_z = far_z,
-                m_bot_y = m_bot_y,
+                m_bot_y = m_bot_y + m_bevel_tuning.m_extrusion_bottom_vertical_offset,
                 m_top_y = m_top_y,
                 m_left_near_density = left_near_density,
                 m_right_near_density = right_near_density,
@@ -863,7 +863,6 @@ public class VoxelChunk
         var extrusion_distance = m_bevel_tuning.m_extrusion_distance;
         var upper_vertical_offset = new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0);
         var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0);
-        var bottom_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
 
         for(int i = 0; i < edge_count; ++i)
         {
