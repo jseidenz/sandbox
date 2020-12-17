@@ -13,6 +13,7 @@ public class SolidLayeredBrush : LayeredBrush
     static int TOP_COLOR_ID = Shader.PropertyToID("_TopColor");
     static int NOISE_OPACITY_ID = Shader.PropertyToID("_NoiseOpacity");
     static int NOISE_TILING_ID = Shader.PropertyToID("_NoiseTiling");
+    static int TRI_PLANAR_OFFSET_ID = Shader.PropertyToID("_TriPlanarOffset");
 
     static float[] HUE_VARIATION_PATTERN = new float[] { 0, -0.3f, 0.1f, 0.5f, -0.15f, 0.25f };
     static float[] SATURATION_VARIATION_PATTERN = new float[] { 0, -0.5f, 0.1f, -0.3f, -0.4f };
@@ -107,6 +108,9 @@ public class SolidLayeredBrush : LayeredBrush
                     material.SetColor(COMPUTED_COLOR_ID, computed_color);
                     material.SetFloat(NOISE_OPACITY_ID, entry.m_noise_opacity);
                     material.SetFloat(NOISE_TILING_ID, entry.m_noise_tiling);
+
+                    var tri_planar_offset = new Vector3(layer_idx * 3, layer_idx * 7, layer_idx * 11);
+                    material.SetVector(TRI_PLANAR_OFFSET_ID, tri_planar_offset);
 
                     m_layer_idx_to_material[layer_idx] = new MaterialLayer
                     {
