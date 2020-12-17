@@ -417,13 +417,13 @@ public class VoxelChunk
         for (int y = start_y; y < max_y; ++y)
         {
             var vertical_occlusion_region = DirtyOcclusionRegion.Center;
-            if(y <= start_y + 1)
+            if(y == start_y)
             {
-                vertical_occlusion_region = DirtyOcclusionRegion.Left;
+                vertical_occlusion_region = DirtyOcclusionRegion.Near;
             }
-            else if(y >= max_y - 2)
+            else if(y == max_y - 1)
             {
-                vertical_occlusion_region = DirtyOcclusionRegion.Right;
+                vertical_occlusion_region = DirtyOcclusionRegion.Far;
             }
 
             var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
@@ -458,11 +458,11 @@ public class VoxelChunk
                     if (was_occluding != is_occluding)
                     {
                         var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
-                        if(x <= start_x + 1)
+                        if(x == start_x)
                         {
                             horizontal_occlusion_region = DirtyOcclusionRegion.Left;
                         }
-                        else if(x <= max_x - 2)
+                        else if(x == max_x - 1)
                         {
                             horizontal_occlusion_region = DirtyOcclusionRegion.Right;
                         }
@@ -484,11 +484,11 @@ public class VoxelChunk
                     if (was_occluding != is_occluding)
                     {
                         var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
-                        if (x <= start_x + 1)
+                        if (x == start_x)
                         {
                             horizontal_occlusion_region = DirtyOcclusionRegion.Left;
                         }
-                        else if (x <= max_x - 2)
+                        else if (x == max_x - 1)
                         {
                             horizontal_occlusion_region = DirtyOcclusionRegion.Right;
                         }

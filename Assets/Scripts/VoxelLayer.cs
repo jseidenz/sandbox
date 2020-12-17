@@ -117,19 +117,19 @@ public class VoxelLayer
                 m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, 0));
                 if(dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Left))
                 {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(-1, 0, 0));
+                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(-1, -1, 0));
                 }
                 if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Right))
                 {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(1, 0, 0));
+                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(1, -1, 0));
                 }
                 if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Near))
                 {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, 0, -1));
+                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, -1));
                 }
                 if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Far))
                 {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, 0, 1));
+                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, 1));
                 }
             }
         }
