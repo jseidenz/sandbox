@@ -391,10 +391,12 @@ public class VoxelChunk
         has_occlusion_changed = false;
 
         var max_y = System.Math.Min(m_density_grid_y + m_chunk_dimension_in_voxels + 1, m_layer_height_in_voxels - 1);
-        for (int y = System.Math.Max(m_density_grid_y - 1, 0); y < max_y; ++y)
+        var start_y = System.Math.Max(m_density_grid_y - 1, 0);
+        for (int y = start_y; y < max_y; ++y)
         {
             var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
-            for (int x = System.Math.Max(m_density_grid_x - 1, 0); x < max_x; ++x)
+            var start_x = System.Math.Max(m_density_grid_x - 1, 0);
+            for (int x = start_x; x < max_x; ++x)
             {
                 int left_near_cell_idx = y * m_layer_width_in_voxels + x;
 
@@ -444,7 +446,7 @@ public class VoxelChunk
                     if (is_occluded) continue;
                 }
 
-                bool is_border_sample = x == m_density_grid_x - 1 || x == max_x - 1 || y == m_density_grid_y - 1 || y == max_y - 1;
+                bool is_border_sample = x == start_x || x == max_x - 1 || y == start_y || y == max_y - 1;
                 density_samples[sample_count++] = new DensitySample
                 {
                     m_x = x,
@@ -916,28 +918,49 @@ public class VoxelChunk
             };
         }
 
+        foreach(var triangle_to_strip in triangles_to_strip)
+        {
+            triangles[triangle_to_strip + 0] = 0;
+            triangles[triangle_to_strip + 1] = 0;
+            triangles[triangle_to_strip + 2] = 0;
+        }
+
+        /*
         if (triangles_to_strip.Count > 0)
         {
             var next_stripped_triangle_iter = 0;
             var triangles_stripped = 0;
-            for (int i = 0; i < triangle_idx - triangles_stripped; i += 3)
+            for (int i = triangles_to_strip[0]; i < triangle_idx - triangles_stripped;)
             {
+                bool is_fully_stripped = false;
                 if (next_stripped_triangle_iter < triangles_to_strip.Count)
                 {
-                    var next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_iter] + triangles_stripped;
-                    if (next_stripped_triangle_idx == i)
+                    var next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_iter];
+                    while(next_stripped_triangle_idx == (i + triangles_stripped) && !is_fully_stripped)
                     {
-                       //triangles_stripped += 3;
+                        next_stripped_triangle_iter++;
+                        triangles_stripped += 3;
+                        is_fully_stripped = next_stripped_triangle_iter >= triangles_to_strip.Count;
+                        if (!is_fully_stripped)
+                        {
+                            next_stripped_triangle_idx = triangles_to_strip[next_stripped_triangle_iter];
+                        }                        
                     }
                 }
 
-                triangles[i + 0] = triangles[i + 0 + triangles_stripped];
-                triangles[i + 1] = triangles[i + 1 + triangles_stripped];
-                triangles[i + 2] = triangles[i + 2 + triangles_stripped];
+                if (!is_fully_stripped)
+                {
+                    triangles[i + 0] = triangles[i + 0 + triangles_stripped];
+                    triangles[i + 1] = triangles[i + 1 + triangles_stripped];
+                    triangles[i + 2] = triangles[i + 2 + triangles_stripped];
+                }
+
+                i += 3;
             }
 
             triangle_idx -= triangles_stripped;
         }
+        */
 
     }
 
