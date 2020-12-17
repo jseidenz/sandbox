@@ -451,56 +451,29 @@ public class VoxelChunk
                 if (right_far_density >= m_iso_level) sample_type |= 4;
                 if (left_far_density >= m_iso_level) sample_type |= 8;
 
-                if (sample_type != SAMPLE_TYPE_FULL_SQUARE)
+                bool is_occluding = sample_type == SAMPLE_TYPE_FULL_SQUARE;
+                var was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
+                if(was_occluding != is_occluding)
                 {
-                    var is_occluding = false;
-                    var was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
-                    if (was_occluding != is_occluding)
+                    var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
+                    if (x == start_x)
                     {
-                        var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
-                        if(x == start_x)
-                        {
-                            horizontal_occlusion_region = DirtyOcclusionRegion.Left;
-                        }
-                        else if(x == max_x - 1)
-                        {
-                            horizontal_occlusion_region = DirtyOcclusionRegion.Right;
-                        }
-
-                        dirty_occlusion_regions = dirty_occlusion_regions | horizontal_occlusion_region | vertical_occlusion_region;
+                        horizontal_occlusion_region = DirtyOcclusionRegion.Left;
+                    }
+                    else if (x == max_x - 1)
+                    {
+                        horizontal_occlusion_region = DirtyOcclusionRegion.Right;
                     }
 
-                    m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
-
-                    if (sample_type == SAMPLE_TYPE_EMTPY)
-                    {
-                        continue;
-                    }
+                    dirty_occlusion_regions = dirty_occlusion_regions | horizontal_occlusion_region | vertical_occlusion_region;
                 }
-                else
-                {
-                    var is_occluding = true;
-                    bool was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
-                    if (was_occluding != is_occluding)
-                    {
-                        var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
-                        if (x == start_x)
-                        {
-                            horizontal_occlusion_region = DirtyOcclusionRegion.Left;
-                        }
-                        else if (x == max_x - 1)
-                        {
-                            horizontal_occlusion_region = DirtyOcclusionRegion.Right;
-                        }
 
-                        dirty_occlusion_regions = dirty_occlusion_regions | horizontal_occlusion_region | vertical_occlusion_region;
-                    }
+                m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
 
-                    m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
+                if (sample_type == SAMPLE_TYPE_EMTPY) continue;
 
-                    bool is_occluded = m_layer_above_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
-                    if (is_occluded) continue;
-                }
+                bool is_occluded = m_layer_above_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE && is_occluding;
+                if (is_occluded) continue;
 
                 bool is_border_sample = x == start_x || x == max_x - 1 || y == start_y || y == max_y - 1;
                 density_samples[sample_count++] = new DensitySample
