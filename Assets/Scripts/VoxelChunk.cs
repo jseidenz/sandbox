@@ -54,7 +54,8 @@ public class VoxelChunk
             scratch_buffer.m_accumulated_normals = new Vector3[ushort.MaxValue];
             scratch_buffer.m_vertex_table = new VertexTable();
             scratch_buffer.m_density_samples = new DensitySample[ushort.MaxValue];
-            scratch_buffer.m_vertex_id_to_connecting_edge_idx = new Dictionary<ushort, int>();
+            scratch_buffer.m_vertex_id_to_incoming_edge_idx = new Dictionary<ushort, int>();
+            scratch_buffer.m_vertex_id_to_outgoing_edge_idx = new Dictionary<ushort, int>();
             scratch_buffer.m_edge_connections = new EdgeConnections[ushort.MaxValue];
             scratch_buffer.m_edge_face_infos = new EdgeFaceInfo[ushort.MaxValue];
             scratch_buffer.m_triangles_to_strip = new List<ushort>();
@@ -64,7 +65,8 @@ public class VoxelChunk
         public void Clear()
         {
             m_vertex_table.Clear();
-            m_vertex_id_to_connecting_edge_idx.Clear();
+            m_vertex_id_to_incoming_edge_idx.Clear();
+            m_vertex_id_to_outgoing_edge_idx.Clear();
             m_triangles_to_strip.Clear();
         }
 
@@ -74,7 +76,8 @@ public class VoxelChunk
         public Edge[] m_edges;
         public VertexTable m_vertex_table;
         public Vector3[] m_accumulated_normals;
-        public Dictionary<ushort, int> m_vertex_id_to_connecting_edge_idx;
+        public Dictionary<ushort, int> m_vertex_id_to_incoming_edge_idx;
+        public Dictionary<ushort, int> m_vertex_id_to_outgoing_edge_idx;
         public EdgeConnections[] m_edge_connections;
         public EdgeFaceInfo[] m_edge_face_infos;
         public DensitySample[] m_density_samples;
@@ -756,7 +759,8 @@ public class VoxelChunk
             scratch_buffer.m_triangles, 
             scratch_buffer.m_edges,
             scratch_buffer.m_accumulated_normals,
-            scratch_buffer.m_vertex_id_to_connecting_edge_idx,
+            scratch_buffer.m_vertex_id_to_incoming_edge_idx,
+            scratch_buffer.m_vertex_id_to_outgoing_edge_idx,
             scratch_buffer.m_edge_connections,
             scratch_buffer.m_edge_face_infos,
             scratch_buffer.m_triangles_to_strip,
@@ -773,7 +777,8 @@ public class VoxelChunk
         ushort[] triangles, 
         Edge[] edges,
         Vector3[] accumulated_normals,
-        Dictionary<ushort, int> vertex_id_to_connecting_edge_idx,
+        Dictionary<ushort, int> vertex_id_to_incoming_edge_idx,
+        Dictionary<ushort, int> vertex_id_to_outoing_edge_idx,
         EdgeConnections[] edge_connections,
         EdgeFaceInfo[] edge_face_infos,
         List<ushort> triangles_to_strip,
@@ -793,19 +798,27 @@ public class VoxelChunk
         for(int i = 0; i < edge_count; ++i)
         {
             var edge = edges[i];
-#if UNITY_EDITOR
-            if (vertex_id_to_connecting_edge_idx.ContainsKey(edge.m_vertex_idx_a))
-            {
-                throw new System.Exception($"Error edge already exists {edge.m_vertex_idx_a}");
-            }
-#endif
             var pos_a = pos_writer.m_positions[edge.m_vertex_idx_a];
             var pos_b = pos_writer.m_positions[edge.m_vertex_idx_b];
             var pos_for_normal = pos_a - Vector3.up;
             var normal = Vector3.Cross(pos_b - pos_a, pos_for_normal - pos_a).normalized;
 
             var edge_idx = i;
-            vertex_id_to_connecting_edge_idx[edge.m_vertex_idx_a] = edge_idx;
+
+#if UNITY_EDITOR
+            if (vertex_id_to_outoing_edge_idx.ContainsKey(edge.m_vertex_idx_a))
+            {
+                throw new System.Exception($"Error edge already exists {edge.m_vertex_idx_a}");
+            }
+
+            if (vertex_id_to_incoming_edge_idx.ContainsKey(edge.m_vertex_idx_b))
+            {
+                throw new System.Exception($"Error edge already exists {edge.m_vertex_idx_b}");
+            }
+#endif
+
+            vertex_id_to_outoing_edge_idx[edge.m_vertex_idx_a] = edge_idx;
+            vertex_id_to_incoming_edge_idx[edge.m_vertex_idx_b] = edge_idx;
             edge_face_infos[i] = new EdgeFaceInfo
             {
                 m_vertex_idx_a = edge.m_vertex_idx_a,
@@ -835,8 +848,37 @@ public class VoxelChunk
 
             var a_to_b_normalized = (pos_b - pos_a).normalized;
 
-            var left_offset = a_to_b_normalized * max_edge_seperation;
-            var right_offset = a_to_b_normalized * -max_edge_seperation;
+            float left_offset_multiplier = 0f;
+            if(vertex_id_to_incoming_edge_idx.TryGetValue(vert_idx_a, out var incoming_edge_idx))
+            {
+                var incoming_edge = edge_face_infos[incoming_edge_idx];
+                var edge_face_normals_dp = Vector3.Dot(edge_face_info.m_normal, incoming_edge.m_normal);
+                if(edge_face_normals_dp > 0)
+                {
+                    left_offset_multiplier = Mathf.Abs(edge_face_normals_dp);
+                }
+            }
+
+            float right_offset_multiplier = 0f;
+            if (vertex_id_to_outoing_edge_idx.TryGetValue(vert_idx_b, out var outgoing_edge_idx))
+            {
+                var outgoing_edge = edge_face_infos[outgoing_edge_idx];
+                var edge_face_normals_dp = Vector3.Dot(edge_face_info.m_normal, outgoing_edge.m_normal);
+                if (edge_face_normals_dp > 0)
+                {
+                    right_offset_multiplier = Mathf.Abs(edge_face_normals_dp);
+                }
+            }
+
+            if (m_bevel_tuning.m_disable_dot_product_check)
+            {
+                left_offset_multiplier = 1f;
+                right_offset_multiplier = 1f;
+            }
+
+
+            var left_offset = a_to_b_normalized * max_edge_seperation * left_offset_multiplier;
+            var right_offset = a_to_b_normalized * -max_edge_seperation * right_offset_multiplier;
 
             var vert_idx_c = pos_writer.Write(pos_a + horizontal_offset + upper_vertical_offset + left_offset);
             var vert_idx_d = pos_writer.Write(pos_b + horizontal_offset + upper_vertical_offset + right_offset);
@@ -868,7 +910,7 @@ public class VoxelChunk
         for(int i = 0; i < edge_count; ++i)
         {
             var start_edge = edge_connections[i];
-            if (!vertex_id_to_connecting_edge_idx.TryGetValue(start_edge.m_vertex_idx_b, out var end_edge_idx)) continue;
+            if (!vertex_id_to_outoing_edge_idx.TryGetValue(start_edge.m_vertex_idx_b, out var end_edge_idx)) continue;
 
             bool is_border_edge = start_edge.m_is_border_edge;
 

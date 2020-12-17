@@ -55,6 +55,11 @@ public class DigTool : MonoBehaviour
             liquid_simulation.SetSimulationEnabled(!liquid_simulation.IsSimulationEnabled());
         }
 
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            Game.Instance.GetSolidMesher().TriangulateAll();
+        }
+
         UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
         UpdateLiquidControl(KeyCode.E, -m_liquid_remove_rate);
 
