@@ -65,6 +65,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Triplanar_4B1A1759_Texture_1:
+        m_Texture: {fileID: 2800000, guid: ad0b94c5c9559184083ffcaf54449019, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Triplanar_ED48165E_Texture_1:
         m_Texture: {fileID: 2800000, guid: ad0b94c5c9559184083ffcaf54449019, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -104,3 +108,4 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
     - _TopColor: {r: 0.7264151, g: 0.628428, b: 0.36663404, a: 1}
+    - _TriPlanarOffset: {r: 0, g: 0, b: 0, a: 0}
