@@ -34,6 +34,11 @@ public class VoxelChunk
                     m_position = position
                 };
             }
+            else
+            {
+                int bp = 0;
+                ++bp;
+            }
 
             return vertex_idx;
         }
