@@ -36,6 +36,7 @@ public class Mesher
         float iso_level,
         float density_height_weight,
         LayeredBrush brush,
+        bool cast_shadows,
         BevelTuning bevel_tuning
         )
     {
@@ -56,7 +57,7 @@ public class Mesher
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters.y;
             float top_y = (float)y * m_voxel_size_in_meters.y;
 
-            var layer = new VoxelLayer(name, density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, m_vertex_attribute_descriptors, bevel_tuning);
+            var layer = new VoxelLayer(name, density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, m_vertex_attribute_descriptors, cast_shadows, bevel_tuning);
             m_layers[y] = layer;
         }
 
