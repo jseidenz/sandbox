@@ -109,6 +109,9 @@ public class VoxelLayer
         {
             if (chunk_id.y != m_layer_idx) continue;
 
+            if (chunk_id.x < 0 || chunk_id.x >= m_width_in_chunks) continue;
+            if (chunk_id.z < 0 || chunk_id.z >= m_height_in_chunks) continue;
+
             var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
 
             var chunk = m_voxel_chunks[chunk_idx];
