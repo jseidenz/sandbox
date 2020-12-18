@@ -336,7 +336,7 @@ public class VoxelChunk
         {
             var top_pos = new Vector3(m_right_x, m_right_near_top_y, m_near_z);
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
-            if (m_chunk_relative_cell_idx < m_chunk_dimensions_in_voxels - 2)
+            if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
                 var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 1;
                 return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.LeftNear, top_pos, bot_pos, chunk_relative_cell_idx);
