@@ -296,8 +296,11 @@ public class VoxelChunk
         public float m_right_x;
         public float m_near_z;
         public float m_far_z;
+        public float m_left_near_top_y;
+        public float m_left_far_top_y;
+        public float m_right_near_top_y;
+        public float m_right_far_top_y;
         public float m_bot_y;
-        public float m_top_y;
         public float m_left_near_density;
         public float m_right_near_density;
         public float m_left_far_density;
@@ -316,7 +319,7 @@ public class VoxelChunk
 
         public VertexPair LeftNear()
         {
-            var top_pos = new Vector3(m_left_x, m_top_y, m_near_z);
+            var top_pos = new Vector3(m_left_x, m_left_near_top_y, m_near_z);
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
             return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.LeftNear, top_pos, bot_pos, chunk_relative_cell_idx);
@@ -324,7 +327,7 @@ public class VoxelChunk
 
         public VertexPair RightNear()
         {
-            var top_pos = new Vector3(m_right_x, m_top_y, m_near_z);
+            var top_pos = new Vector3(m_right_x, m_right_near_top_y, m_near_z);
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
             if (m_chunk_relative_cell_idx < m_chunk_dimensions_in_voxels - 2)
             {
@@ -339,7 +342,7 @@ public class VoxelChunk
 
         public VertexPair LeftFar()
         {
-            var top_pos = new Vector3(m_left_x, m_top_y, m_far_z);
+            var top_pos = new Vector3(m_left_x, m_left_far_top_y, m_far_z);
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
             if (m_chunk_relative_y < m_chunk_dimensions_in_voxels - 2)
             {
@@ -354,7 +357,7 @@ public class VoxelChunk
 
         public VertexPair RightFar()
         {
-            var top_pos = new Vector3(m_right_x, m_top_y, m_far_z);
+            var top_pos = new Vector3(m_right_x, m_right_far_top_y, m_far_z);
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
 
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
@@ -370,7 +373,7 @@ public class VoxelChunk
 
         public VertexPair LeftEdge()
         {
-            var top_pos = new Vector3(m_left_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
+            var top_pos = new Vector3(m_left_x, InterpolatePosition(m_left_near_top_y, m_left_far_top_y, m_left_near_density, m_left_far_density), InterpolatePosition(m_near_z, m_far_z, m_left_near_density, m_left_far_density));
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
             return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Left, top_pos, bot_pos, chunk_relative_cell_idx);
@@ -378,7 +381,7 @@ public class VoxelChunk
 
         public VertexPair RightEdge()
         {
-            var top_pos = new Vector3(m_right_x, m_top_y, InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
+            var top_pos = new Vector3(m_right_x, InterpolatePosition(m_right_near_top_y, m_right_far_top_y, m_right_near_density, m_right_far_density), InterpolatePosition(m_near_z, m_far_z, m_right_near_density, m_right_far_density));
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
             if (m_chunk_relative_x < m_chunk_dimensions_in_voxels - 2)
             {
@@ -393,7 +396,7 @@ public class VoxelChunk
 
         public VertexPair NearEdge()
         {
-            var top_pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), m_top_y, m_near_z);
+            var top_pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_near_density, m_right_near_density), InterpolatePosition(m_left_near_top_y, m_right_near_top_y, m_left_near_density, m_right_near_density), m_near_z);
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + 0;
             return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Near, top_pos, bot_pos, chunk_relative_cell_idx);
@@ -401,7 +404,7 @@ public class VoxelChunk
 
         public VertexPair FarEdge()
         {
-            var top_pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), m_top_y, m_far_z);
+            var top_pos = new Vector3(InterpolatePosition(m_left_x, m_right_x, m_left_far_density, m_right_far_density), InterpolatePosition(m_left_far_top_y, m_right_far_top_y, m_left_far_density, m_right_far_density), m_far_z);
             var bot_pos = new Vector3(top_pos.x, m_bot_y, top_pos.z);
             var chunk_relative_cell_idx = m_chunk_relative_cell_idx + m_chunk_dimensions_in_voxels;
             return m_vertex_table.CreateTopAndBottomVertexPair(VertexLocation.Near, top_pos, bot_pos, chunk_relative_cell_idx);
@@ -567,6 +570,12 @@ public class VoxelChunk
             var left_x = (float)x * m_voxel_size_in_meters.x;
             var right_x = left_x + m_voxel_size_in_meters.x;
 
+            var left_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_near_density);
+            var left_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_far_density);
+            var right_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_near_density);
+            var right_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_far_density);
+
+
             var marcher = new MeshMarcher
             {
                 m_left_x = left_x,
@@ -574,7 +583,10 @@ public class VoxelChunk
                 m_near_z = near_z,
                 m_far_z = far_z,
                 m_bot_y = m_bot_y + m_bevel_tuning.m_extrusion_bottom_vertical_offset,
-                m_top_y = m_top_y,
+                m_left_near_top_y = m_top_y + left_near_top_y_delta,
+                m_left_far_top_y = m_top_y + left_far_top_y_delta,
+                m_right_near_top_y = m_top_y + right_near_top_y_delta,
+                m_right_far_top_y = m_top_y + right_far_top_y_delta,
                 m_left_near_density = left_near_density,
                 m_right_near_density = right_near_density,
                 m_left_far_density = left_far_density,
