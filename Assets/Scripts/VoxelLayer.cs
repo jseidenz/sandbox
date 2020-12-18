@@ -21,7 +21,6 @@ public class VoxelLayer
         bool generate_collision, 
         float density_height_weight, 
         VertexAttributeDescriptor[] vertex_attribute_descriptors,
-        bool cast_shadows,
         BevelTuning bevel_tuning
         )
     {
@@ -50,7 +49,7 @@ public class VoxelLayer
             for(int x = 0; x < m_width_in_chunks; ++x)
             {
                 var bounds = GetChunkBounds(x, y);
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_sample_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, cast_shadows, bevel_tuning);
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_sample_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, bevel_tuning);
             }
         }
     }
@@ -191,11 +190,11 @@ public class VoxelLayer
     }
 
 
-    public void Render(float dt, Material material)
+    public void Render(float dt, Material prepass_material, Material material, bool cast_shadows)
     {
         foreach(var chunk in m_visible_voxel_chunks)
         {
-            chunk.Render(dt, material);
+            chunk.Render(dt, prepass_material, material, cast_shadows);
         }
     }
 

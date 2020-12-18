@@ -218,7 +218,6 @@ public class VoxelChunk
         bool generate_collision,
         float density_height_weight,        
         Bounds bounds,
-        bool cast_shadows,
         BevelTuning bevel_tuning
         )
     {
@@ -233,7 +232,6 @@ public class VoxelChunk
         m_iso_level = iso_level;
         m_voxel_size_in_meters = voxel_size_in_meters;
         m_generate_collision = generate_collision;
-        m_cast_shadows = cast_shadows;
         m_bevel_tuning = bevel_tuning;
 
         m_mesh = new Mesh();
@@ -1079,11 +1077,16 @@ public class VoxelChunk
         GatherDensitySamples(scratch_buffer.m_density_samples, out var _, out var _);
     }
 
-    public void Render(float dt, Material material)
+    public void Render(float dt, Material prepass_material, Material material, bool cast_shadows)
     {
         if (!m_is_empty)
         {
-            Graphics.DrawMesh(m_mesh, Matrix4x4.identity, material, 0, null, 0, null, m_cast_shadows);
+            var matrix = Matrix4x4.identity;
+            if(prepass_material != null)
+            {
+                Graphics.DrawMesh(m_mesh, matrix, prepass_material, 0, null, 0, null, false);
+            }
+            Graphics.DrawMesh(m_mesh, matrix, material, 0, null, 0, null, cast_shadows);
         }
     }
 
@@ -1106,7 +1109,6 @@ public class VoxelChunk
     bool m_is_empty = true;
     bool m_generate_collision;
     BevelTuning m_bevel_tuning;
-    bool m_cast_shadows;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
         | MeshUpdateFlags.DontValidateIndices

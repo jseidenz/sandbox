@@ -16,6 +16,9 @@ public class Mesher
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
     HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
     LayeredBrush m_brush;
+    bool m_cast_shadows;
+    Material m_prepass_material;
+    
 
     struct DensityChange
     {
@@ -37,6 +40,7 @@ public class Mesher
         float density_height_weight,
         LayeredBrush brush,
         bool cast_shadows,
+        Material prepass_material,
         BevelTuning bevel_tuning
         )
     {
@@ -50,6 +54,8 @@ public class Mesher
         m_voxel_chunk_scratch_buffer = VoxelChunk.ScratchBuffer.CreateScratchBuffer();
         m_layers = new VoxelLayer[m_grid_height_in_voxels];
         m_brush = brush;
+        m_cast_shadows = cast_shadows;
+        m_prepass_material = prepass_material;
 
 
         for (int y = 0; y < m_grid_height_in_voxels; ++y)
@@ -57,7 +63,7 @@ public class Mesher
             float bot_y = (float)(y - 1) * m_voxel_size_in_meters.y;
             float top_y = (float)y * m_voxel_size_in_meters.y;
 
-            var layer = new VoxelLayer(name, density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, m_vertex_attribute_descriptors, cast_shadows, bevel_tuning);
+            var layer = new VoxelLayer(name, density_grids[y], y, m_grid_width_in_voxels, m_grid_depth_in_voxels, m_voxel_chunk_dimensions, m_voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, m_vertex_attribute_descriptors, bevel_tuning);
             m_layers[y] = layer;
         }
 
@@ -95,7 +101,7 @@ public class Mesher
         {
             m_brush.GetMaterialForLayer(y, out var material);
 
-            m_layers[y].Render(dt, material);
+            m_layers[y].Render(dt, m_prepass_material, material, m_cast_shadows);
         }
         Profiler.EndSample();
     }
