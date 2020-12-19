@@ -310,13 +310,20 @@ public class LiquidSimulation
             if (flow != 0)
             {
                 remaining_liquid -= flow;
-                delta_layer[cell_idx] -= flow;
-                target_delta_layer[target_cell_idx] += flow;
 
                 min_dirty_idx = Vector3Int.Min(min_dirty_idx, new Vector3Int(x, layer_idx, z));
                 max_dirty_idx = Vector3Int.Max(max_dirty_idx, new Vector3Int(x, layer_idx, z));
-                target_min_dirty_idx = Vector3Int.Min(target_min_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
-                target_max_dirty_idx = Vector3Int.Max(target_max_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
+
+                const float MIN_LIQUID = 0.0001f;
+                bool is_evaporating = flow < MIN_LIQUID && target_liquid < MIN_LIQUID;
+                if (!is_evaporating)
+                {
+                    delta_layer[cell_idx] -= flow;
+                    target_delta_layer[target_cell_idx] += flow;
+                    target_min_dirty_idx = Vector3Int.Min(target_min_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
+                    target_max_dirty_idx = Vector3Int.Max(target_max_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
+                }
+
 
                 if (remaining_liquid <= 0)
                 {
