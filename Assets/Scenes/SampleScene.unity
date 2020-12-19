@@ -13185,6 +13185,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 7976e3a3be073c740a5bf73f7e18a21f,
         type: 2}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_water
+      value: 
+      objectReference: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9,
+        type: 3}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name
