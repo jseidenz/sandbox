@@ -8,7 +8,6 @@ public class LiquidSimulation
     const float MAX_VALUE = 1.0f;
     const float MAX_COMPRESSION = 0.25f;
     const float MAX_FLOW = 4f;
-    const float FLOW_SPEED = 0.1f;
 
     const float SIMULATION_TICK_RATE = 1f / 30f;
 
@@ -299,10 +298,10 @@ public class LiquidSimulation
         {
             var target_liquid = Mathf.Max(target_layer[target_cell_idx] - min_density_to_allow_flow, 0);
             var flow = (remaining_liquid - target_liquid) / 4f;
-            flow *= FLOW_SPEED;
+            flow = flow * 0.5f;
             if(is_bottom_cell)
             {
-                flow = remaining_liquid;
+                flow = Mathf.Min(1f - target_liquid,  remaining_liquid);
             }
 
             flow = Mathf.Max(flow, 0);

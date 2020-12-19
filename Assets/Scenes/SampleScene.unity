@@ -13171,7 +13171,7 @@ PrefabInstance:
     - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_min_density_to_allow_flow
-      value: 0.5
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
