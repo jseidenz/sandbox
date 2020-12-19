@@ -261,7 +261,6 @@ public class LiquidSimulation
             m_max_dirty_cell_per_layer[layer_idx + 1] = Vector3Int.Max(max_upper_dirty_idx, m_max_dirty_cell_per_layer[layer_idx + 1]);
         }
 
-        bool is_dirty = false;
         for (int layer_idx = 0; layer_idx < m_delta_layers.Length; ++layer_idx)
         {
             var layer = m_layers[layer_idx];
