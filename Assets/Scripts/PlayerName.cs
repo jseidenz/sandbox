@@ -10,6 +10,9 @@ public class PlayerName : MonoBehaviour
 
     void OnDestroy()
     {
-        NameScreen.Instance.Unregister(this);
+        if (NameScreen.Instance != null)
+        {
+            NameScreen.Instance.Unregister(this);
+        }
     }
 }
