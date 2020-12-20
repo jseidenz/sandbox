@@ -7,6 +7,7 @@ public class PauseScreen : MonoBehaviour
 {
     [SerializeField] Button m_disconnect_button;
     [SerializeField] Button m_resume_button;
+    [SerializeField] Button m_save_button;
     [SerializeField] TMPro.TMP_InputField m_your_name;
     [SerializeField] TMPro.TextMeshProUGUI m_island_name;
 
@@ -29,6 +30,12 @@ public class PauseScreen : MonoBehaviour
 
         m_resume_button.onClick.AddListener(() =>
         {
+            StartScreenFade();
+        });
+
+        m_save_button.onClick.AddListener(() =>
+        {
+            Game.Instance.Save();
             StartScreenFade();
         });
     }
