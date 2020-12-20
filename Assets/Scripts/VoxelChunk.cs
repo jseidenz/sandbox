@@ -128,6 +128,7 @@ public class VoxelChunk
         public ushort m_vertex_idx_a;
         public ushort m_vertex_idx_b;
         public ushort m_vertex_idx_c;
+        public ushort m_vertex_idx_d;
         public Vector3 m_pos_a;
         public Vector3 m_pos_b;
         public Vector3 m_normal;
@@ -925,6 +926,7 @@ public class VoxelChunk
                 m_vertex_idx_a = edge.m_top_bot_vertex_pair_a.m_top_vertex_idx,
                 m_vertex_idx_b = edge.m_top_bot_vertex_pair_b.m_top_vertex_idx,
                 m_vertex_idx_c = edge.m_top_bot_vertex_pair_a.m_bot_vertex_idx,
+                m_vertex_idx_d = edge.m_top_bot_vertex_pair_b.m_bot_vertex_idx,
                 m_pos_a = pos_a,
                 m_pos_b = pos_b,
                 m_normal = normal,
@@ -943,6 +945,7 @@ public class VoxelChunk
             var vert_idx_a = edge_face_info.m_vertex_idx_a;
             var vert_idx_b = edge_face_info.m_vertex_idx_b;
             var vert_idx_g = edge_face_info.m_vertex_idx_c;
+            var vert_idx_h = edge_face_info.m_vertex_idx_d;
 
             var pos_a = edge_face_info.m_pos_a;
             var pos_b = edge_face_info.m_pos_b;
@@ -999,6 +1002,10 @@ public class VoxelChunk
             triangle_writer.Write(vert_idx_c, vert_idx_d, vert_idx_e, is_border_edge);
             triangle_writer.Write(vert_idx_e, vert_idx_d, vert_idx_f, is_border_edge);
 
+
+            triangle_writer.Write(vert_idx_e, vert_idx_f, vert_idx_g, is_border_edge);
+            triangle_writer.Write(vert_idx_g, vert_idx_f, vert_idx_h, is_border_edge);
+
             edge_connections[i] = new EdgeConnections
             {
                 m_vertex_idx_a = vert_idx_a,
@@ -1025,9 +1032,6 @@ public class VoxelChunk
 
             triangle_writer.Write(start_edge.m_vertex_idx_d, end_edge.m_vertex_idx_c, start_edge.m_vertex_idx_f, is_border_edge);
             triangle_writer.Write(start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_c, end_edge.m_vertex_idx_e, is_border_edge);
-
-            triangle_writer.Write(start_edge.m_vertex_idx_e, start_edge.m_vertex_idx_f, start_edge.m_vertex_idx_g, is_border_edge);
-            triangle_writer.Write(start_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_g, is_border_edge);
 
             if (!m_is_liquid)
             {
