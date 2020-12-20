@@ -46,7 +46,6 @@ public class LiquidSimulation
         m_cell_size_in_meters = cell_size_in_meters;
         m_dimensions_in_cells = dimensions_in_cells;
         m_simulation_layers = new float[dimensions_in_cells.y][];
-        m_visual_layers = new float[dimensions_in_cells.y][];
         m_delta_layers = new float[dimensions_in_cells.y][];
         m_dimensions_in_chunks = new Vector3Int(dimensions_in_cells.x / chunk_dimensions_in_cells, dimensions_in_cells.y / chunk_dimensions_in_cells, dimensions_in_cells.z / chunk_dimensions_in_cells);
 
@@ -55,7 +54,6 @@ public class LiquidSimulation
         for (int i = 0; i < dimensions_in_cells.y; ++i)
         {
             m_simulation_layers[i] = new float[dimensions_in_cells.x * dimensions_in_cells.z];
-            m_visual_layers[i] = new float[dimensions_in_cells.x * dimensions_in_cells.z];
             m_delta_layers[i] = new float[dimensions_in_cells.x * dimensions_in_cells.z];
         }
 
@@ -264,7 +262,6 @@ public class LiquidSimulation
         for (int layer_idx = 0; layer_idx < m_delta_layers.Length; ++layer_idx)
         {
             var layer = m_simulation_layers[layer_idx];
-            var visual_layer = m_visual_layers[layer_idx];
             var delta_layer = m_delta_layers[layer_idx];
 
             for (int z = m_min_dirty_cell_per_layer[layer_idx].z; z < m_max_dirty_cell_per_layer[layer_idx].z; ++z)
@@ -278,7 +275,6 @@ public class LiquidSimulation
                     {
                         var liquid = layer[cell_idx] + delta;
                         layer[cell_idx] = liquid;
-                        visual_layer[cell_idx] = liquid;
                         delta_layer[cell_idx] = 0;
                     }
                 }
@@ -436,10 +432,9 @@ public class LiquidSimulation
         }
     }
 
-    public float[][] GetVisualLayers() { return m_visual_layers; }
+    public float[][] GetLayers() { return m_simulation_layers; }
 
     float[][] m_simulation_layers;
-    float[][] m_visual_layers;
     float[][] m_delta_layers;
     float[][] m_solid_layers;
     float m_solid_iso_level;
