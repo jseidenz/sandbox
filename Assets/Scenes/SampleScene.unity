@@ -13191,6 +13191,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 8882731314843521000, guid: 923d8bd461eec5145ab4f6009e9186c9,
         type: 3}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_liquid_iso_level
+      value: 0.005
+      objectReference: {fileID: 0}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name
