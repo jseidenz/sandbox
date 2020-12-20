@@ -39,7 +39,7 @@ public class LiquidSimulation
         public int m_max_y;
     }
 
-    public LiquidSimulation(Vector3Int dimensions_in_cells, Vector3 cell_size_in_meters, int chunk_dimensions_in_cells, float[][] solid_layers, float solid_iso_level, float min_density_to_allow_flow)
+    public LiquidSimulation(Vector3Int dimensions_in_cells, Vector3 cell_size_in_meters, int chunk_dimensions_in_cells, float[][] solid_layers, float solid_iso_level, float min_density_to_allow_flow, LiquidTuning liquid_tuning)
     {        
         m_solid_iso_level = solid_iso_level;
         m_solid_layers = solid_layers;
@@ -48,6 +48,7 @@ public class LiquidSimulation
         m_simulation_layers = new float[dimensions_in_cells.y][];
         m_delta_layers = new float[dimensions_in_cells.y][];
         m_dimensions_in_chunks = new Vector3Int(dimensions_in_cells.x / chunk_dimensions_in_cells, dimensions_in_cells.y / chunk_dimensions_in_cells, dimensions_in_cells.z / chunk_dimensions_in_cells);
+        m_liquid_tuning = liquid_tuning;
 
         m_min_density_to_allow_flow = min_density_to_allow_flow;
 
@@ -452,4 +453,5 @@ public class LiquidSimulation
     int m_debug_cell_idx = -1;
     int m_debug_layer_idx = -1;
     float m_min_density_to_allow_flow;
+    LiquidTuning m_liquid_tuning;
 }
