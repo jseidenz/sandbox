@@ -89,7 +89,7 @@ public class Game : MonoBehaviour
     Mesher CreateSolidMesher(float[][] layers, LayeredBrush brush)
     {
         var solid_mesher = new Mesher();
-        solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, true, m_solid_iso_level, 0f, brush, true, null, m_bevel_tuning);
+        solid_mesher.Init("Solid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, true, m_solid_iso_level, 0f, brush, true, false, null, m_bevel_tuning);
 
         //solid_mesher.enabled = false;
 
@@ -100,7 +100,7 @@ public class Game : MonoBehaviour
     {
         var liquid_mesher = new Mesher();
         var prepass_material = Resources.Load<Material>("LiquidMaterials/LiquidPrepass");
-        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, false, m_liquid_iso_level, 1f, brush, false, prepass_material, m_bevel_tuning);
+        liquid_mesher.Init("Liquid", layers, m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels, m_voxel_size_in_meters, m_voxel_chunk_dimensions, false, m_liquid_iso_level, 1f, brush, false, true, prepass_material, m_bevel_tuning);
 
         return liquid_mesher;
     }

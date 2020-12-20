@@ -218,6 +218,7 @@ public class VoxelChunk
         bool generate_collision,
         float density_height_weight,        
         Bounds bounds,
+        bool is_liquid,
         BevelTuning bevel_tuning
         )
     {
@@ -232,6 +233,7 @@ public class VoxelChunk
         m_iso_level = iso_level;
         m_voxel_size_in_meters = voxel_size_in_meters;
         m_generate_collision = generate_collision;
+        m_is_liquid = is_liquid;
         m_bevel_tuning = bevel_tuning;
 
         m_mesh = new Mesh();
@@ -320,6 +322,7 @@ public class VoxelChunk
         public int m_chunk_relative_x;
         public int m_chunk_relative_y;
         public VertexTable m_vertex_table;
+        public bool m_is_liquid;
         public List<ushort> m_border_triangles;
 
         public VertexPair LeftNear()
@@ -432,18 +435,24 @@ public class VoxelChunk
                 m_border_triangles.Add(top_bot_vertex_pair_a.m_top_vertex_idx);
                 m_border_triangles.Add(top_bot_vertex_pair_b.m_top_vertex_idx);
                 m_border_triangles.Add(top_bot_vertex_pair_c.m_top_vertex_idx);
-                m_border_triangles.Add(top_bot_vertex_pair_b.m_bot_vertex_idx);
-                m_border_triangles.Add(top_bot_vertex_pair_a.m_bot_vertex_idx);
-                m_border_triangles.Add(top_bot_vertex_pair_c.m_bot_vertex_idx);
+                if (!m_is_liquid)
+                {
+                    m_border_triangles.Add(top_bot_vertex_pair_b.m_bot_vertex_idx);
+                    m_border_triangles.Add(top_bot_vertex_pair_a.m_bot_vertex_idx);
+                    m_border_triangles.Add(top_bot_vertex_pair_c.m_bot_vertex_idx);
+                }
             }
             else
             {
                 m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_top_vertex_idx;
                 m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_top_vertex_idx;
                 m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_top_vertex_idx;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_bot_vertex_idx;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_bot_vertex_idx;
-                m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_bot_vertex_idx;
+                if (!m_is_liquid)
+                {
+                    m_triangles[m_triangle_idx++] = top_bot_vertex_pair_b.m_bot_vertex_idx;
+                    m_triangles[m_triangle_idx++] = top_bot_vertex_pair_a.m_bot_vertex_idx;
+                    m_triangles[m_triangle_idx++] = top_bot_vertex_pair_c.m_bot_vertex_idx;
+                }
             }
         }
 
@@ -606,6 +615,7 @@ public class VoxelChunk
                 m_chunk_relative_x = chunk_relative_x,
                 m_chunk_relative_y = chunk_relative_y,
                 m_vertex_table = scratch_buffer.m_vertex_table,
+                m_is_liquid = m_is_liquid,
                 m_border_triangles = scratch_buffer.m_boder_triangles
             };
 
@@ -881,6 +891,11 @@ public class VoxelChunk
         var upper_vertical_offset = new Vector3(0, m_bevel_tuning.m_extrusion_vertical_offset, 0);
         var lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y + m_bevel_tuning.m_extrusion_lower_vertical_offset, 0);
 
+        if(m_is_liquid)
+        {
+            lower_vertical_offset = new Vector3(0, -m_voxel_size_in_meters.y, 0);
+        }
+
         for(int i = 0; i < edge_count; ++i)
         {
             var edge = edges[i];
@@ -1014,7 +1029,10 @@ public class VoxelChunk
             triangle_writer.Write(start_edge.m_vertex_idx_e, start_edge.m_vertex_idx_f, start_edge.m_vertex_idx_g, is_border_edge);
             triangle_writer.Write(start_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_g, is_border_edge);
 
-            triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e, is_border_edge);
+            if (!m_is_liquid)
+            {
+                triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e, is_border_edge);
+            }
         }
 
         triangle_idx = triangle_writer.Count;
@@ -1109,6 +1127,7 @@ public class VoxelChunk
     bool m_is_empty = true;
     bool m_generate_collision;
     BevelTuning m_bevel_tuning;
+    bool m_is_liquid;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
         | MeshUpdateFlags.DontValidateIndices
