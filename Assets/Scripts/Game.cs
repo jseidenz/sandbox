@@ -462,7 +462,7 @@ public class Game : MonoBehaviour
 
     public void StartWorldGeneration()
     {
-        m_world_generator = new WorldGenerator(m_solid_simulation, m_solid_mesher);
+        m_world_generator = new WorldGenerator(m_solid_simulation, m_solid_mesher, m_liquid_mesher);
     }
 
     public bool IsWorldGenerationComplete()

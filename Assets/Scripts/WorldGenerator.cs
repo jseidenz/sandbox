@@ -4,14 +4,15 @@ using UnityEngine.Profiling;
 
 public class WorldGenerator
 {
-    public WorldGenerator(SolidSimulation solid_simulation, Mesher solid_mesher)
+    public WorldGenerator(SolidSimulation solid_simulation, Mesher solid_mesher, Mesher liquid_mesher)
     {
-        m_solid_simulation = solid_simulation;
         m_solid_mesher = solid_mesher;
+        m_liquid_mesher = liquid_mesher;
         m_dimensions_in_cells = solid_simulation.GetDimensionsInCells();
 
         m_solid_mesher.SetCollisionGenerationEnabled(false);
         m_solid_mesher.UpdateOcclusion();
+        m_liquid_mesher.UpdateOcclusion();
 
         m_layer_idx = 0;
     }
@@ -19,6 +20,7 @@ public class WorldGenerator
     bool FadingIn()
     {
         m_solid_mesher.TriangulateLayer(m_layer_idx, true);
+        m_liquid_mesher.TriangulateLayer(m_layer_idx, true);
 
         m_layer_idx++;
 
@@ -28,6 +30,7 @@ public class WorldGenerator
     bool Finalizing()
     {
         m_solid_mesher.TriangulateLayer(m_layer_idx, false);
+        m_liquid_mesher.TriangulateLayer(m_layer_idx, false);
 
         m_layer_idx--;
 
@@ -67,8 +70,7 @@ public class WorldGenerator
 
     State m_state;
     int m_layer_idx;
-    SolidSimulation m_solid_simulation;
     Mesher m_solid_mesher;
+    Mesher m_liquid_mesher;
     Vector3Int m_dimensions_in_cells;
-    float[] m_height_map;
 }
