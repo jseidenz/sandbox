@@ -40,14 +40,16 @@ public class NameScreen : MonoBehaviour
 
     void Update()
     {
-        var camera_pos = Game.Instance.GetCamera().transform.position;
+        var camera_transform = Game.Instance.GetCamera().transform;
         foreach(var kvp in m_player_names)
         {
             if (kvp.Key == null) continue;
-            kvp.Value.transform.position = kvp.Key.transform.position + new Vector3(0, m_name_height, 0);
 
-            var dir = (camera_pos = kvp.Value.transform.position).normalized;
-            kvp.Value.transform.forward = dir;
+            var widget_transform = kvp.Value.transform;
+            var avatar_pos = kvp.Key.transform.position;
+
+            widget_transform.position = avatar_pos + new Vector3(0, m_name_height, 0);
+            widget_transform.LookAt(widget_transform.position + camera_transform.rotation * Vector3.forward, camera_transform.rotation * Vector3.up);
         }
     }
 
