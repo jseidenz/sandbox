@@ -6,7 +6,7 @@ public class Player
     const string PLAYER_NAME_ID = "PlayerName";
     public static string GetPlayerName()
     {
-        var default_name = $"Visitor #{UnityEngine.Random.Range(100, 999)}";
+        var default_name = $"Visitor #{UnityEngine.Random.Range(10, 99)}";
         return PlayerPrefs.GetString(PLAYER_NAME_ID, default_name);
     }
 
