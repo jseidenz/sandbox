@@ -33,7 +33,15 @@ public class DigTool : MonoBehaviour
     [SerializeField] float m_liquid_remove_rate;
 
     float m_locked_fill_height;
-    
+
+    void Awake()
+    {
+        if(!GetComponent<Photon.Pun.PhotonView>().IsMine)
+        {
+            GameObject.Destroy(this);
+        }
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
@@ -73,11 +81,13 @@ public class DigTool : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.Escape))
         {
+            /*
             if (Application.isEditor)
             {
 
             }
             else
+            */
             {
 
                 var camera = Game.Instance.GetCamera();

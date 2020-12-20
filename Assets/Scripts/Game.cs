@@ -228,7 +228,6 @@ public class Game : MonoBehaviour
 
     public void SpawnAvatar(Vector3 avatar_local_pos, Quaternion avatar_local_orientation, Vector3 camera_local_pos, Quaternion camera_local_orientation)
     {
-        var pos = m_camera.transform.position - m_camera_offset;
         m_player_avatar = PhotonNetwork.Instantiate("PlayerPrefab", avatar_local_pos, avatar_local_orientation);
 
         m_camera.transform.parent = m_player_avatar.transform;
