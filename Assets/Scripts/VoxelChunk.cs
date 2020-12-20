@@ -561,6 +561,12 @@ public class VoxelChunk
         triangle_count = 0;
         int edge_idx = 0;
 
+        var extrusion_bottom_vertical_offset = m_bevel_tuning.m_extrusion_bottom_vertical_offset;
+        if(m_is_liquid)
+        {
+            extrusion_bottom_vertical_offset = -0.5f;
+        }
+
         Profiler.BeginSample("GenerateTriangles");
         for (int density_sample_idx = 0; density_sample_idx < density_sample_count; ++density_sample_idx)
         {
@@ -598,7 +604,7 @@ public class VoxelChunk
                 m_right_x = right_x,
                 m_near_z = near_z,
                 m_far_z = far_z,
-                m_bot_y = m_bot_y + m_bevel_tuning.m_extrusion_bottom_vertical_offset,
+                m_bot_y = m_bot_y + extrusion_bottom_vertical_offset,
                 m_left_near_top_y = m_top_y + left_near_top_y_delta,
                 m_left_far_top_y = m_top_y + left_far_top_y_delta,
                 m_right_near_top_y = m_top_y + right_near_top_y_delta,
