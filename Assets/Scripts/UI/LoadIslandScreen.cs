@@ -51,6 +51,7 @@ public class LoadIslandScreen : MonoBehaviour
         {
             Game.Instance.SpawnAvatar();
             MainMenu.Instance.gameObject.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 }

@@ -11,7 +11,7 @@ using UnityEditor;
 
 public class Game : MonoBehaviour 
 {
-    [SerializeField] GameObject m_player_avatar;
+    [SerializeField] GameObject m_player_avatar_prefab;
     [SerializeField] int m_grid_width_in_voxels;
     [SerializeField] int m_grid_depth_in_voxels;
     [SerializeField] int m_grid_height_in_voxels;
@@ -41,6 +41,7 @@ public class Game : MonoBehaviour
     WorldGenerator m_world_generator;
     SolidLayeredBrush m_solid_brush;
     LiquidLayeredBrush m_liquid_brush;
+    GameObject m_player_avatar;
 
 
     HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
@@ -191,16 +192,46 @@ public class Game : MonoBehaviour
         }
     }
 
+    public void DestroyAvatar()
+    {
+        var camera_pos = m_camera.transform.position;
+        var camera_rotation = m_camera.transform.rotation;
+        m_camera.transform.parent = null;
+        m_player_avatar.GetComponent<IL3DN.IL3DN_SimpleFPSController>().enabled = false;
+        m_camera.transform.position = camera_pos;
+        m_camera.transform.rotation = camera_rotation;
+
+        StartCoroutine(DestroyAvatarCoroutine());
+    }
+
+    IEnumerator DestroyAvatarCoroutine()
+    {
+        yield return null;
+
+        PhotonNetwork.Destroy(m_player_avatar);
+        m_has_spawned_avatar = false;
+    }
+
     public void SpawnAvatar()
     {
         var pos = m_camera.transform.position - m_camera_offset;
-        m_player_avatar = PhotonNetwork.Instantiate("PlayerPrefab", pos, m_player_avatar.transform.rotation);
+        m_player_avatar = PhotonNetwork.Instantiate("PlayerPrefab", pos, m_player_avatar_prefab.transform.localRotation);
 
         m_camera.transform.parent = m_player_avatar.transform;
         m_camera.transform.localPosition = m_camera_offset;
         m_camera.transform.forward = -Vector3.forward;
 
         m_has_spawned_avatar = true;
+    }
+
+    public void SpawnAvatar(Vector3 avatar_local_pos, Quaternion avatar_local_orientation, Vector3 camera_local_pos, Quaternion camera_local_orientation)
+    {
+        var pos = m_camera.transform.position - m_camera_offset;
+        m_player_avatar = PhotonNetwork.Instantiate("PlayerPrefab", avatar_local_pos, avatar_local_orientation);
+
+        m_camera.transform.parent = m_player_avatar.transform;
+        m_camera.transform.localPosition = camera_local_pos;
+        m_camera.transform.localRotation = camera_local_orientation;
     }
 
     public Mesher GetSolidMesher()
@@ -313,6 +344,15 @@ public class Game : MonoBehaviour
         ground_plane_mesh_renderer.receiveShadows = false;
         m_ground_plane.transform.localScale = new Vector3(m_ground_plane_size, 1, m_ground_plane_size);
         m_ground_plane.transform.localPosition = new Vector3(0, -0.5f, 0);
+    }
+
+    public GameObject GetPlayerAvatar()
+    {
+        return m_player_avatar;
+    }
+    public Camera GetCamera()
+    {
+        return m_camera;
     }
 
     void OnDestroy()

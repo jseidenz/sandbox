@@ -131,6 +131,7 @@ public class CreateIslandScreen : MonoBehaviour
         {
             Game.Instance.SpawnAvatar();
             MainMenu.Instance.gameObject.SetActive(false);
+            gameObject.SetActive(false);
         }
     }
 }
