@@ -1040,10 +1040,7 @@ public class VoxelChunk
             triangle_writer.Write(start_edge.m_vertex_idx_d, end_edge.m_vertex_idx_c, start_edge.m_vertex_idx_f, is_border_edge);
             triangle_writer.Write(start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_c, end_edge.m_vertex_idx_e, is_border_edge);
 
-            if (!m_is_liquid)
-            {
-                triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e, is_border_edge);
-            }
+            triangle_writer.Write(end_edge.m_vertex_idx_g, start_edge.m_vertex_idx_f, end_edge.m_vertex_idx_e, is_border_edge);
         }
 
         triangle_idx = triangle_writer.Count;
