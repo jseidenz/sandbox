@@ -29,6 +29,7 @@ public class Game : MonoBehaviour
     [SerializeField] Camera m_camera;
     [SerializeField] Vector3 m_camera_offset;
     [SerializeField] bool m_draw_solid_meshes;
+    [SerializeField] bool m_draw_liquid_meshes;
     [SerializeField] BevelTuning m_bevel_tuning;
     
 
@@ -292,7 +293,10 @@ public class Game : MonoBehaviour
         {
             m_solid_mesher.Render(dt);
         }
-        m_liquid_mesher.Render(dt);
+        if (m_draw_liquid_meshes)
+        {
+            m_liquid_mesher.Render(dt);
+        }
     }
 
     void CreateGroundPlane(LayeredBrush brush)
