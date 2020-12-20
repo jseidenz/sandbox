@@ -591,7 +591,7 @@ public class VoxelChunk
             var left_x = (float)x * m_voxel_size_in_meters.x;
             var right_x = left_x + m_voxel_size_in_meters.x;
 
-            m_density_height_weight = 0.85f;
+            m_density_height_weight = 0.8f;
             var left_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_near_density);
             var left_far_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - left_far_density);
             var right_near_top_y_delta = m_density_height_weight * -m_voxel_size_in_meters.y * (1 - right_near_density);
