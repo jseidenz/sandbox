@@ -1110,7 +1110,7 @@ public class VoxelChunk
             var matrix = Matrix4x4.identity;
             if(prepass_material != null)
             {
-                Graphics.DrawMesh(m_mesh, matrix, prepass_material, 0, null, 0, null, false);
+                Graphics.DrawMesh(m_mesh, matrix, prepass_material, 0, null, 0, null, false, false, false);
             }
             Graphics.DrawMesh(m_mesh, matrix, material, 0, null, 0, null, cast_shadows);
         }
