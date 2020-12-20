@@ -62,14 +62,21 @@ public class DigTool : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.Escape))
         {
-            var camera = Game.Instance.GetCamera();
-            MainMenu.Instance.m_pause_screen.SetTransforms(transform.localPosition, transform.localRotation, camera.transform.localPosition, camera.transform.localRotation);
+            if (Application.isEditor)
+            {
 
-            Game.Instance.DestroyAvatar();
-            MainMenu.Instance.gameObject.SetActive(true);
-            MainMenu.Instance.GetComponent<CanvasGroup>().alpha = 1f;
-            MainMenu.Instance.TransitionScreens(null, MainMenu.Instance.m_pause_screen.gameObject);
+            }
+            else
+            {
 
+                var camera = Game.Instance.GetCamera();
+                MainMenu.Instance.m_pause_screen.SetTransforms(transform.localPosition, transform.localRotation, camera.transform.localPosition, camera.transform.localRotation);
+
+                Game.Instance.DestroyAvatar();
+                MainMenu.Instance.gameObject.SetActive(true);
+                MainMenu.Instance.GetComponent<CanvasGroup>().alpha = 1f;
+                MainMenu.Instance.TransitionScreens(null, MainMenu.Instance.m_pause_screen.gameObject);
+            }
         }
 
         UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
