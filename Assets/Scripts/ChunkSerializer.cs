@@ -17,7 +17,7 @@ public class ChunkSerializer
     {
         m_max_chunks = max_chunks;
 
-        m_buffer = new byte[30 * 1024 * 1024];
+        m_buffer = new byte[64 * 1024 * 1024];
 
         var placeholdedr_major_version = 0;
         var placeholder_minor_version = 0;

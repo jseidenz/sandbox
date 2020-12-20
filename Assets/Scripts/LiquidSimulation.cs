@@ -45,7 +45,7 @@ public class LiquidSimulation
         m_solid_layers = solid_layers;
         m_cell_size_in_meters = cell_size_in_meters;
         m_dimensions_in_cells = dimensions_in_cells;
-        m_simulation_layers = new float[dimensions_in_cells.y][];
+        m_layers = new float[dimensions_in_cells.y][];
         m_delta_layers = new float[dimensions_in_cells.y][];
         m_dimensions_in_chunks = new Vector3Int(dimensions_in_cells.x / chunk_dimensions_in_cells, dimensions_in_cells.y / chunk_dimensions_in_cells, dimensions_in_cells.z / chunk_dimensions_in_cells);
         m_water_plane_layer = water_plane_layer;
@@ -53,29 +53,20 @@ public class LiquidSimulation
 
         m_min_density_to_allow_flow = min_density_to_allow_flow;
 
-        for (int i = 0; i < dimensions_in_cells.y; ++i)
-        {
-            m_simulation_layers[i] = new float[dimensions_in_cells.x * dimensions_in_cells.z];
-            m_delta_layers[i] = new float[dimensions_in_cells.x * dimensions_in_cells.z];
-        }
-
         m_chunk_dimensions_in_cells = chunk_dimensions_in_cells;
         m_one_over_chunk_dimensions_in_cells = 1f / chunk_dimensions_in_cells;
 
-        m_min_dirty_cell_per_layer = new Vector3Int[m_simulation_layers.Length];
-        m_max_dirty_cell_per_layer = new Vector3Int[m_simulation_layers.Length];
+        m_min_dirty_cell_per_layer = new Vector3Int[m_layers.Length];
+        m_max_dirty_cell_per_layer = new Vector3Int[m_layers.Length];
 
-        for(int i = 0; i < m_simulation_layers.Length; ++i)
-        {
-            m_min_dirty_cell_per_layer[i] = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
-            m_max_dirty_cell_per_layer[i] = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
-        }
+
+        Clear();
     }
 
     public void AddDensity(Vector3 world_pos, float amount)
     {
         var layer_idx = (int)(world_pos.y / m_cell_size_in_meters.y);
-        if (layer_idx < 0 || layer_idx >= m_simulation_layers.Length) return;
+        if (layer_idx < 0 || layer_idx >= m_layers.Length) return;
 
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
@@ -112,15 +103,15 @@ public class LiquidSimulation
     {
         var min_density_to_allow_flow = m_min_density_to_allow_flow;
 
-        for(int layer_idx = 1; layer_idx < m_simulation_layers.Length - 1; ++layer_idx)
+        for(int layer_idx = 1; layer_idx < m_layers.Length - 1; ++layer_idx)
         {
             var solid_layer = m_solid_layers[layer_idx];
             var lower_solid_layer = m_solid_layers[layer_idx - 1];
             var upper_solid_layer = m_solid_layers[layer_idx + 1];
             
-            var layer = m_simulation_layers[layer_idx];
-            var lower_layer = m_simulation_layers[layer_idx - 1];
-            var upper_layer = m_simulation_layers[layer_idx + 1];
+            var layer = m_layers[layer_idx];
+            var lower_layer = m_layers[layer_idx - 1];
+            var upper_layer = m_layers[layer_idx + 1];
 
             var delta_layer = m_delta_layers[layer_idx];
             var lower_delta_layer = m_delta_layers[layer_idx - 1];
@@ -265,7 +256,7 @@ public class LiquidSimulation
 
         for (int layer_idx = 0; layer_idx < m_delta_layers.Length; ++layer_idx)
         {
-            var layer = m_simulation_layers[layer_idx];
+            var layer = m_layers[layer_idx];
             var delta_layer = m_delta_layers[layer_idx];
 
             for (int z = m_min_dirty_cell_per_layer[layer_idx].z; z < m_max_dirty_cell_per_layer[layer_idx].z; ++z)
@@ -342,13 +333,31 @@ public class LiquidSimulation
         UpdateSimulation(force);
     }
 
+    public void Clear()
+    {
+        for (int i = 0; i < m_dimensions_in_cells.y; ++i)
+        {
+            m_layers[i] = new float[m_dimensions_in_cells.x * m_dimensions_in_cells.z];
+            m_delta_layers[i] = new float[m_dimensions_in_cells.x * m_dimensions_in_cells.z];
+        }
+
+        m_min_dirty_cell_per_layer = new Vector3Int[m_layers.Length];
+        m_max_dirty_cell_per_layer = new Vector3Int[m_layers.Length];
+
+        for (int i = 0; i < m_layers.Length; ++i)
+        {
+            m_min_dirty_cell_per_layer[i] = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+            m_max_dirty_cell_per_layer[i] = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+        }
+    }
+
     public void Update(HashSet<Vector3Int> dirty_chunk_ids)
     {
         if (m_density_changes.Count > 0)
         {
             for (int layer_idx = 0; layer_idx < m_dimensions_in_cells.y; ++layer_idx)
             {
-                var layer = m_simulation_layers[layer_idx];
+                var layer = m_layers[layer_idx];
                 foreach (var density_change in m_density_changes)
                 {
                     if (density_change.m_layer_idx != layer_idx) continue;
@@ -394,7 +403,7 @@ public class LiquidSimulation
             //m_simulation_timer -= SIMULATION_TICK_RATE;
         }
 
-        for(int layer_idx = 0; layer_idx < m_simulation_layers.Length; ++layer_idx)
+        for(int layer_idx = 0; layer_idx < m_layers.Length; ++layer_idx)
         {
             var min_dirty_cell_coordinates = m_min_dirty_cell_per_layer[layer_idx];
             var max_dirty_cell_coordinates = m_max_dirty_cell_per_layer[layer_idx];
@@ -421,9 +430,16 @@ public class LiquidSimulation
     }
 
     static Hash LIQUID_SIMULATION_ID = new Hash("LiquidSimulation");
+
     public void Save(ChunkSerializer serializer)
     {
         serializer.BeginChunk(LIQUID_SIMULATION_ID);
+
+        for (int y = 0; y < m_layers.Length; ++y)
+        {
+            var layer = m_layers[y];
+            serializer.Write(layer);
+        }
 
         serializer.EndChunk();
     }
@@ -432,13 +448,17 @@ public class LiquidSimulation
     {
         if (deserializer.TryGetChunk(LIQUID_SIMULATION_ID))
         {
-
+            for (int y = 0; y < m_layers.Length; ++y)
+            {
+                var layer = m_layers[y];
+                deserializer.Read(layer);
+            }
         }
     }
 
-    public float[][] GetLayers() { return m_simulation_layers; }
+    public float[][] GetLayers() { return m_layers; }
 
-    float[][] m_simulation_layers;
+    float[][] m_layers;
     float[][] m_delta_layers;
     float[][] m_solid_layers;
     float m_solid_iso_level;

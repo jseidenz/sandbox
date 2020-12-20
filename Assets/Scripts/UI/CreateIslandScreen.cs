@@ -32,7 +32,8 @@ public class CreateIslandScreen : MonoBehaviour
         "Exotic",
         "Peaceful",
         "Tranquil",
-        "Serene"
+        "Serene",
+        "Sunny"
     };
 
     string[] m_nouns = new string[]
@@ -121,6 +122,8 @@ public class CreateIslandScreen : MonoBehaviour
         Profiler.BeginSample("ApplyHeightMap");
         solid_simulation.ApplyHeightMap(height_map);
         Profiler.EndSample();
+
+        Game.Instance.GetLiquidSimulation().Clear();
 
         Game.Instance.StartWorldGeneration();
     }
