@@ -26,6 +26,8 @@ public class NameScreen : MonoBehaviour
 
     public void Register(PlayerName player_name)
     {
+        if (player_name.gameObject == Game.Instance.GetPlayerAvatar()) return;
+
         var widget = GameObject.Instantiate(m_name_widget_prefab);
         widget.GetComponent<RectTransform>().SetParent(m_name_widget_prefab.transform.parent);
         widget.transform.localPosition = new Vector3(0, m_name_height, 0);
@@ -35,6 +37,7 @@ public class NameScreen : MonoBehaviour
         widget.gameObject.SetActive(true);
         m_player_names[player_name] = widget;
     }
+
     void Update()
     {
         var camera_pos = Game.Instance.GetCamera().transform.position;

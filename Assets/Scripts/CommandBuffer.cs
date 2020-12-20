@@ -57,6 +57,7 @@ static class CommandHandlerManager
     static CommandHandlerManager()
     {
         Registerhandler<AddSolidDensityCommand>();
+        Registerhandler<AddLiquidDensityCommand>();
     }
 
     static void Registerhandler<T>() where T : struct, ICommand

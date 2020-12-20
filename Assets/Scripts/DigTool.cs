@@ -12,6 +12,17 @@ public struct AddSolidDensityCommand : ICommand
     public Vector3 m_position;
 }
 
+public struct AddLiquidDensityCommand : ICommand
+{
+    public void Run()
+    {
+        Game.Instance.GetLiquidSimulation().AddDensity(m_position, m_amount);
+    }
+
+    public float m_amount;
+    public Vector3 m_position;
+}
+
 public class DigTool : MonoBehaviour 
 {
     [SerializeField] float m_fill_rate;
@@ -109,6 +120,15 @@ public class DigTool : MonoBehaviour
                 hit_point.y = m_locked_fill_height;
 
                 Game.Instance.GetLiquidSimulation().AddDensity(hit_point, amount * Time.deltaTime);
+
+                var command = new AddLiquidDensityCommand
+                {
+                    m_position = hit_point,
+                    m_amount = amount * Time.deltaTime
+                };
+
+                Game.Instance.SendCommand(command);
+                command.Run();
             }
         }
     }
