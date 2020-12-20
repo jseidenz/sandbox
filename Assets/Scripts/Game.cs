@@ -222,6 +222,8 @@ public class Game : MonoBehaviour
         m_camera.transform.forward = -Vector3.forward;
 
         m_has_spawned_avatar = true;
+
+        PhotonNetwork.LocalPlayer.NickName = Player.GetPlayerName();
     }
 
     public void SpawnAvatar(Vector3 avatar_local_pos, Quaternion avatar_local_orientation, Vector3 camera_local_pos, Quaternion camera_local_orientation)
