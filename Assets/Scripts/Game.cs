@@ -59,7 +59,8 @@ public class Game : MonoBehaviour
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
         var solid_layers = m_solid_simulation.GetLayers();
 
-        m_liquid_simulation = new LiquidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions, solid_layers, m_solid_iso_level, m_min_density_to_allow_flow, m_liquid_tuning);
+        var water_plane_layer = (int)(m_water_height / m_voxel_size_in_meters.y) + 1;
+        m_liquid_simulation = new LiquidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions, solid_layers, m_solid_iso_level, m_min_density_to_allow_flow, water_plane_layer, m_liquid_tuning);
         var liquid_layers = m_liquid_simulation.GetLayers();
         m_liquid_simulation.SetSimulationEnabled(m_liquid_sim_enabled_on_startup);
 
