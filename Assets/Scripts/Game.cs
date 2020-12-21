@@ -174,17 +174,21 @@ public class Game : MonoBehaviour
             var ldf = new DensityField(liquid_layers, m_grid_width_in_voxels, m_grid_depth_in_voxels);
             var l = 22;
 
-            {
-                var x = 188;
-                var y = 206;
 
+            var x = 130;
+            var y = 250;
+            {
                 sdf.Line(x + 0, y + 0, x + 2, y + 0, l, 1f);
                 sdf.Line(x + 0, y + 2, x + 2, y + 2, l, 1f);
                 sdf.Line(x + 0, y + 0, x + 0, y + 2, l, 1f);
                 sdf.Line(x + 2, y + 0, x + 2, y + 2, l, 1f);
 
                 ldf.Line(x + 1, y + 1, x + 1, y + 1, l, 1f);
+            }
 
+            x += 4;
+            {
+                sdf.Line(x + 0, y + 0, x + 1, y + 0, l, 0.94f);
             }
 
             m_solid_mesher.TriangulateAll();

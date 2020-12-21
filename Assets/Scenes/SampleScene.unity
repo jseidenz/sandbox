@@ -15359,6 +15359,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5372770372708608955, guid: 6adbf587ccf463c40a51f92b37d5c887,
         type: 3}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_use_height_map
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name
