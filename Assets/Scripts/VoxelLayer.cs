@@ -116,45 +116,13 @@ public class VoxelLayer
 
             var chunk = m_voxel_chunks[chunk_idx];
             var dirty_occlusion_regions = chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
-            if (dirty_occlusion_regions != VoxelChunk.DirtyOcclusionRegion.None && m_layer_idx > 0)
+
+            if(m_layer_idx > 0)
             {
-                if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Center))
+                var dirty_occlusion_offsets = scratch_buffer.m_occlusion_region_chunk_offset_table[(int)dirty_occlusion_regions];
+                foreach( var dirty_occlusion_offset in dirty_occlusion_offsets)
                 {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, 0));
-                }
-                if(dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Left))
-                {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(-1, -1, 0));
-
-                    if(dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Near))
-                    {
-                        m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(-1, -1, -1));
-                    }
-                    if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Far))
-                    {
-                        m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(-1, -1, 1));
-                    }
-                }
-                if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Right))
-                {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(1, -1, 0));
-
-                    if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Near))
-                    {
-                        m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(1, -1, -1));
-                    }
-                    if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Far))
-                    {
-                        m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(1, -1, 1));
-                    }
-                }
-                if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Near))
-                {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, -1));
-                }
-                if (dirty_occlusion_regions.HasFlag(VoxelChunk.DirtyOcclusionRegion.Far))
-                {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + new Vector3Int(0, -1, 1));
+                    m_scratch_dirty_chunk_ids.Add(chunk_id + dirty_occlusion_offset);
                 }
             }
         }

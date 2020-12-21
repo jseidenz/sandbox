@@ -86,8 +86,8 @@ public class VoxelChunk
             scratch_buffer.m_border_triangles = new List<ushort>();
 
             var occlusion_region_variation_count = (int)DirtyOcclusionRegion.TotalVariations;
-            var occlusion_region_chunk_offset_table = new Vector3[occlusion_region_variation_count][];
-            var occlusion_regions = new List<Vector3>();
+            var occlusion_region_chunk_offset_table = new Vector3Int[occlusion_region_variation_count][];
+            var occlusion_regions = new List<Vector3Int>();
 
             for(int i = 0; i < occlusion_region_variation_count; ++i)
             {
@@ -136,6 +136,8 @@ public class VoxelChunk
                 occlusion_regions.Clear();
             }
 
+            scratch_buffer.m_occlusion_region_chunk_offset_table = occlusion_region_chunk_offset_table;
+
             return scratch_buffer;
         }
 
@@ -159,6 +161,7 @@ public class VoxelChunk
         public EdgeFaceInfo[] m_edge_face_infos;
         public DensitySample[] m_density_samples;
         public List<ushort> m_border_triangles;
+        public Vector3Int[][] m_occlusion_region_chunk_offset_table;
     }
 
     [StructLayout(LayoutKind.Sequential)]
