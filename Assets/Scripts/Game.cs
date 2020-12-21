@@ -513,7 +513,7 @@ public class Game : MonoBehaviour
         MainMenu.Instance.gameObject.SetActive(false);
     }
 
-        public static void DeleteCommandLineFile()
+    public static void DeleteCommandLineFile()
     {
         if (!File.Exists(COMMAND_LINE_FILE)) return;
 

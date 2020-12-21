@@ -2,6 +2,13 @@
 using System.Collections.Generic;
 using System;
 
+public struct DensityCell
+{
+    public int m_x;
+    public int m_layer_idx;
+    public int m_z;
+}
+
 public class SolidSimulation
 {
     struct DensityChange
@@ -168,6 +175,33 @@ public class SolidSimulation
                 deserializer.Read(layer);
             }
         }        
+    }
+
+    public bool TryGetDensityCellFromWorldPosition(Vector3 world_pos, out DensityCell density_cell)
+    {
+        var layer_idx = (int)(world_pos.y / m_cell_size_in_meters.y);
+        if (layer_idx < 0 || layer_idx >= m_layers.Length)
+        {
+            density_cell = default;
+            return false;
+        }
+
+        var x = (int)(world_pos.x / (float)m_cell_size_in_meters.x);
+        if (x < 0 || x >= m_dimensions_in_cells.x)
+        {
+            density_cell = default;
+            return false;
+        }
+
+        var z = (int)(world_pos.z / (float)m_cell_size_in_meters.z);
+        if (z < 0 || z >= m_dimensions_in_cells.z)
+        {
+            density_cell = default;
+            return false;
+        };
+
+        density_cell = new DensityCell { m_x = x, m_layer_idx = layer_idx, m_z = z };
+        return true;
     }
 
     public Vector3Int GetDimensionsInCells() { return m_dimensions_in_cells; }
