@@ -14,6 +14,7 @@ public class Mesher
     VoxelLayer[] m_layers;
     byte[] m_empty_sample_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
+    DirtyChunkTable m_dirty_mesh_chunks;
     LayeredBrush m_brush;
     bool m_cast_shadows;
     Material m_prepass_material;
@@ -33,7 +34,7 @@ public class Mesher
         int grid_height_in_voxels,
         int grid_depth_in_voxels,
         Vector3 voxel_size_in_meters,
-        int voxel_chunk_dimesnions,
+        int voxel_chunk_dimensions,
         bool generate_collision,
         float iso_level,
         float density_height_weight,
@@ -44,11 +45,13 @@ public class Mesher
         BevelTuning bevel_tuning
         )
     {
-        m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
+        m_voxel_chunk_dimensions = voxel_chunk_dimensions;
         m_voxel_size_in_meters = voxel_size_in_meters;
         m_grid_width_in_voxels = grid_width_in_voxels;
         m_grid_height_in_voxels = grid_height_in_voxels;
         m_grid_depth_in_voxels = grid_depth_in_voxels;
+
+        m_dirty_mesh_chunks = new DirtyChunkTable(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), voxel_chunk_dimensions);
 
         m_empty_sample_grid = new byte[m_grid_width_in_voxels * m_grid_depth_in_voxels];
         m_voxel_chunk_scratch_buffer = VoxelChunk.ScratchBuffer.CreateScratchBuffer();
@@ -109,6 +112,12 @@ public class Mesher
     public void Triangulate(DirtyChunkTable dirty_density_chunks, HashSet<Vector3Int> dirty_chunk_ids)
     {
         if (dirty_chunk_ids.Count == 0) return;
+
+        m_dirty_mesh_chunks.Clear();
+        foreach(var chunk in dirty_density_chunks.GetChunks())
+        {
+
+        }
 
         Profiler.BeginSample("Triangulate");
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)

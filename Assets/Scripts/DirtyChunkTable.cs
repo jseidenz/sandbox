@@ -68,6 +68,30 @@ public class DirtyChunkTable
         m_chunks[chunk_id] = region;
     }
 
+    public void AddRegion(int min_x, int min_z, int max_x, int max_z, int layer_idx)
+    {
+        if (layer_idx < 0 || layer_idx >= m_grid_dimensions_in_cells.y) return;
+
+        min_x = Math.Min(Math.Max(min_x, 0), m_grid_dimensions_in_cells.x - 1);
+        min_z = Math.Min(Math.Max(min_z, 0), m_grid_dimensions_in_cells.z - 1);
+        max_x = Math.Min(Math.Max(max_x, 0), m_grid_dimensions_in_cells.x - 1);
+        max_z = Math.Min(Math.Max(max_z, 0), m_grid_dimensions_in_cells.z - 1);
+
+        for(int z = min_z; z <= max_z; z += m_grid_dimensions_in_cells.z)
+        {
+            var chunk_z = z / m_chunk_dimensions_in_cells;
+            for(int x = min_x; x <= max_x; x += m_grid_dimensions_in_cells.x)
+            {
+                var chunk_x = x / m_chunk_dimensions_in_cells;
+
+                var chunk_id = new Vector3Int(chunk_x, layer_idx, chunk_z);
+                
+            }
+        }
+    }
+
+
+
     Vector3Int m_grid_dimensions_in_cells;
     int m_chunk_dimensions_in_cells;
 }
