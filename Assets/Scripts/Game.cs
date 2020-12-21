@@ -44,7 +44,8 @@ public class Game : MonoBehaviour
     GameObject m_player_avatar;
 
 
-    HashSet<Vector3Int> m_dirty_chunk_ids = new HashSet<Vector3Int>();
+    HashSet<Vector3Int> m_solid_density_dirty_chunk_ids = new HashSet<Vector3Int>();
+    HashSet<Vector3Int> m_liquid_mesh_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
     CommandBuffer m_outgoing_command_buffer = new CommandBuffer();
     string m_room_id;
@@ -270,19 +271,20 @@ public class Game : MonoBehaviour
             }
         }
 
-        m_dirty_chunk_ids.Clear();
+        m_solid_density_dirty_chunk_ids.Clear();
 
-        m_solid_simulation.Update(m_dirty_chunk_ids);
-        if (m_dirty_chunk_ids.Count > 0)
+        m_solid_simulation.Update(m_solid_density_dirty_chunk_ids);
+        if (m_solid_density_dirty_chunk_ids.Count > 0)
         {
-            m_solid_mesher.Triangulate(m_dirty_chunk_ids);
+            m_solid_mesher.Triangulate(m_solid_density_dirty_chunk_ids);
         }
 
-        m_dirty_chunk_ids.Clear();
-        m_liquid_simulation.Update(m_dirty_chunk_ids);
-        if (m_dirty_chunk_ids.Count > 0)
+        m_liquid_mesh_dirty_chunk_ids.Clear();
+
+        m_liquid_simulation.Update(m_solid_density_dirty_chunk_ids, m_liquid_mesh_dirty_chunk_ids);
+        if (m_liquid_mesh_dirty_chunk_ids.Count > 0)
         {
-            m_liquid_mesher.Triangulate(m_dirty_chunk_ids);
+            m_liquid_mesher.Triangulate(m_liquid_mesh_dirty_chunk_ids);
         }
 
         if(Input.GetKeyDown(KeyCode.F9))

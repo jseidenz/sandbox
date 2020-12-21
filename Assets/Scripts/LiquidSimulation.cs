@@ -356,7 +356,7 @@ public class LiquidSimulation
         }
     }
 
-    public void Update(HashSet<Vector3Int> dirty_chunk_ids)
+    public void Update(HashSet<Vector3Int> solid_density_dirty_chunk_ids, HashSet<Vector3Int> liquid_mesh_dirty_chunk_ids)
     {
         if (m_density_changes.Count > 0)
         {
@@ -401,33 +401,33 @@ public class LiquidSimulation
             if (m_simulation_enabled)
             {
                 UpdateSimulation(false);
+
+                for (int layer_idx = 0; layer_idx < m_layers.Length; ++layer_idx)
+                {
+                    var min_dirty_cell_coordinates = m_min_dirty_cell_per_layer[layer_idx];
+                    var max_dirty_cell_coordinates = m_max_dirty_cell_per_layer[layer_idx];
+
+                    int min_chunk_grid_z = (int)((min_dirty_cell_coordinates.z - 1) * m_one_over_chunk_dimensions_in_cells);
+                    int max_chunk_grid_z = (int)((max_dirty_cell_coordinates.z + 1) * m_one_over_chunk_dimensions_in_cells);
+
+                    int min_chunk_grid_x = (int)((min_dirty_cell_coordinates.x - 1) * m_one_over_chunk_dimensions_in_cells);
+                    int max_chunk_grid_x = (int)((max_dirty_cell_coordinates.x + 1) * m_one_over_chunk_dimensions_in_cells);
+
+                    max_chunk_grid_x = Math.Min(max_chunk_grid_x, m_dimensions_in_chunks.x - 1);
+                    max_chunk_grid_z = Math.Min(max_chunk_grid_z, m_dimensions_in_chunks.z - 1);
+
+                    for (int chunk_grid_z = min_chunk_grid_z; chunk_grid_z <= max_chunk_grid_z; ++chunk_grid_z)
+                    {
+                        for (int chunk_grid_x = min_chunk_grid_x; chunk_grid_x <= max_chunk_grid_x; ++chunk_grid_x)
+                        {
+                            liquid_mesh_dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
+                        }
+                    }
+                }
             }
             Profiler.EndSample();
             m_simulation_timer = 0;
             //m_simulation_timer -= SIMULATION_TICK_RATE;
-        }
-
-        for(int layer_idx = 0; layer_idx < m_layers.Length; ++layer_idx)
-        {
-            var min_dirty_cell_coordinates = m_min_dirty_cell_per_layer[layer_idx];
-            var max_dirty_cell_coordinates = m_max_dirty_cell_per_layer[layer_idx];
-
-            int min_chunk_grid_z = (int)((min_dirty_cell_coordinates.z - 1) * m_one_over_chunk_dimensions_in_cells);
-            int max_chunk_grid_z = (int)((max_dirty_cell_coordinates.z + 1) * m_one_over_chunk_dimensions_in_cells);
-
-            int min_chunk_grid_x = (int)((min_dirty_cell_coordinates.x - 1) * m_one_over_chunk_dimensions_in_cells);
-            int max_chunk_grid_x = (int)((max_dirty_cell_coordinates.x + 1) * m_one_over_chunk_dimensions_in_cells);
-
-            max_chunk_grid_x = Math.Min(max_chunk_grid_x, m_dimensions_in_chunks.x - 1);
-            max_chunk_grid_z = Math.Min(max_chunk_grid_z, m_dimensions_in_chunks.z - 1);
-
-            for (int chunk_grid_z = min_chunk_grid_z; chunk_grid_z <= max_chunk_grid_z; ++chunk_grid_z)
-            {
-                for (int chunk_grid_x = min_chunk_grid_x; chunk_grid_x <= max_chunk_grid_x; ++chunk_grid_x)
-                {
-                    dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
-                }
-            }
         }
 
         m_density_changes.Clear();
