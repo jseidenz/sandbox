@@ -355,14 +355,10 @@ public class LiquidSimulation
             var layer = m_layers[layer_idx];
             var delta_layer = m_delta_layers[layer_idx];
 
-            for (int z = m_min_dirty_cell_per_layer[layer_idx].z; z < m_max_dirty_cell_per_layer[layer_idx].z; ++z)
+            for(int cell_idx = 0; cell_idx < layer.Length; ++cell_idx)
             {
-                for (int x = m_min_dirty_cell_per_layer[layer_idx].x; x < m_max_dirty_cell_per_layer[layer_idx].x; ++x)
-                {
-                    var cell_idx = z * m_dimensions_in_cells.z + x;
-                    layer[cell_idx] = 0;
-                    delta_layer[cell_idx] = 0;
-                }
+                layer[cell_idx] = 0;
+                delta_layer[cell_idx] = 0;
             }
         }
     }

@@ -26,26 +26,35 @@ public class PauseScreen : MonoBehaviour
         {
             NetCode.Instance.LeaveRoom();
             MainMenu.Instance.TransitionScreens(gameObject, MainMenu.Instance.m_start_game_screen.gameObject);
+            ScreenFader.StartScreenFade(MainMenu.Instance.m_controls_screen.gameObject, false, 12f, 0f, () =>
+            {
+                MainMenu.Instance.m_controls_screen.gameObject.SetActive(false);
+            });
         });
 
         m_resume_button.onClick.AddListener(() =>
         {
-            StartScreenFade();
+            StartFadeOut();
         });
 
         m_save_button.onClick.AddListener(() =>
         {
             Game.Instance.Save();
-            StartScreenFade();
+            StartFadeOut();
         });
     }
 
-    void StartScreenFade()
+    void StartFadeOut()
     {
         m_is_fading = true;
         ScreenFader.StartScreenFade(gameObject, false, 12f, 0.0f, () =>
         {
             m_is_screen_faded = true;
+        });
+
+        ScreenFader.StartScreenFade(MainMenu.Instance.m_controls_screen.gameObject, false, 12f, 0f, () =>
+        {
+            MainMenu.Instance.m_controls_screen.gameObject.SetActive(false);
         });
     }
 
@@ -59,6 +68,13 @@ public class PauseScreen : MonoBehaviour
         Cursor.visible = true;
 
         StartCoroutine(EnableCursor());
+
+
+        MainMenu.Instance.m_controls_screen.gameObject.SetActive(true);
+        ScreenFader.StartScreenFade(MainMenu.Instance.m_controls_screen.gameObject, true, 12f, 0.25f, () =>
+        {
+
+        });
     }
 
     public void SetTransforms(Vector3 avatar_local_position, Quaternion avatar_local_rotation, Vector3 camera_local_position, Quaternion camera_local_rotation)
@@ -82,7 +98,7 @@ public class PauseScreen : MonoBehaviour
     {
         if(!m_is_fading && Input.GetKeyDown(KeyCode.Escape))
         {
-            StartScreenFade();
+            StartFadeOut();
         }
 
         if (m_is_screen_faded)
