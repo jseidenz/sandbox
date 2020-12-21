@@ -107,7 +107,7 @@ public class Mesher
         Profiler.EndSample();
     }
 
-    public void Triangulate(HashSet<Vector3Int> dirty_chunk_ids)
+    public void Triangulate(DirtyChunkTable dirty_density_chunks, HashSet<Vector3Int> dirty_chunk_ids)
     {
         if (dirty_chunk_ids.Count == 0) return;
 
