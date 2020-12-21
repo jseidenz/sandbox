@@ -188,7 +188,8 @@ public class Game : MonoBehaviour
 
             x += 4;
             {
-                sdf.Line(x + 0, y + 0, x + 1, y + 0, l, 0.94f);
+                sdf.Line(x + 0, y + 0, x + 1, y + 0, l, 0.96f);
+                sdf.Line(x + 0, y + 1, x + 1, y + 1, l, 0.96f);
             }
 
             m_solid_mesher.TriangulateAll();
