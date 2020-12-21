@@ -37,6 +37,11 @@ public struct DensityCell
     {
         return DensityCell.FromXZLayer(m_x, m_z, m_layer_idx + delta_layer);
     }
+
+    public Vector3 ToWorldPositionCenter(Vector3 cell_size_in_meters)
+    {
+        return new Vector3((float)m_x * cell_size_in_meters.x, (float)m_layer_idx * cell_size_in_meters.y, (float)m_z * cell_size_in_meters.z);
+    }
 }
 
 public class SolidSimulation

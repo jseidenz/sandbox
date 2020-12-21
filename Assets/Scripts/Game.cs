@@ -521,6 +521,11 @@ public class Game : MonoBehaviour
         MainMenu.Instance.gameObject.SetActive(false);
     }
 
+    public Vector3 GetCellSizeInMeters()
+    {
+        return m_voxel_size_in_meters;
+    }
+
     public static void DeleteCommandLineFile()
     {
         if (!File.Exists(COMMAND_LINE_FILE)) return;
