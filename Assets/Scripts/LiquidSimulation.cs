@@ -30,15 +30,6 @@ public class LiquidSimulation
         chunk_z = (chunk_id << 16) & 0x000000FF;
     }
 
-    struct ChunkRegion
-    {
-        public Vector3Int m_chunk_id;
-        public int m_min_x;
-        public int m_min_y;
-        public int m_max_x;
-        public int m_max_y;
-    }
-
     public LiquidSimulation(Vector3Int dimensions_in_cells, Vector3 cell_size_in_meters, int chunk_dimensions_in_cells, float[][] solid_layers, float solid_iso_level, float min_density_to_allow_flow, int water_plane_layer, LiquidTuning liquid_tuning)
     {        
         m_solid_iso_level = solid_iso_level;
@@ -370,6 +361,7 @@ public class LiquidSimulation
             for (int layer_idx = 0; layer_idx < m_dimensions_in_cells.y; ++layer_idx)
             {
                 var layer = m_layers[layer_idx];
+                var solid_layer = m_solid_layers[layer_idx];
                 foreach (var density_change in m_density_changes)
                 {
                     if (density_change.m_layer_idx != layer_idx) continue;
@@ -383,6 +375,8 @@ public class LiquidSimulation
                     if (z < 0 || z >= m_dimensions_in_cells.z) return;
 
                     var cell_idx = z * m_dimensions_in_cells.x + x;
+
+                    if (solid_layer[cell_idx] > m_solid_iso_level) continue;
 
                     var previous_density = layer[cell_idx];
                     var new_density = Mathf.Clamp01(previous_density + density_change.m_amount);

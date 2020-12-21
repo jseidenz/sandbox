@@ -8,11 +8,9 @@ public struct DensityCell
     public int m_layer_idx;
     public int m_z;
 
-    public DensityCell(int x, int z, int layer_idx)
+    public static DensityCell FromXZLayer(int x, int z, int layer_idx)
     {
-        m_x = x;
-        m_z = z;
-        m_layer_idx = layer_idx;
+        return new DensityCell { m_x = x, m_z = z, m_layer_idx = layer_idx };
     }
 
     public bool IsInBounds(Vector3Int dimensions_in_cells)
@@ -27,17 +25,17 @@ public struct DensityCell
 
     public DensityCell Dx(int delta_x)
     {
-        return new DensityCell(m_x + delta_x, m_layer_idx, m_z);
+        return DensityCell.FromXZLayer(m_x + delta_x, m_z, m_layer_idx);
     }
 
     public DensityCell Dz(int delta_z)
     {
-        return new DensityCell(m_x, m_z + delta_z, m_layer_idx);
+        return DensityCell.FromXZLayer(m_x, m_z + delta_z, m_layer_idx);
     }
 
     public DensityCell Dl(int delta_layer)
     {
-        return new DensityCell(m_x, m_z, m_layer_idx + delta_layer);
+        return DensityCell.FromXZLayer(m_x, m_z, m_layer_idx + delta_layer);
     }
 }
 
