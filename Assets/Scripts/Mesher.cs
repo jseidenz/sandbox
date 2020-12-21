@@ -14,7 +14,6 @@ public class Mesher
     VoxelLayer[] m_layers;
     byte[] m_empty_sample_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
-    HashSet<int> m_dirty_chunk_occlusion_indices = new HashSet<int>();
     LayeredBrush m_brush;
     bool m_cast_shadows;
     Material m_prepass_material;
@@ -110,9 +109,6 @@ public class Mesher
     public void Triangulate(DirtyChunkTable dirty_density_chunks, HashSet<Vector3Int> dirty_chunk_ids)
     {
         if (dirty_chunk_ids.Count == 0) return;
-
-        m_dirty_chunk_occlusion_indices.Clear();
-
 
         Profiler.BeginSample("Triangulate");
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
