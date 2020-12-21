@@ -46,18 +46,23 @@ public class DirtyChunkTable
 
     public void AddCell(int x, int layer_idx, int z)
     {
+        if (x < 0 || x >= m_grid_dimensions_in_cells.x) return;
+        if (layer_idx < 0 || layer_idx >= m_grid_dimensions_in_cells.y) return;
+        if (z < 0 || z >= m_grid_dimensions_in_cells.z) return;
+
         var chunk_x = x / m_chunk_dimensions_in_cells;
         var chunk_z = z / m_chunk_dimensions_in_cells;
         var chunk_id = new Vector3Int(chunk_x, layer_idx, chunk_z);
         if(!m_regions.TryGetValue(chunk_id, out var region))
         {
-            region = new ChunkRegion(x, z, x, z, layer_idx);
-            m_regions[chunk_id] = region;
+            region = new ChunkRegion(x, z, x, z, layer_idx);            
         }
         else
         {
             region.AddCell(x, z);
         }
+
+        m_regions[chunk_id] = region;
     }
 
     Vector3Int m_grid_dimensions_in_cells;
