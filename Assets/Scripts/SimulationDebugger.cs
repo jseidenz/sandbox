@@ -19,6 +19,8 @@ class SimulationDebugger : EditorWindow
 
     void OnGUI()
     {
+        if (!IsSimulationReady()) return;
+
         var solid_mesher = Game.Instance.GetSolidMesher();
         var liquid_mesher = Game.Instance.GetLiquidMesher();
         var liquid_simulation = Game.Instance.GetLiquidSimulation();
@@ -100,10 +102,14 @@ class SimulationDebugger : EditorWindow
         EditorGUILayout.EndHorizontal();
     }
 
+    bool IsSimulationReady()
+    {
+        return Game.Instance != null && Game.Instance.GetLiquidSimulation() != null;
+    }
+
     void Update()
     {
-        bool is_simulation_ready = Game.Instance != null && Game.Instance.GetLiquidSimulation() != null;
-        if (!is_simulation_ready) return;
+        if (!IsSimulationReady()) return;
 
         Repaint();
     }
