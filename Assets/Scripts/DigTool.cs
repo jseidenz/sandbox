@@ -53,41 +53,13 @@ public class DigTool : MonoBehaviour
             }
         }
 
-        if(Input.GetKeyDown(KeyCode.F1))
-        {
-            Game.Instance.GetLiquidMesher().TriangulateAll();
-        }
-
-        if (Input.GetKeyDown(KeyCode.F2))
-        {
-            Game.Instance.GetLiquidSimulation().StepOnce(false);
-        }
-
-        if (Input.GetKeyDown(KeyCode.F3))
-        {
-            Game.Instance.GetLiquidSimulation().StepOnce(true);
-        }
-
-        if (Input.GetKeyDown(KeyCode.F4))
-        {
-            var liquid_simulation = Game.Instance.GetLiquidSimulation();
-            liquid_simulation.SetSimulationEnabled(!liquid_simulation.IsSimulationEnabled());
-        }
-
-        if (Input.GetKeyDown(KeyCode.F5))
-        {
-            Game.Instance.GetSolidMesher().TriangulateAll();
-        }
-
         if(Input.GetKeyDown(KeyCode.Escape))
         {
-            /*
             if (Application.isEditor)
             {
 
             }
             else
-            */
             {
 
                 var camera = Game.Instance.GetCamera();
