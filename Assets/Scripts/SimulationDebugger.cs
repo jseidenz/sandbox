@@ -54,11 +54,11 @@ class SimulationDebugger : EditorWindow
             solid_simulation.TryGetDensityCellFromWorldPosition(hit_info.point, out m_raycast_cell);
         }
 
-        ShowCellFoldout("Raycast Cell", m_raycast_cell, ref m_is_rasycast_cell_expanded, false, solid_simulation, liquid_simulation);
-        ShowCellFoldout("Debug Cell(F2)", CellDebugger.s_debug_cell, ref m_is_debug_cell_expanded, true, solid_simulation, liquid_simulation);
+        ShowCellFoldout("Raycast Cell", m_raycast_cell, ref m_is_rasycast_cell_expanded, solid_simulation, liquid_simulation);
+        ShowCellFoldout("Debug Cell(F2)", CellDebugger.s_debug_cell, ref m_is_debug_cell_expanded, solid_simulation, liquid_simulation);
     }
 
-    void ShowCellFoldout(string cell_name, DensityCell cell, ref bool is_expanded, bool allow_editing, SolidSimulation solid_simulation, LiquidSimulation liquid_simulation)
+    void ShowCellFoldout(string cell_name, DensityCell cell, ref bool is_expanded, SolidSimulation solid_simulation, LiquidSimulation liquid_simulation)
     {
         if(is_expanded = EditorGUILayout.Foldout(is_expanded, cell_name))
         {
@@ -66,17 +66,38 @@ class SimulationDebugger : EditorWindow
 
             EditorGUILayout.LabelField($"x={cell.m_x}, z={cell.m_z}, l={cell.m_layer_idx}");
 
-            ShowCellLine("C", cell, false, solid_simulation, liquid_simulation);
+            ShowCellLine("C", cell, solid_simulation, liquid_simulation);
+            ShowCellLine("L", cell.Dx(-1), solid_simulation, liquid_simulation);
+            ShowCellLine("R", cell.Dx(+1), solid_simulation, liquid_simulation);
+            ShowCellLine("N", cell.Dz(-1), solid_simulation, liquid_simulation);
+            ShowCellLine("F", cell.Dz(+1), solid_simulation, liquid_simulation);
+            ShowCellLine("B", cell.Dl(-1), solid_simulation, liquid_simulation);
+            ShowCellLine("A", cell.Dl(+1), solid_simulation, liquid_simulation);
 
             EditorGUI.indentLevel -= 2;
         }
     }
 
-    void ShowCellLine(string cell_name, DensityCell cell, bool allow_editing, SolidSimulation solid_simulation, LiquidSimulation liquid_simulation)
+    void ShowCellLine(string cell_name, DensityCell cell, SolidSimulation solid_simulation, LiquidSimulation liquid_simulation)
     {
-        solid_simulation.TryGetDensity(cell, out var density);
-        string text = $"{cell_name}: sd={density}";
-        EditorGUILayout.LabelField(text);
+        bool is_valid = solid_simulation.TryGetDensity(cell, out var solid_density);
+        liquid_simulation.TryGetDensity(cell, out var liquid_density);
+        string text = $"{cell_name}: sd={solid_density}, ld={liquid_density}";
+
+        EditorGUILayout.BeginHorizontal();
+        if (is_valid)
+        {
+            EditorGUILayout.LabelField(text);
+            if (GUILayout.Button("->"))
+            {
+                CellDebugger.s_debug_cell = cell;
+            }
+        }
+        else
+        {
+            EditorGUILayout.LabelField($"{cell_name}: INVALID");
+        }
+        EditorGUILayout.EndHorizontal();
     }
 
     void Update()

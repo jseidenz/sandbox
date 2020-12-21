@@ -8,6 +8,13 @@ public struct DensityCell
     public int m_layer_idx;
     public int m_z;
 
+    public DensityCell(int x, int z, int layer_idx)
+    {
+        m_x = x;
+        m_z = z;
+        m_layer_idx = layer_idx;
+    }
+
     public bool IsInBounds(Vector3Int dimensions_in_cells)
     {
         return m_x >= 0 && m_x < dimensions_in_cells.x && m_z >= 0 && m_z < dimensions_in_cells.z && m_layer_idx >= 0 && m_layer_idx < dimensions_in_cells.y;
@@ -16,6 +23,21 @@ public struct DensityCell
     public int ToCellIdx(Vector3Int dimensions_in_cells)
     {
         return m_z * dimensions_in_cells.x + m_x;
+    }
+
+    public DensityCell Dx(int delta_x)
+    {
+        return new DensityCell(m_x + delta_x, m_layer_idx, m_z);
+    }
+
+    public DensityCell Dz(int delta_z)
+    {
+        return new DensityCell(m_x, m_z + delta_z, m_layer_idx);
+    }
+
+    public DensityCell Dl(int delta_layer)
+    {
+        return new DensityCell(m_x, m_z, m_layer_idx + delta_layer);
     }
 }
 

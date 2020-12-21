@@ -156,7 +156,7 @@ public class LiquidSimulation
                     var cell_idx = z * m_dimensions_in_cells.x + x;
 
 #if UNITY_EDITOR
-                    if(m_debug_cell_idx == cell_idx && m_debug_layer_idx == layer_idx)
+                    if(CellDebugger.s_debug_cell.m_x == x && CellDebugger.s_debug_cell.m_z == z && CellDebugger.s_debug_cell.m_layer_idx == layer_idx)
                     {
                         int bp = 0;
                         ++bp;
@@ -384,10 +384,6 @@ public class LiquidSimulation
 
                     var cell_idx = z * m_dimensions_in_cells.x + x;
 
-
-                    m_debug_cell_idx = cell_idx;
-                    m_debug_layer_idx = layer_idx;
-
                     var previous_density = layer[cell_idx];
                     var new_density = Mathf.Clamp01(previous_density + density_change.m_amount);
                     if (new_density != previous_density)
@@ -470,6 +466,21 @@ public class LiquidSimulation
 
     public float[][] GetLayers() { return m_layers; }
 
+    public bool TryGetDensity(DensityCell cell, out float density)
+    {
+        if (cell.IsInBounds(m_dimensions_in_cells))
+        {
+            var cell_idx = cell.ToCellIdx(m_dimensions_in_cells);
+            density = m_layers[cell.m_layer_idx][cell_idx];
+            return true;
+        }
+        else
+        {
+            density = default;
+            return false;
+        }
+    }
+
     float[][] m_layers;
     float[][] m_delta_layers;
     float[][] m_solid_layers;
@@ -485,8 +496,6 @@ public class LiquidSimulation
     List<DensityChange> m_density_changes = new List<DensityChange>();
     float m_simulation_timer;
     bool m_simulation_enabled;
-    int m_debug_cell_idx = -1;
-    int m_debug_layer_idx = -1;
     float m_min_density_to_allow_flow;
     int m_water_plane_layer;
     LiquidTuning m_liquid_tuning;
