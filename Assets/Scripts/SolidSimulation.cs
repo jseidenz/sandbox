@@ -134,6 +134,8 @@ public class SolidSimulation
                         {
                             layer[cell_idx] = new_density;
 
+                            dirty_density_chunks.AddCell(x, layer_idx, z);
+
                             for (int j = -2; j <= 2; ++j)
                             {
                                 for (int i = -2; i <= 2; ++i)
@@ -146,7 +148,6 @@ public class SolidSimulation
 
                                     dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
 
-                                    dirty_density_chunks.AddCell(x + i, layer_idx, z + j);
                                 }
                             }
                         }
