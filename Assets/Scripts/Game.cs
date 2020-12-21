@@ -321,6 +321,14 @@ public class Game : MonoBehaviour
     void LateUpdate()
     {
 #if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            CellDebugger.s_debug_cell = SimulationDebugger.m_raycast_cell;
+        }
+#endif
+
+
+#if UNITY_EDITOR
         Profiler.BeginSample("RefreshLookupTable");
         m_solid_brush.RefreshLookupTable();
         Profiler.EndSample();

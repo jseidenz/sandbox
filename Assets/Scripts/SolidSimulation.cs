@@ -7,6 +7,16 @@ public struct DensityCell
     public int m_x;
     public int m_layer_idx;
     public int m_z;
+
+    public bool IsInBounds(Vector3Int dimensions_in_cells)
+    {
+        return m_x >= 0 && m_x < dimensions_in_cells.x && m_z >= 0 && m_z < dimensions_in_cells.z && m_layer_idx >= 0 && m_layer_idx < dimensions_in_cells.y;
+    }
+
+    public int ToCellIdx(Vector3Int dimensions_in_cells)
+    {
+        return m_z * dimensions_in_cells.x + m_x;
+    }
 }
 
 public class SolidSimulation
@@ -202,6 +212,21 @@ public class SolidSimulation
 
         density_cell = new DensityCell { m_x = x, m_layer_idx = layer_idx, m_z = z };
         return true;
+    }
+
+    public bool TryGetDensity(DensityCell cell, out float density)
+    {
+        if(cell.IsInBounds(m_dimensions_in_cells))
+        {
+            var cell_idx = cell.ToCellIdx(m_dimensions_in_cells);
+            density = m_layers[cell.m_layer_idx][cell_idx];
+            return true;
+        }
+        else
+        {
+            density = default;
+            return false;
+        }
     }
 
     public Vector3Int GetDimensionsInCells() { return m_dimensions_in_cells; }

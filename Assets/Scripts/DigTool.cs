@@ -44,6 +44,7 @@ public class DigTool : MonoBehaviour
 
     void Update()
     {
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.T))
         {
             if(CameraRayCast(out var hit))
@@ -52,8 +53,9 @@ public class DigTool : MonoBehaviour
                 GetComponent<IL3DN.IL3DN_SimpleFPSController>().Teleport(hit.point + new Vector3(0, teleport_vertical_offset, 0));
             }
         }
+#endif
 
-        if(Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (Application.isEditor)
             {
