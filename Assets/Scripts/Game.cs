@@ -44,8 +44,6 @@ public class Game : MonoBehaviour
     GameObject m_player_avatar;
 
 
-    DirtyChunkTable m_solid_dirty_density_chunks;
-    DirtyChunkTable m_liquid_dirty_density_chunks;
     HashSet<Vector3Int> m_solid_density_dirty_chunk_ids = new HashSet<Vector3Int>();
     HashSet<Vector3Int> m_liquid_mesh_dirty_chunk_ids = new HashSet<Vector3Int>();
     GameObject m_ground_plane;
@@ -59,8 +57,6 @@ public class Game : MonoBehaviour
 
     void Awake()
     {
-        m_solid_dirty_density_chunks = new DirtyChunkTable(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_chunk_dimensions);
-        m_liquid_dirty_density_chunks = new DirtyChunkTable(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_chunk_dimensions);
         Application.targetFrameRate = -1;
         m_solid_simulation = new SolidSimulation(new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_voxel_size_in_meters, m_voxel_chunk_dimensions);
         var solid_layers = m_solid_simulation.GetLayers();
@@ -276,21 +272,19 @@ public class Game : MonoBehaviour
         }
 
         m_solid_density_dirty_chunk_ids.Clear();
-        m_solid_dirty_density_chunks.Clear();
 
-        m_solid_simulation.Update(m_solid_dirty_density_chunks, m_solid_density_dirty_chunk_ids);
+        m_solid_simulation.Update(m_solid_density_dirty_chunk_ids);
         if (m_solid_density_dirty_chunk_ids.Count > 0)
         {
-            m_solid_mesher.Triangulate(m_solid_dirty_density_chunks, m_solid_density_dirty_chunk_ids);
+            m_solid_mesher.Triangulate(m_solid_density_dirty_chunk_ids);
         }
 
         m_liquid_mesh_dirty_chunk_ids.Clear();
-        m_liquid_dirty_density_chunks.Clear();
 
         m_liquid_simulation.Update(m_solid_density_dirty_chunk_ids, m_liquid_mesh_dirty_chunk_ids);
         if (m_liquid_mesh_dirty_chunk_ids.Count > 0)
         {
-            m_liquid_mesher.Triangulate(m_liquid_dirty_density_chunks, m_liquid_mesh_dirty_chunk_ids);
+            m_liquid_mesher.Triangulate(m_liquid_mesh_dirty_chunk_ids);
         }
 
         if(Input.GetKeyDown(KeyCode.F9))

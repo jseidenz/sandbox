@@ -76,14 +76,13 @@ public class SolidSimulation
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
-    public void Update(DirtyChunkTable dirty_density_chunks, HashSet<Vector3Int> dirty_chunk_ids)
+    public void Update(HashSet<Vector3Int> dirty_chunk_ids)
     {
         if (m_density_changes.Count <= 0) return;
 
         for(int layer_idx = 0; layer_idx < m_dimensions_in_cells.y; ++layer_idx)
         {
             var layer = m_layers[layer_idx];
-
             foreach(var density_change in m_density_changes)
             {
                 if (density_change.m_layer_idx != layer_idx) continue;
@@ -134,8 +133,6 @@ public class SolidSimulation
                         {
                             layer[cell_idx] = new_density;
 
-                            dirty_density_chunks.AddCell(x, layer_idx, z);
-
                             for (int j = -2; j <= 2; ++j)
                             {
                                 for (int i = -2; i <= 2; ++i)
@@ -147,7 +144,6 @@ public class SolidSimulation
                                     var chunk_grid_z = (int)(offset_z * m_one_over_chunk_dimensions_in_cells);
 
                                     dirty_chunk_ids.Add(new Vector3Int(chunk_grid_x, layer_idx, chunk_grid_z));
-
                                 }
                             }
                         }
