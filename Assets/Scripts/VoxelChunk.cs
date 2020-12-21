@@ -83,7 +83,59 @@ public class VoxelChunk
             scratch_buffer.m_vertex_id_to_outgoing_edge_idx = new Dictionary<ushort, int>();
             scratch_buffer.m_edge_connections = new EdgeConnections[ushort.MaxValue];
             scratch_buffer.m_edge_face_infos = new EdgeFaceInfo[ushort.MaxValue];
-            scratch_buffer.m_boder_triangles = new List<ushort>();
+            scratch_buffer.m_border_triangles = new List<ushort>();
+
+            var occlusion_region_variation_count = (int)DirtyOcclusionRegion.TotalVariations;
+            var occlusion_region_chunk_offset_table = new Vector3[occlusion_region_variation_count][];
+            var occlusion_regions = new List<Vector3>();
+
+            for(int i = 0; i < occlusion_region_variation_count; ++i)
+            {
+                var occlusion_region_flags = (DirtyOcclusionRegion)i;
+
+                if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Center))
+                {
+                    occlusion_regions.Add(new Vector3Int(0, -1, 0));
+                }
+                if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Left))
+                {
+                    occlusion_regions.Add(new Vector3Int(-1, -1, 0));
+
+                    if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Near))
+                    {
+                        occlusion_regions.Add(new Vector3Int(-1, -1, -1));
+                    }
+                    if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Far))
+                    {
+                        occlusion_regions.Add(new Vector3Int(-1, -1, 1));
+                    }
+                }
+                if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Right))
+                {
+                    occlusion_regions.Add(new Vector3Int(1, -1, 0));
+
+                    if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Near))
+                    {
+                        occlusion_regions.Add(new Vector3Int(1, -1, -1));
+                    }
+                    if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Far))
+                    {
+                        occlusion_regions.Add(new Vector3Int(1, -1, 1));
+                    }
+                }
+                if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Near))
+                {
+                    occlusion_regions.Add(new Vector3Int(0, -1, -1));
+                }
+                if (occlusion_region_flags.HasFlag(DirtyOcclusionRegion.Far))
+                {
+                    occlusion_regions.Add(new Vector3Int(0, -1, 1));
+                }
+
+                occlusion_region_chunk_offset_table[i] = occlusion_regions.ToArray();
+                occlusion_regions.Clear();
+            }
+
             return scratch_buffer;
         }
 
@@ -92,7 +144,7 @@ public class VoxelChunk
             m_vertex_table.Clear();
             m_vertex_id_to_incoming_edge_idx.Clear();
             m_vertex_id_to_outgoing_edge_idx.Clear();
-            m_boder_triangles.Clear();
+            m_border_triangles.Clear();
         }
 
         public Vector3[] m_positions;
@@ -106,7 +158,7 @@ public class VoxelChunk
         public EdgeConnections[] m_edge_connections;
         public EdgeFaceInfo[] m_edge_face_infos;
         public DensitySample[] m_density_samples;
-        public List<ushort> m_boder_triangles;
+        public List<ushort> m_border_triangles;
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -168,7 +220,9 @@ public class VoxelChunk
         Left = 2,
         Right = 4,
         Near = 8,
-        Far = 16
+        Far = 16,
+
+        TotalVariations = 32
     }
 
     [System.Flags]
@@ -586,7 +640,7 @@ public class VoxelChunk
                 m_edges = scratch_buffer.m_edges,
                 m_vertex_table = scratch_buffer.m_vertex_table,
                 m_is_liquid = m_is_liquid,
-                m_border_triangles = scratch_buffer.m_boder_triangles
+                m_border_triangles = scratch_buffer.m_border_triangles
             };
 
 
@@ -830,7 +884,7 @@ public class VoxelChunk
             scratch_buffer.m_vertex_id_to_outgoing_edge_idx,
             scratch_buffer.m_edge_connections,
             scratch_buffer.m_edge_face_infos,
-            scratch_buffer.m_boder_triangles,
+            scratch_buffer.m_border_triangles,
             ref vert_count, 
             ref triangle_count, 
             ref edge_idx
