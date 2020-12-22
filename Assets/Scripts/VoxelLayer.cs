@@ -82,7 +82,6 @@ public class VoxelLayer
         {
             foreach (var chunk in m_visible_voxel_chunks)
             {
-                chunk.UpdateDensitySamples();
                 chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
             }
         }

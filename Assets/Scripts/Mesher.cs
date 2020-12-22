@@ -139,7 +139,8 @@ public class Mesher
         Profiler.BeginSample("TriangulateAll");
         for(int y = m_layers.Length - 1; y >= 0; --y)
         {
-            m_layers[y].March(m_voxel_chunk_scratch_buffer, false);
+            var layer = m_layers[y];
+            layer.March(m_voxel_chunk_scratch_buffer, false);
         }
         Profiler.EndSample();
     }
