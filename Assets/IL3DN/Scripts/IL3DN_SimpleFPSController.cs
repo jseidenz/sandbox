@@ -26,6 +26,7 @@ namespace IL3DN
         [SerializeField] private AudioClip m_LandSound = default;           // the sound played when character touches back on ground.
         [SerializeField] float m_max_fall_speed_when_floating;
         [SerializeField] float m_jump_window;
+        [SerializeField] float m_jump_pressed_window;
         [SerializeField] float m_float_delay;
 
         private Camera m_Camera;
@@ -45,6 +46,7 @@ namespace IL3DN
         private AudioClip landSoundOverride;
         private bool isInSpecialSurface;
         float m_jump_window_remaining;
+        float m_jump_pressed_window_remaining;
         float m_time_until_floating;
         Animator m_animator;
 
@@ -94,6 +96,15 @@ namespace IL3DN
                 RotateView();
             }
 
+            if(Input.GetButtonDown("Jump"))
+            {
+                m_jump_pressed_window_remaining = m_jump_pressed_window;
+            }
+            else
+            {
+                m_jump_pressed_window_remaining = Mathf.Max(0f, m_jump_pressed_window_remaining - Time.deltaTime);
+            }
+
             if(!m_CharacterController.isGrounded)
             {
                 m_jump_window_remaining = Mathf.Max(0, m_jump_window_remaining - Time.deltaTime);
@@ -103,10 +114,10 @@ namespace IL3DN
                 m_jump_window_remaining = m_jump_window;
             }
 
-            // the jump state needs to read here to make sure it is not missed
-            if (!m_Jump && m_jump_window_remaining > 0)
+            if(!m_Jump && m_jump_pressed_window_remaining > 0 && m_jump_window_remaining > 0)
             {
-                m_Jump = Input.GetButtonDown("Jump");
+                m_jump_pressed_window_remaining = 0;
+                m_Jump = true;
             }
 
             if (!m_PreviouslyGrounded && m_CharacterController.isGrounded)
