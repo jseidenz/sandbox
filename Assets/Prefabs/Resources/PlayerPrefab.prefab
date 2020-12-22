@@ -139,7 +139,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 45e00aaa75951424f948be918aa90d37, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1424,7 +1424,7 @@ Animator:
   m_GameObject: {fileID: 5372770372708608955}
   m_Enabled: 1
   m_Avatar: {fileID: 9000000, guid: 4c1b8d822e6f52e4c8e79812ece64519, type: 3}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 018968e1a8f66854fb60a24c250951ad, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1449,13 +1449,13 @@ MonoBehaviour:
   ShowParameterInspector: 1
   m_SynchronizeParameters:
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: grounded
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: running
   - Type: 4
-    SynchronizeType: 1
+    SynchronizeType: 0
     Name: flying
   m_SynchronizeLayers:
   - SynchronizeType: 0
