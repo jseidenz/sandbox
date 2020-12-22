@@ -1151,6 +1151,7 @@ GameObject:
   - component: {fileID: -5312913605051854493}
   - component: {fileID: 7173957413449708559}
   - component: {fileID: 4198342976179857155}
+  - component: {fileID: -2158596801835184481}
   m_Layer: 8
   m_Name: PlayerPrefab
   m_TagString: Untagged
@@ -1377,6 +1378,7 @@ MonoBehaviour:
   OwnershipTransfer: 0
   ObservedComponents:
   - {fileID: -5312913605051854493}
+  - {fileID: -2158596801835184481}
   viewIdField: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
@@ -1427,6 +1429,24 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &-2158596801835184481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5372770372708608955}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b8c4a61274f60b4ea5fb4299cfdbf14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowLayerWeightsInspector: 1
+  ShowParameterInspector: 1
+  m_SynchronizeParameters: []
+  m_SynchronizeLayers:
+  - SynchronizeType: 0
+    LayerIndex: 0
 --- !u!1 &5869527811617159813
 GameObject:
   m_ObjectHideFlags: 0

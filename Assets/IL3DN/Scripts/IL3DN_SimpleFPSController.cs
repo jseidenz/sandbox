@@ -42,7 +42,20 @@ namespace IL3DN
         {
             if(!GetComponent<Photon.Pun.PhotonView>().IsMine)
             {
+                SetLayerRecursively(transform, LayerMask.NameToLayer("Default"));
                 GameObject.Destroy(this);
+            }            
+        }
+
+        void SetLayerRecursively(Transform iter, int layer)
+        {
+            if (iter == null) return;
+
+            iter.gameObject.layer = layer;
+            var child_count = iter.childCount;
+            for(int i = 0; i < child_count; ++i)
+            {
+                SetLayerRecursively(iter.GetChild(i), layer);
             }
         }
 
