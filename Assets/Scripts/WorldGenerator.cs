@@ -11,8 +11,8 @@ public class WorldGenerator
         m_dimensions_in_cells = solid_simulation.GetDimensionsInCells();
 
         m_solid_mesher.SetCollisionGenerationEnabled(false);
-        m_solid_mesher.UpdateOcclusion();
-        m_liquid_mesher.UpdateOcclusion();
+        m_solid_mesher.UpdateDensitySamples();
+        m_liquid_mesher.UpdateDensitySamples();
 
         m_layer_idx = 0;
     }

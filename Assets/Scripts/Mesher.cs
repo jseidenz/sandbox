@@ -14,6 +14,7 @@ public class Mesher
     VoxelLayer[] m_layers;
     byte[] m_empty_sample_grid;
     VoxelChunk.ScratchBuffer m_voxel_chunk_scratch_buffer;
+    HashSet<Vector3Int> m_dirty_mesh_ids = new HashSet<Vector3Int>();
     LayeredBrush m_brush;
     bool m_cast_shadows;
     Material m_prepass_material;
@@ -106,26 +107,39 @@ public class Mesher
         Profiler.EndSample();
     }
 
-    public void Triangulate(HashSet<Vector3Int> dirty_chunk_ids)
+    public void Triangulate(HashSet<Vector3Int> modified_chunk_ids)
     {
-        if (dirty_chunk_ids.Count == 0) return;
+        m_dirty_mesh_ids.Clear();
+        foreach(var dirty_chunk_id in modified_chunk_ids)
+        {
+            m_dirty_mesh_ids.Add(dirty_chunk_id);
+        }
+
+        for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
+        {
+            var layer = m_layers[y];
+
+            layer.UpdateDensitySamples(m_voxel_chunk_scratch_buffer, modified_chunk_ids, m_dirty_mesh_ids);
+        }
+
 
         Profiler.BeginSample("Triangulate");
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
             var layer = m_layers[y];
 
-            layer.Triangulate(m_voxel_chunk_scratch_buffer, dirty_chunk_ids);            
+            layer.March(m_voxel_chunk_scratch_buffer, m_dirty_mesh_ids);            
         }
         Profiler.EndSample();
     }
 
     public void TriangulateAll()
     {
+        UpdateDensitySamples();
         Profiler.BeginSample("TriangulateAll");
         for(int y = m_layers.Length - 1; y >= 0; --y)
         {
-            m_layers[y].Triangulate(m_voxel_chunk_scratch_buffer, false);
+            m_layers[y].March(m_voxel_chunk_scratch_buffer, false);
         }
         Profiler.EndSample();
     }
@@ -148,15 +162,15 @@ public class Mesher
 
     public void TriangulateLayer(int layer_idx, bool only_visible_chunks)
     {
-        m_layers[layer_idx].Triangulate(m_voxel_chunk_scratch_buffer, only_visible_chunks);
+        m_layers[layer_idx].March(m_voxel_chunk_scratch_buffer, only_visible_chunks);
     }
 
-    public void UpdateOcclusion()
+    public void UpdateDensitySamples()
     {
         for(int layer_idx = m_grid_height_in_voxels - 1; layer_idx >= 0; layer_idx--)
         {
             var layer = m_layers[layer_idx];
-            layer.UpdateOcclusion(m_voxel_chunk_scratch_buffer);
+            layer.UpdateDensitySamples();
         }
     }
 

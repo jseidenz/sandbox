@@ -76,12 +76,13 @@ public class VoxelLayer
         }
     }
 
-    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, bool only_visible_chunks)
+    public void March(VoxelChunk.ScratchBuffer scratch_buffer, bool only_visible_chunks)
     {
         if(only_visible_chunks)
         {
             foreach (var chunk in m_visible_voxel_chunks)
             {
+                chunk.UpdateDensitySamples();
                 chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
             }
         }
@@ -94,17 +95,17 @@ public class VoxelLayer
         }
     }
 
-    public void UpdateOcclusion(VoxelChunk.ScratchBuffer scratch_buffer)
+    public void UpdateDensitySamples()
     {
         foreach(var chunk in m_voxel_chunks)
         {
-            chunk.UpdateOcclusion(scratch_buffer);
+            chunk.UpdateDensitySamples();
         }
     }
 
-    public void UpdateDensityGrid(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
+    public void UpdateDensitySamples(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> modified_chunk_ids, HashSet<Vector3Int> dirty_mesh_ids)
     {
-        foreach (var chunk_id in dirty_chunk_ids)
+        foreach (var chunk_id in modified_chunk_ids)
         {
             if (chunk_id.y != m_layer_idx) continue;
 
@@ -114,22 +115,21 @@ public class VoxelLayer
             var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
 
             var chunk = m_voxel_chunks[chunk_idx];
-            var dirty_occlusion_regions = chunk.UpdateDensityGrid();
+            var dirty_occlusion_regions = chunk.UpdateDensitySamples();
 
             if (m_layer_idx > 0)
             {
                 var dirty_occlusion_offsets = scratch_buffer.m_occlusion_region_chunk_offset_table[(int)dirty_occlusion_regions];
                 foreach (var dirty_occlusion_offset in dirty_occlusion_offsets)
                 {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + dirty_occlusion_offset);
+                    dirty_mesh_ids.Add(chunk_id + dirty_occlusion_offset);
                 }
             }
         }
     }
 
-    public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
+    public void March(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
     {
-        m_scratch_dirty_chunk_ids.Clear();
         foreach (var chunk_id in dirty_chunk_ids)
         {
             if (chunk_id.y != m_layer_idx) continue;
@@ -140,21 +140,7 @@ public class VoxelLayer
             var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
 
             var chunk = m_voxel_chunks[chunk_idx];
-            var dirty_occlusion_regions = chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
-
-            if(m_layer_idx > 0)
-            {
-                var dirty_occlusion_offsets = scratch_buffer.m_occlusion_region_chunk_offset_table[(int)dirty_occlusion_regions];
-                foreach( var dirty_occlusion_offset in dirty_occlusion_offsets)
-                {
-                    m_scratch_dirty_chunk_ids.Add(chunk_id + dirty_occlusion_offset);
-                }
-            }
-        }
-
-        foreach (var chunk_id in m_scratch_dirty_chunk_ids)
-        {
-            dirty_chunk_ids.Add(chunk_id);
+            chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
         }
     }
 
@@ -288,7 +274,6 @@ public class VoxelLayer
     float m_top_y;
     int m_layer_idx;
     HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
-    HashSet<Vector3Int> m_scratch_dirty_chunk_ids = new HashSet<Vector3Int>();
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors;
     BevelTuning m_bevel_tuning;
 }
