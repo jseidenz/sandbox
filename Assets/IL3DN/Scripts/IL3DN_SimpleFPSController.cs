@@ -8,6 +8,9 @@ namespace IL3DN
     ///A simplified version of the FPSController from standard assets 
     public class IL3DN_SimpleFPSController : MonoBehaviour
     {
+        static int GROUNDED_ID = Animator.StringToHash("grounded");
+        static int RUNNING_ID = Animator.StringToHash("running");
+
         [SerializeField] private bool m_IsWalking = false;
         [SerializeField] private float m_WalkSpeed = 2;
         [SerializeField] private float m_RunSpeed = 5;
@@ -37,6 +40,7 @@ namespace IL3DN
         private AudioClip jumpSoundOverride;
         private AudioClip landSoundOverride;
         private bool isInSpecialSurface;
+        Animator m_animator;
 
         void Awake()
         {
@@ -45,6 +49,10 @@ namespace IL3DN
                 SetLayerRecursively(transform, LayerMask.NameToLayer("Default"));
                 GameObject.Destroy(this);
             }            
+            else
+            {
+                m_animator = GetComponent<Animator>();
+            }
         }
 
         void SetLayerRecursively(Transform iter, int layer)
@@ -97,6 +105,8 @@ namespace IL3DN
             }
 
             m_PreviouslyGrounded = m_CharacterController.isGrounded;
+
+            m_animator.SetBool(GROUNDED_ID, m_CharacterController.isGrounded);
         }
 
         /// <summary>
@@ -135,6 +145,8 @@ namespace IL3DN
             m_MoveDir.x = desiredMove.x * speed;
             m_MoveDir.z = desiredMove.z * speed;
 
+
+            m_animator.SetBool(RUNNING_ID, m_Input.sqrMagnitude > 0.001f);
 
             if (m_CharacterController.isGrounded)
             {
