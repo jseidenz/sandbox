@@ -31,6 +31,8 @@ public class ListIslandsScreen : MonoBehaviour
         var rooms = NetCode.Instance.GetRooms();
         foreach (var room in rooms)
         {
+            if (room.PlayerCount <= 0) continue;
+
             var widget = GameObject.Instantiate(m_join_island_widget);
             widget.GetComponent<RectTransform>().SetParent(m_join_island_widget.transform.parent);
             widget.m_island_name.text = room.Name.Split('_')[0];
