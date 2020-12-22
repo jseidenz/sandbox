@@ -167,6 +167,7 @@ public class Mesher
 
     public void UpdateDensitySamples()
     {
+        m_dirty_mesh_ids.Clear();
         for(int layer_idx = m_grid_height_in_voxels - 1; layer_idx >= 0; layer_idx--)
         {
             var layer = m_layers[layer_idx];
