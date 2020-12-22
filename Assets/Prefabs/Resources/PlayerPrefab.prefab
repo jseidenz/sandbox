@@ -1229,6 +1229,7 @@ MonoBehaviour:
   m_JumpSound: {fileID: 8300000, guid: 183bfe3a3604edd4789cf735888a70bc, type: 3}
   m_LandSound: {fileID: 8300000, guid: f7c55af852ea4ec42beb950a6d63dcd1, type: 3}
   m_max_fall_speed_when_floating: -1
+  m_jump_window: 0.25
 --- !u!54 &5372770372713826523
 Rigidbody:
   m_ObjectHideFlags: 0
