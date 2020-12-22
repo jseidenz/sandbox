@@ -26,6 +26,7 @@ namespace IL3DN
         [SerializeField] private AudioClip m_LandSound = default;           // the sound played when character touches back on ground.
         [SerializeField] float m_max_fall_speed_when_floating;
         [SerializeField] float m_jump_window;
+        [SerializeField] float m_float_delay;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -44,6 +45,7 @@ namespace IL3DN
         private AudioClip landSoundOverride;
         private bool isInSpecialSurface;
         float m_jump_window_remaining;
+        float m_time_until_floating;
         Animator m_animator;
 
         void Awake()
@@ -118,6 +120,15 @@ namespace IL3DN
                 m_MoveDir.y = 0f;
             }
 
+            if(Input.GetKey(KeyCode.Space))
+            {
+                m_time_until_floating = Mathf.Max(0, m_time_until_floating - Time.deltaTime);
+            }
+            else
+            {
+                m_time_until_floating = m_float_delay;
+            }
+
             m_PreviouslyGrounded = m_CharacterController.isGrounded;
 
             m_animator.SetBool(GROUNDED_ID, m_CharacterController.isGrounded);
@@ -178,7 +189,7 @@ namespace IL3DN
             else
             {
                 m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
-                if (Input.GetKey(KeyCode.Space))
+                if (m_time_until_floating <= 0f)
                 {
                     m_MoveDir.y = Mathf.Max(m_MoveDir.y, m_max_fall_speed_when_floating);
                     is_flying = true;
