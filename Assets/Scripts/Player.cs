@@ -4,10 +4,27 @@ using System.Collections.Generic;
 public class Player
 {
     const string PLAYER_NAME_ID = "PlayerName";
+
+    static string[] m_names = new string[]
+    {
+        "Nibbles",
+        "Chippy",
+        "Breezer",
+        "Racer",
+        "Peanut",
+        "Echo",
+        "Roco"
+    };
+
     public static string GetPlayerName()
     {
-        var default_name = $"Visitor {UnityEngine.Random.Range(10, 99)}";
-        return PlayerPrefs.GetString(PLAYER_NAME_ID, default_name);
+        if(!PlayerPrefs.HasKey(PLAYER_NAME_ID))
+        {
+            SetPlayerName(m_names[UnityEngine.Random.Range(0, m_names.Length)]);
+        }
+
+        return PlayerPrefs.GetString(PLAYER_NAME_ID);
+        
     }
 
     public static void SetPlayerName(string player_name)
