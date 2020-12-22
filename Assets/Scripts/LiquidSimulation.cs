@@ -231,6 +231,11 @@ public class LiquidSimulation
             var min_dirty_cell_delta_per_layer = m_min_dirty_cell_delta_per_layer[layer_idx];
             var max_dirty_cell_delta_per_layer = m_max_dirty_cell_delta_per_layer[layer_idx];
 
+            min_dirty_cell_delta_per_layer = Vector3Int.Max(min_dirty_cell_delta_per_layer, new Vector3Int(1, 1, 1));
+            max_dirty_cell_delta_per_layer = Vector3Int.Max(max_dirty_cell_delta_per_layer, new Vector3Int(1, 1, 1));
+            min_dirty_cell_delta_per_layer = Vector3Int.Min(min_dirty_cell_delta_per_layer, new Vector3Int(m_dimensions_in_cells.x - 2, m_dimensions_in_cells.y - 2, m_dimensions_in_cells.z - 2));
+            max_dirty_cell_delta_per_layer = Vector3Int.Min(max_dirty_cell_delta_per_layer, new Vector3Int(m_dimensions_in_cells.x - 2, m_dimensions_in_cells.y - 2, m_dimensions_in_cells.z - 2));
+
             m_min_dirty_cell_per_layer[layer_idx] = min_dirty_cell_delta_per_layer;
             m_max_dirty_cell_per_layer[layer_idx] = max_dirty_cell_delta_per_layer;
             m_min_dirty_cell_delta_per_layer[layer_idx] = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
