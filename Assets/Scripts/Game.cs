@@ -42,6 +42,7 @@ public class Game : MonoBehaviour
     SolidLayeredBrush m_solid_brush;
     LiquidLayeredBrush m_liquid_brush;
     GameObject m_player_avatar;
+    List<DensityCell> m_dirty_solid_density_cells = new List<DensityCell>();
 
 
     HashSet<Vector3Int> m_solid_density_dirty_chunk_ids = new HashSet<Vector3Int>();
@@ -272,20 +273,25 @@ public class Game : MonoBehaviour
         }
 
         m_solid_density_dirty_chunk_ids.Clear();
+        m_dirty_solid_density_cells.Clear();
 
-        m_solid_simulation.Update(m_solid_density_dirty_chunk_ids);
+        m_solid_simulation.Update(m_dirty_solid_density_cells, m_solid_density_dirty_chunk_ids);
+        Profiler.BeginSample("MeshSolid");
         if (m_solid_density_dirty_chunk_ids.Count > 0)
         {
             m_solid_mesher.Triangulate(m_solid_density_dirty_chunk_ids);
         }
+        Profiler.EndSample();
 
         m_liquid_mesh_dirty_chunk_ids.Clear();
 
-        m_liquid_simulation.Update(m_solid_density_dirty_chunk_ids, m_liquid_mesh_dirty_chunk_ids);
+        m_liquid_simulation.Update(m_dirty_solid_density_cells, m_liquid_mesh_dirty_chunk_ids);
+        Profiler.BeginSample("MeshLiquid");
         if (m_liquid_mesh_dirty_chunk_ids.Count > 0)
         {
             m_liquid_mesher.Triangulate(m_liquid_mesh_dirty_chunk_ids);
         }
+        Profiler.EndSample();
 
         if(Input.GetKeyDown(KeyCode.F9))
         {

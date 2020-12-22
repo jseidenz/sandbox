@@ -356,7 +356,7 @@ public class LiquidSimulation
         }
     }
 
-    public void Update(HashSet<Vector3Int> solid_density_dirty_chunk_ids, HashSet<Vector3Int> liquid_mesh_dirty_chunk_ids)
+    public void Update(List<DensityCell> dirty_density_cells, HashSet<Vector3Int> liquid_mesh_dirty_chunk_ids)
     {
         if (m_density_changes.Count > 0)
         {
@@ -389,6 +389,33 @@ public class LiquidSimulation
                         var cell_coordinates = new Vector3Int(x, layer_idx, z);
                         m_min_dirty_cell_per_layer[layer_idx] = Vector3Int.Min(m_min_dirty_cell_per_layer[layer_idx], cell_coordinates);
                         m_max_dirty_cell_per_layer[layer_idx] = Vector3Int.Max(m_max_dirty_cell_per_layer[layer_idx], cell_coordinates);
+                    }
+                }
+            }
+        }
+
+        if (dirty_density_cells.Count > 0)
+        {
+            foreach (var dirty_solid_density_cell in dirty_density_cells)
+            {
+                var layer_idx = dirty_solid_density_cell.m_layer_idx;
+                var min_x = Math.Max(dirty_solid_density_cell.m_x - 1, 0);
+                var max_x = Math.Min(dirty_solid_density_cell.m_x + 1, m_dimensions_in_cells.x - 1);
+                var min_z = Math.Max(dirty_solid_density_cell.m_z - 1, 0);
+                var max_z = Math.Min(dirty_solid_density_cell.m_z + 1, m_dimensions_in_cells.z - 1);
+                var min_layer_idx = Math.Max(dirty_solid_density_cell.m_layer_idx - 1, 0);
+                var max_layer_idx = Math.Max(dirty_solid_density_cell.m_layer_idx + 1, m_dimensions_in_cells.y - 1);
+
+                for (int y = min_layer_idx; y <= max_layer_idx; ++y)
+                {
+                    for (int z = min_z; z <= max_z; ++z)
+                    {
+                        for (int x = min_x; x <= max_x; ++x)
+                        {
+                            var cell_coordinates = new Vector3Int(x, y, z);
+                            m_min_dirty_cell_per_layer[layer_idx] = Vector3Int.Min(m_min_dirty_cell_per_layer[layer_idx], cell_coordinates);
+                            m_max_dirty_cell_per_layer[layer_idx] = Vector3Int.Max(m_max_dirty_cell_per_layer[layer_idx], cell_coordinates);
+                        }
                     }
                 }
             }

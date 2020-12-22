@@ -76,7 +76,7 @@ public class SolidSimulation
         m_density_changes.Add(new DensityChange { m_position = world_pos, m_layer_idx = layer_idx, m_amount = amount });
     }
 
-    public void Update(HashSet<Vector3Int> dirty_chunk_ids)
+    public void Update(List<DensityCell> dirty_density_cells, HashSet<Vector3Int> dirty_chunk_ids)
     {
         if (m_density_changes.Count <= 0) return;
 
@@ -132,6 +132,8 @@ public class SolidSimulation
                         if (new_density != previous_density)
                         {
                             layer[cell_idx] = new_density;
+
+                            dirty_density_cells.Add(DensityCell.FromXZLayer(x, z, layer_idx));
 
                             for (int j = -2; j <= 2; ++j)
                             {
