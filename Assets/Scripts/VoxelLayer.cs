@@ -128,20 +128,42 @@ public class VoxelLayer
         }
     }
 
-    public void March(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
+    public void March(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_mesh_chunk_ids)
     {
-        foreach (var chunk_id in dirty_chunk_ids)
+        scratch_buffer.m_processed_chunks.Clear();
+
+        foreach (var chunk_id in dirty_mesh_chunk_ids)
         {
             if (chunk_id.y != m_layer_idx) continue;
 
-            if (chunk_id.x < 0 || chunk_id.x >= m_width_in_chunks) continue;
-            if (chunk_id.z < 0 || chunk_id.z >= m_height_in_chunks) continue;
+
+            if (chunk_id.x < 0 || chunk_id.x >= m_width_in_chunks) 
+            {
+                scratch_buffer.m_processed_chunks.Add(chunk_id);
+                continue; 
+            }
+            if (chunk_id.z < 0 || chunk_id.z >= m_height_in_chunks) 
+            {
+                scratch_buffer.m_processed_chunks.Add(chunk_id);
+                continue; 
+            }
 
             var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
 
             var chunk = m_voxel_chunks[chunk_idx];
+            if (!m_visible_voxel_chunks.Contains(chunk)) continue;
+
             chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
+
+            scratch_buffer.m_processed_chunks.Add(chunk_id);
         }
+
+        foreach(var processed_chunk_id in scratch_buffer.m_processed_chunks)
+        {
+            dirty_mesh_chunk_ids.Remove(processed_chunk_id);
+        }
+
+        scratch_buffer.m_processed_chunks.Clear();
     }
 
     public Bounds GetChunkBounds(int chunk_x, int chunk_y)

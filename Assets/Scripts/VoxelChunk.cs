@@ -84,6 +84,7 @@ public class VoxelChunk
             scratch_buffer.m_edge_connections = new EdgeConnections[ushort.MaxValue];
             scratch_buffer.m_edge_face_infos = new EdgeFaceInfo[ushort.MaxValue];
             scratch_buffer.m_border_triangles = new List<ushort>();
+            scratch_buffer.m_processed_chunks = new HashSet<Vector3Int>();
 
             var occlusion_region_variation_count = (int)DirtyOcclusionRegion.TotalVariations;
             var occlusion_region_chunk_offset_table = new Vector3Int[occlusion_region_variation_count][];
@@ -157,6 +158,7 @@ public class VoxelChunk
         public Vector3[] m_accumulated_normals;
         public Dictionary<ushort, int> m_vertex_id_to_incoming_edge_idx;
         public Dictionary<ushort, int> m_vertex_id_to_outgoing_edge_idx;
+        public HashSet<Vector3Int> m_processed_chunks;
         public EdgeConnections[] m_edge_connections;
         public EdgeFaceInfo[] m_edge_face_infos;
         public DensitySample[] m_density_samples;
