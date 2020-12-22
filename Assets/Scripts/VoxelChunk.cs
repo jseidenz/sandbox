@@ -488,6 +488,65 @@ public class VoxelChunk
         }
     }
 
+    public DirtyOcclusionRegion UpdateDensityGrid()
+    {
+        var dirty_occlusion_regions = DirtyOcclusionRegion.None;
+
+        var max_y = System.Math.Min(m_density_grid_y + m_chunk_dimension_in_voxels + 1, m_layer_height_in_voxels - 1);
+        var start_y = System.Math.Max(m_density_grid_y - 1, 0);
+        for (int y = start_y; y < max_y; ++y)
+        {
+            var vertical_occlusion_region = DirtyOcclusionRegion.Center;
+            if (y == start_y)
+            {
+                vertical_occlusion_region = DirtyOcclusionRegion.Near;
+            }
+            else if (y == max_y - 1)
+            {
+                vertical_occlusion_region = DirtyOcclusionRegion.Far;
+            }
+
+            var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
+            var start_x = System.Math.Max(m_density_grid_x - 1, 0);
+            for (int x = start_x; x < max_x; ++x)
+            {
+                int left_near_cell_idx = y * m_layer_width_in_voxels + x;
+
+                var left_near_density = m_layer_density_grid[left_near_cell_idx];
+                var right_near_density = m_layer_density_grid[left_near_cell_idx + 1];
+                var left_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels];
+                var right_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels + 1];
+
+                int sample_type = 0;
+                if (left_near_density >= m_iso_level) sample_type |= 1;
+                if (right_near_density >= m_iso_level) sample_type |= 2;
+                if (right_far_density >= m_iso_level) sample_type |= 4;
+                if (left_far_density >= m_iso_level) sample_type |= 8;
+
+                bool is_occluding = sample_type == SAMPLE_TYPE_FULL_SQUARE;
+                var was_occluding = m_layer_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
+                if (was_occluding != is_occluding)
+                {
+                    var horizontal_occlusion_region = DirtyOcclusionRegion.Center;
+                    if (x == start_x)
+                    {
+                        horizontal_occlusion_region = DirtyOcclusionRegion.Left;
+                    }
+                    else if (x == max_x - 1)
+                    {
+                        horizontal_occlusion_region = DirtyOcclusionRegion.Right;
+                    }
+
+                    dirty_occlusion_regions = dirty_occlusion_regions | horizontal_occlusion_region | vertical_occlusion_region;
+                }
+
+                m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
+            }
+        }
+
+        return dirty_occlusion_regions;
+    }
+
     void GatherDensitySamples(DensitySample[] density_samples, out int sample_count, out DirtyOcclusionRegion dirty_occlusion_regions)
     {
         sample_count = 0;

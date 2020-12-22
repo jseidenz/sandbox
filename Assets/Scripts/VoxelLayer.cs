@@ -102,6 +102,31 @@ public class VoxelLayer
         }
     }
 
+    public void UpdateDensityGrid(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
+    {
+        foreach (var chunk_id in dirty_chunk_ids)
+        {
+            if (chunk_id.y != m_layer_idx) continue;
+
+            if (chunk_id.x < 0 || chunk_id.x >= m_width_in_chunks) continue;
+            if (chunk_id.z < 0 || chunk_id.z >= m_height_in_chunks) continue;
+
+            var chunk_idx = chunk_id.z * m_width_in_chunks + chunk_id.x;
+
+            var chunk = m_voxel_chunks[chunk_idx];
+            var dirty_occlusion_regions = chunk.UpdateDensityGrid();
+
+            if (m_layer_idx > 0)
+            {
+                var dirty_occlusion_offsets = scratch_buffer.m_occlusion_region_chunk_offset_table[(int)dirty_occlusion_regions];
+                foreach (var dirty_occlusion_offset in dirty_occlusion_offsets)
+                {
+                    m_scratch_dirty_chunk_ids.Add(chunk_id + dirty_occlusion_offset);
+                }
+            }
+        }
+    }
+
     public void Triangulate(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_chunk_ids)
     {
         m_scratch_dirty_chunk_ids.Clear();
