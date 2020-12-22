@@ -495,6 +495,9 @@ public class VoxelChunk
 
         var max_y = System.Math.Min(m_density_grid_y + m_chunk_dimension_in_voxels + 1, m_layer_height_in_voxels - 1);
         var start_y = System.Math.Max(m_density_grid_y - 1, 0);
+        var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
+        var start_x = System.Math.Max(m_density_grid_x - 1, 0);
+
         for (int y = start_y; y < max_y; ++y)
         {
             var vertical_occlusion_region = DirtyOcclusionRegion.Center;
@@ -507,8 +510,6 @@ public class VoxelChunk
                 vertical_occlusion_region = DirtyOcclusionRegion.Far;
             }
 
-            var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
-            var start_x = System.Math.Max(m_density_grid_x - 1, 0);
             for (int x = start_x; x < max_x; ++x)
             {
                 int left_near_cell_idx = y * m_layer_width_in_voxels + x;

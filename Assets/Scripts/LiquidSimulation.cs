@@ -175,22 +175,12 @@ public class LiquidSimulation
                     {
                         continue;
                     }
-                    else
-                    {
-
-                    }
 
                     FlowAndTryToFinish(ref flow_liquid, min_density_to_allow_flow, cell_idx, cell_idx, delta_layer, lower_layer, lower_delta_layer, lower_solid_layer, x, layer_idx, z, x, z, true, is_target_layer_water_plane, ref min_dirty_idx, ref max_dirty_idx, ref min_lower_dirty_idx, ref max_lower_dirty_idx, ALIGNED_FLOW_MULTIPLIRE);
-
-                    flow_liquid = flow_liquid - min_density_to_allow_flow;
 
                     if(flow_liquid <= 0)
                     {
                         continue;
-                    }
-                    else
-                    {
-
                     }
 
                     if (FlowAndTryToFinish(ref flow_liquid, min_density_to_allow_flow, cell_idx, cell_idx - 1, delta_layer, layer, delta_layer, solid_layer, x, layer_idx, z, x - 1, z, false, false, ref min_dirty_idx, ref max_dirty_idx, ref min_dirty_idx, ref max_dirty_idx, ALIGNED_FLOW_MULTIPLIRE))
@@ -264,7 +254,7 @@ public class LiquidSimulation
         bool is_target_solid = target_solid_layer[target_cell_idx] > m_solid_iso_level;
         if (!is_target_solid)
         {
-            var target_liquid = Mathf.Max(target_layer[target_cell_idx] - min_density_to_allow_flow, 0);
+            var target_liquid =target_layer[target_cell_idx];
             var flow = (remaining_liquid - target_liquid) * flow_multiplier;
             flow = flow * 0.5f;
             if(is_bottom_cell)
@@ -272,10 +262,9 @@ public class LiquidSimulation
                 flow = Mathf.Min(1f - target_liquid,  remaining_liquid);
             }
 
-            flow = Mathf.Max(flow, 0);
             flow = Mathf.Min(remaining_liquid, Mathf.Min(MAX_FLOW, flow));
 
-            if (flow != 0)
+            if (flow > 0)
             {
                 remaining_liquid -= flow;
                 delta_layer[cell_idx] -= flow;
@@ -291,7 +280,6 @@ public class LiquidSimulation
                     target_min_dirty_idx = Vector3Int.Min(target_min_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
                     target_max_dirty_idx = Vector3Int.Max(target_max_dirty_idx, new Vector3Int(target_x, layer_idx, target_z));
                 }
-
 
                 if (remaining_liquid <= 0)
                 {
