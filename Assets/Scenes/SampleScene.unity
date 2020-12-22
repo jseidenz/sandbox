@@ -12542,7 +12542,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_name_widget_prefab: {fileID: 491905103}
-  m_name_height: 1.55
+  m_name_height: 0.9
 --- !u!1 &1677892885
 GameObject:
   m_ObjectHideFlags: 0
