@@ -10,6 +10,7 @@ namespace IL3DN
     {
         static int GROUNDED_ID = Animator.StringToHash("grounded");
         static int RUNNING_ID = Animator.StringToHash("running");
+        static int FLYING_ID = Animator.StringToHash("flying");
 
         [SerializeField] private bool m_IsWalking = false;
         [SerializeField] private float m_WalkSpeed = 2;
@@ -149,6 +150,7 @@ namespace IL3DN
 
             m_animator.SetBool(RUNNING_ID, m_Input.sqrMagnitude > 0.001f);
 
+            bool is_flying = false;
             if (m_CharacterController.isGrounded)
             {
                 m_MoveDir.y = -m_StickToGroundForce;
@@ -167,8 +169,12 @@ namespace IL3DN
                 if (Input.GetKey(KeyCode.Space))
                 {
                     m_MoveDir.y = Mathf.Max(m_MoveDir.y, m_max_fall_speed_when_floating);
+                    is_flying = true;
                 }
             }
+
+            m_animator.SetBool(FLYING_ID, is_flying);
+
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
 
             ProgressStepCycle(speed);
