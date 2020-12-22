@@ -23,6 +23,7 @@ namespace IL3DN
         [SerializeField] private AudioClip[] m_FootstepSounds = default;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound = default;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound = default;           // the sound played when character touches back on ground.
+        [SerializeField] float m_max_fall_speed_when_floating;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -163,6 +164,10 @@ namespace IL3DN
             else
             {
                 m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
+                if (Input.GetKey(KeyCode.Space))
+                {
+                    m_MoveDir.y = Mathf.Max(m_MoveDir.y, m_max_fall_speed_when_floating);
+                }
             }
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir * Time.fixedDeltaTime);
 
