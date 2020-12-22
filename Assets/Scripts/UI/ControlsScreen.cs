@@ -15,6 +15,7 @@ public class ControlsScreen : MonoBehaviour
             "<b>Controls:</b>\n" +
             "WASD - Move\n" +
             "Space - Jump\n" +
+            "Space(Hold) - Fly\n" +
             "Shift - Run\n" +
             "Q - Flood\n" +
             "Left Click - Dig\n" +
