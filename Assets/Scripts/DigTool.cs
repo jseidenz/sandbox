@@ -77,7 +77,14 @@ public class DigTool : MonoBehaviour
         UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
         if(Input.GetKey(KeyCode.E))
         {
-            Game.Instance.GetLiquidSimulation().AddDensity(transform.position, m_liquid_fill_rate * Time.deltaTime);
+            var command = new AddLiquidDensityCommand
+            {
+                m_position = transform.position,
+                m_amount = m_liquid_fill_rate * Time.deltaTime
+            };
+
+            Game.Instance.SendCommand(command);
+            command.Run();
         }
 
 
