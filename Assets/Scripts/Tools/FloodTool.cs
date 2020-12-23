@@ -1,28 +1,18 @@
 ﻿using UnityEngine;
-public struct AddSolidDensityCommand : ICommand
-{
-    public void Run()
-    {
-        Game.Instance.GetSolidSimulation().AddDensity(m_position, m_amount);
-    }
 
-    public float m_amount;
-    public Vector3 m_position;
-}
-
-public class DigTool : Tool
+public class FloodTool : Tool
 {
-    public DigTool(KeyCode key_code, float dig_rate)
+    public FloodTool(KeyCode key_code, float flood_rate)
     :   base(key_code)
     {
-        m_dig_rate = dig_rate;
+        m_flood_rate = flood_rate;
     }
 
     public override bool TryStartUsing()
     {
         if (CameraRayCast(out var hit))
         {
-            var bias = hit.normal.y * 0.05f;
+            var bias = 1f * hit.normal.y;
             m_locked_fill_height = hit.point.y + bias;
 
             return true;
@@ -43,10 +33,10 @@ public class DigTool : Tool
             var hit_point = ray.GetPoint(distance);
             hit_point.y = m_locked_fill_height;
 
-            var command = new AddSolidDensityCommand
+            var command = new AddLiquidDensityCommand
             {
                 m_position = hit_point,
-                m_amount = m_dig_rate * Time.deltaTime
+                m_amount = m_flood_rate * Time.deltaTime
             };
 
             Game.Instance.SendCommand(command);
@@ -54,6 +44,6 @@ public class DigTool : Tool
         }
     }
 
-    float m_dig_rate;
+    float m_flood_rate;
     float m_locked_fill_height;
 }

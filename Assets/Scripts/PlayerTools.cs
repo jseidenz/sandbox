@@ -38,17 +38,6 @@ public abstract class Tool
     KeyCode m_key_code;
 }
 
-public struct AddSolidDensityCommand : ICommand
-{
-    public void Run()
-    {
-        Game.Instance.GetSolidSimulation().AddDensity(m_position, m_amount);
-    }
-
-    public float m_amount;
-    public Vector3 m_position;
-}
-
 public struct AddLiquidDensityCommand : ICommand
 {
     public void Run()
@@ -116,6 +105,7 @@ public class PlayerTools : MonoBehaviour
             new DigTool(KeyCode.Mouse0, -m_dig_rate),
             new DigTool(KeyCode.Mouse1, m_fill_rate),
             new SprayTool(KeyCode.E, m_liquid_fill_rate),
+            new FloodTool(KeyCode.Q, m_liquid_fill_rate)
         };
 
         var camera = Camera.main;
@@ -192,43 +182,6 @@ public class PlayerTools : MonoBehaviour
                 MainMenu.Instance.gameObject.SetActive(true);
                 MainMenu.Instance.GetComponent<CanvasGroup>().alpha = 1f;
                 MainMenu.Instance.TransitionScreens(null, MainMenu.Instance.m_pause_screen.gameObject);
-            }
-        }
-
-        UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
-    }
-
-    void UpdateLiquidControl(KeyCode key_code, float amount)
-    {
-        if (Input.GetKey(key_code))
-        {
-            if (Input.GetKeyDown(key_code))
-            {
-                if (CameraRayCast(out var hit))
-                {
-                    var bias = 1f * hit.normal.y;
-                    m_locked_fill_height = hit.point.y + bias;
-                }
-            }
-
-            var plane = new Plane(Vector3.up, new Vector3(0, m_locked_fill_height, 0));
-
-            var ray = GetCameraRay();
-            if (plane.Raycast(ray, out var distance))
-            {
-                var hit_point = ray.GetPoint(distance);
-                hit_point.y = m_locked_fill_height;
-
-                Game.Instance.GetLiquidSimulation().AddDensity(hit_point, amount * Time.deltaTime);
-
-                var command = new AddLiquidDensityCommand
-                {
-                    m_position = hit_point,
-                    m_amount = amount * Time.deltaTime
-                };
-
-                Game.Instance.SendCommand(command);
-                command.Run();
             }
         }
     }
