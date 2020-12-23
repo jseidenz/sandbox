@@ -12,8 +12,7 @@ public class FloodTool : Tool
     {
         if (CameraRayCast(out var hit))
         {
-            var bias = 1f * hit.normal.y;
-            m_locked_fill_height = hit.point.y + bias;
+            m_locked_visual_height = m_cursor.transform.position.y;
 
             return true;
         }
@@ -25,17 +24,19 @@ public class FloodTool : Tool
 
     public override void LateUpdate(float dt)
     {
-        var plane = new Plane(Vector3.up, new Vector3(0, m_locked_fill_height, 0));
+        var plane = new Plane(Vector3.up, new Vector3(0, m_locked_visual_height, 0));
 
         var ray = GetCameraRay();
         if (plane.Raycast(ray, out var distance))
         {
             var hit_point = ray.GetPoint(distance);
-            hit_point.y = m_locked_fill_height;
+
+            m_cursor.m_target_cursor_position = new Vector3(hit_point.x, m_locked_visual_height, hit_point.z);
 
             var cell_size_in_meters = Game.Instance.GetCellSizeInMeters();
             hit_point.x += 0.5f * cell_size_in_meters.x;
             hit_point.z += 0.5f * cell_size_in_meters.z;
+            hit_point.y += 1.99f * cell_size_in_meters.y;
 
             var command = new AddLiquidDensityCommand
             {
@@ -49,5 +50,5 @@ public class FloodTool : Tool
     }
 
     float m_flood_rate;
-    float m_locked_fill_height;
+    float m_locked_visual_height;
 }

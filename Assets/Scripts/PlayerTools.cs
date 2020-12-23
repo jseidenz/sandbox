@@ -118,7 +118,10 @@ public class PlayerTools : MonoBehaviour
     void OnDisable()
     {
         SetActiveTool(null);
-        GameObject.Destroy(m_cursor.gameObject);
+        if (m_cursor != null)
+        {
+            GameObject.Destroy(m_cursor.gameObject);
+        }
     }
 
     void Update()
