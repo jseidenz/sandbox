@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Photon.Pun;
 public abstract class Tool
 {
     public Tool(KeyCode key_code)
@@ -23,11 +24,22 @@ public abstract class Tool
     public GameObject gameObject { get => transform.gameObject; }
 
     public float m_raycast_distance { get; set; }
+    public PlayerCursor m_cursor { get; set; }
+    public CursorTuning m_cursor_tuning { get; set; }
 
     protected bool CameraRayCast(out RaycastHit hit)
     {
-        var ray = GetCameraRay();
-        return Physics.Raycast(ray, out hit, m_raycast_distance);
+        var ray = GetCameraRay();        
+        bool did_hit = Physics.Raycast(ray, out hit, m_raycast_distance);
+
+        var cell_size_in_meters = Game.Instance.GetCellSizeInMeters();
+
+        var point = hit.point;
+        point.x = (int)(point.x / Game.Instance.GetCellSizeInMeters().x) * cell_size_in_meters.x;
+        point.z = (int)(point.z / Game.Instance.GetCellSizeInMeters().z) * cell_size_in_meters.z;
+        hit.point = point;
+
+        return did_hit;
     }
 
     protected Ray GetCameraRay()
@@ -54,20 +66,12 @@ public class PlayerTools : MonoBehaviour
     [SerializeField] float m_fill_rate;
     [SerializeField] float m_dig_rate;
     [SerializeField] float m_raycast_distance;
-
     [SerializeField] float m_liquid_fill_rate;
-    [SerializeField] Material m_dig_cursor_material;
-    [SerializeField] CursorTuning m_cursor_tuning;
-
-    float m_locked_fill_height;
-
-
-    TorusMesh m_cursor_mesh;
-
 
     Tool m_default_tool;
     Tool m_active_tool;
     Tool[] m_tools;
+    PlayerCursor m_cursor;
 
 
     void Awake()
@@ -94,8 +98,6 @@ public class PlayerTools : MonoBehaviour
 
     void OnEnable()
     {
-        m_cursor_mesh = new TorusMesh(1, 0.3f, 30);
-
         m_default_tool = new DefaultTool();
         SetActiveTool(m_default_tool);
         
@@ -108,24 +110,22 @@ public class PlayerTools : MonoBehaviour
             new FloodTool(KeyCode.Q, m_liquid_fill_rate)
         };
 
+        m_cursor = PhotonNetwork.Instantiate("PlayerCursorPrefab", transform.position, Quaternion.identity).GetComponent<PlayerCursor>();
+
         var camera = Camera.main;
         foreach (var tool in m_tools)
         {
             tool.transform = transform;
             tool.camera = camera;
             tool.m_raycast_distance = m_raycast_distance;
+            tool.m_cursor = m_cursor;
+            tool.m_cursor_tuning = m_cursor.m_cursor_tuning;
         }
-
-        
-
     }
 
     void OnDisable()
     {
         SetActiveTool(null);
-
-        m_cursor_mesh.Destroy();
-        m_cursor_mesh = null;
     }
 
     void Update()

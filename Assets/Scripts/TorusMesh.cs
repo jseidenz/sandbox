@@ -34,7 +34,16 @@ public class TorusMesh
 
 	public void SetRadius(float new_radius)
     {
-		m_radius = new_radius;
+		if(new_radius != m_radius)
+        {
+			m_radius = new_radius;
+			RebuildMesh();
+		}		
+    }
+
+	public float GetRadius()
+    {
+		return m_radius;
     }
 
 	public void RebuildMesh()
@@ -113,4 +122,9 @@ public class TorusMesh
 		mesh.SetUVs(0, m_uvs);
 		mesh.SetIndices(m_indices, MeshTopology.Triangles, 0);
 	}
+
+	public Mesh GetMesh()
+    {
+		return m_mesh;
+    }
 }
