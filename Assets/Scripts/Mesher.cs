@@ -124,7 +124,7 @@ public class Mesher
 
 
         Profiler.BeginSample("Triangulate");
-        int max_meshers_per_tick = 50;
+        int max_meshers_per_tick = 150;
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
             var layer = m_layers[y];
