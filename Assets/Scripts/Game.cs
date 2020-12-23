@@ -199,6 +199,11 @@ public class Game : MonoBehaviour
         }
     }
 
+    public float GetWaterHeight()
+    {
+        return m_water_height;
+    }
+
     public void DestroyAvatar()
     {
         var camera_pos = m_camera.transform.position;

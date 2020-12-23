@@ -17,6 +17,7 @@ namespace IL3DN
         [SerializeField] private float m_RunSpeed = 5;
         [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten = 0.7f;
         [SerializeField] private float m_JumpSpeed = 5;
+        [SerializeField] private float m_UnderwaterJumpSpeed = 1;
         [SerializeField] private float m_StickToGroundForce = 10;
         [SerializeField] private float m_GravityMultiplier = 2;
         [SerializeField] private IL3DN_SimpleMouseLook m_MouseLook = default;
@@ -28,6 +29,10 @@ namespace IL3DN
         [SerializeField] float m_jump_window;
         [SerializeField] float m_jump_pressed_window;
         [SerializeField] float m_float_delay;
+        [SerializeField] float m_underwater_check_offset;
+        [SerializeField] float m_underwater_max_speed;
+        [SerializeField] float m_underwater_speed_lerp;
+        [SerializeField] float m_underwater_gravity_multiplier;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -47,7 +52,8 @@ namespace IL3DN
         private bool isInSpecialSurface;
         float m_jump_window_remaining;
         float m_jump_pressed_window_remaining;
-        float m_time_until_floating;
+        float m_time_until_floating;        
+        bool m_is_underwater;
         Animator m_animator;
 
         void Awake()
@@ -114,7 +120,9 @@ namespace IL3DN
                 m_jump_window_remaining = m_jump_window;
             }
 
-            if(!m_Jump && m_jump_pressed_window_remaining > 0 && m_jump_window_remaining > 0 && !m_Jumping)
+            bool can_jump = !m_Jump && m_jump_pressed_window_remaining > 0 ;
+            can_jump = can_jump && (m_is_underwater || (m_jump_window_remaining > 0 && !m_Jumping));
+            if (can_jump)
             {
                 m_jump_window_remaining = 0;
                 m_jump_pressed_window_remaining = 0;
@@ -168,6 +176,8 @@ namespace IL3DN
         /// </summary>
         private void FixedUpdate()
         {
+            m_is_underwater = transform.position.y + m_underwater_check_offset <= Game.Instance.GetWaterHeight();
+
             float speed;
             GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
@@ -180,26 +190,56 @@ namespace IL3DN
             m_animator.SetBool(RUNNING_ID, m_Input.sqrMagnitude > 0.001f);
 
             bool is_flying = false;
+
             if (m_CharacterController.isGrounded)
             {
                 m_MoveDir.y = -m_StickToGroundForce;
+            }
 
+            if(m_CharacterController.isGrounded || m_is_underwater)
+            {
                 if (m_Jump)
                 {
-                    m_MoveDir.y = m_JumpSpeed;
-                    PlayJumpSound();
+                    var jump_speed = m_JumpSpeed;
+                    if (m_is_underwater)
+                    {
+                        jump_speed = m_UnderwaterJumpSpeed;
+                    }
+                    m_MoveDir.y = jump_speed;
+                    if (!m_is_underwater)
+                    {
+                        PlayJumpSound();
+                    }
                     m_Jump = false;
                     m_Jumping = true;
                 }
             }
-            else
+
+            if(!m_CharacterController.isGrounded)
             {
-                m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime;
-                if (m_time_until_floating <= 0f)
+                bool is_underwater_and_moving_too_fast = m_is_underwater && m_MoveDir.y < m_underwater_max_speed;
+
+                if(is_underwater_and_moving_too_fast)
+                {
+                    m_MoveDir.y = Mathf.Lerp(m_MoveDir.y, m_underwater_max_speed, m_underwater_speed_lerp * Time.fixedDeltaTime);
+                }
+                else
+                {
+                    float underwater_gravity_multiplier = 1f;
+                    if(m_is_underwater)
+                    {
+                        underwater_gravity_multiplier = m_underwater_gravity_multiplier;
+                    }
+
+                    m_MoveDir += Physics.gravity * m_GravityMultiplier * Time.fixedDeltaTime * underwater_gravity_multiplier;
+                }
+                
+                if (m_time_until_floating <= 0f && !m_is_underwater)
                 {
                     m_MoveDir.y = Mathf.Max(m_MoveDir.y, m_max_fall_speed_when_floating);
                     is_flying = true;
                 }
+
             }
 
             m_animator.SetBool(FLYING_ID, is_flying);
@@ -297,7 +337,7 @@ namespace IL3DN
 #if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.
             // keep track of whether or not the character is walking or running
-            m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
+            m_IsWalking = m_is_underwater || !Input.GetKey(KeyCode.LeftShift);
 #endif
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
