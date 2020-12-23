@@ -17,6 +17,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] public LoadIslandScreen m_load_island_screen;
     [SerializeField] public PauseScreen m_pause_screen;
     [SerializeField] public ControlsScreen m_controls_screen;
+    [SerializeField] public AudioClip m_button_click_sound;
 
     public static MainMenu Instance;
 
