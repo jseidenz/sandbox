@@ -30,14 +30,14 @@ public class MainMenu : MonoBehaviour
 
     void Start()
     {
-        ScreenFader.StartScreenFade(m_full_background.gameObject, false, 0.4f, 1f, () =>
+        ScreenFader.StartScreenFade(m_full_background.gameObject, false, 0.4f, 1.5f, () =>
         {
             m_full_background.gameObject.SetActive(false);
             
         });
 
         m_start_game_screen.gameObject.SetActive(true);
-        ScreenFader.StartScreenFade(m_start_game_screen.gameObject, true, 0.4f, 2f);
+        ScreenFader.StartScreenFade(m_start_game_screen.gameObject, true, 0.4f, 3f);
     }
 
     public void TransitionScreens(GameObject previous_screen, GameObject next_screen)
