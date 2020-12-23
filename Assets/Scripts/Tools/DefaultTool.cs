@@ -29,6 +29,9 @@ class DefaultTool : Tool
 
     public override void OnDisable()
     {
-        m_cursor.gameObject.SetActive(true);
+        if (m_cursor != null)
+        {
+            m_cursor.gameObject.SetActive(true);
+        }
     }
 }
