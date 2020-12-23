@@ -1,5 +1,24 @@
 ﻿using UnityEngine;
 using System.Threading.Tasks;
+public abstract class Tool
+{
+    public Tool(KeyCode key_code)
+    {
+
+    }
+
+    public virtual void OnEnable() { }
+
+    public virtual void OnDisable() { }
+
+    public virtual void Update(float dt) { }
+
+    public virtual void LateUpdate(float dt) { }
+
+    public KeyCode GetKeyCode() { return m_key_code; }
+
+    KeyCode m_key_code;
+}
 
 public struct AddSolidDensityCommand : ICommand
 {
@@ -38,34 +57,6 @@ public class DigTool : MonoBehaviour
 
     TorusMesh m_cursor_mesh;
 
-    abstract class Tool
-    {
-        public Tool(KeyCode key_code)
-        {
-
-        }
-
-        public virtual void OnEnable() { }
-
-        public virtual void OnDisable() { }
-
-        public virtual void Update(float dt) { }
-
-        public virtual void LateUpdate(float dt) { }
-
-        public KeyCode GetKeyCode() { return m_key_code; }
-
-        KeyCode m_key_code;
-    }
-
-    class DefaultTool : Tool
-    {
-        public DefaultTool()
-        :   base(KeyCode.None)
-        {
-
-        }
-    }
 
     Tool m_default_tool;
     Tool m_active_tool;
