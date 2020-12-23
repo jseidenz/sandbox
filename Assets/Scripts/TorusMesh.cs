@@ -3,9 +3,38 @@ using System.Collections.Generic;
 
 public class TorusMesh
 {
-	public TorusMesh()
-    {
+	Mesh m_mesh;
+	float m_radius;
+	float m_thickness;
+	float m_slices;
+	float m_slice_tesselation;
 
+	public TorusMesh(float radius, float thickness, int slices, int slice_tessellation)
+    {
+		m_mesh = new Mesh();
+		m_mesh.name = "Torus";
+
+		m_radius = radius;
+		m_thickness = thickness;
+		m_slices = slices;
+		m_slice_tesselation = slice_tessellation;
+
+		RebuildMesh();
+    }
+
+	public void Destroy()
+    {
+		GameObject.DestroyImmediate(m_mesh);
+    }
+
+	public void SetRadius(float new_radius)
+    {
+		m_radius = new_radius;
+    }
+
+	public void RebuildMesh()
+    {
+		m_mesh.Clear();
     }
 
 	public static Mesh CreateTorus(float radius, float thickness, int slices, int sliceTessellation, bool generateNormals, bool generateUVs)
