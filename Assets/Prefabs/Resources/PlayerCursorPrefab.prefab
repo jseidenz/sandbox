@@ -10,9 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 905873101194505801}
   - component: {fileID: 8936396601858107536}
-  - component: {fileID: 6897353433171921471}
+  - component: {fileID: -6743363316322903174}
   - component: {fileID: 394551672303195312}
-  - component: {fileID: -4550703052079906388}
   m_Layer: 0
   m_Name: PlayerCursorPrefab
   m_TagString: Untagged
@@ -49,7 +48,7 @@ MonoBehaviour:
   m_cursor_tuning: {fileID: 11400000, guid: 27534b791dc1b8946a4611c5d6d70792, type: 2}
   m_target_cursor_position: {x: 0, y: 0, z: 0}
   m_target_cursor_radius: 0
---- !u!33 &6897353433171921471
+--- !u!33 &-6743363316322903174
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -96,25 +95,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &-4550703052079906388
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 817944043407573477}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  observableSearch: 2
-  Synchronization: 3
-  OwnershipTransfer: 0
-  ObservedComponents: []
-  viewIdField: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0

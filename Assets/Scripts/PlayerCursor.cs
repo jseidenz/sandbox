@@ -8,9 +8,7 @@ public class PlayerCursor : MonoBehaviour
     TorusMesh m_cursor_mesh;
     MeshFilter m_mesh_filter;
 
-    [SyncVar]
     public Vector3 m_target_cursor_position;
-    [SyncVar]
     public float m_target_cursor_radius;
     Transform m_camera_transform;
 

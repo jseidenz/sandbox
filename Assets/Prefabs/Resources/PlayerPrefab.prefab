@@ -1361,6 +1361,8 @@ MonoBehaviour:
   m_dig_rate: 5
   m_raycast_distance: 10
   m_liquid_fill_rate: 75
+  m_cursor_prefab: {fileID: 8936396601858107536, guid: 88fde9b2ef0cc9f4eac6c1b4a8aac03d,
+    type: 3}
 --- !u!114 &-3246923266169404227
 MonoBehaviour:
   m_ObjectHideFlags: 0

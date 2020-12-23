@@ -58,6 +58,7 @@ public class PlayerTools : MonoBehaviour
     [SerializeField] float m_dig_rate;
     [SerializeField] float m_raycast_distance;
     [SerializeField] float m_liquid_fill_rate;
+    [SerializeField] PlayerCursor m_cursor_prefab;
 
     Tool m_default_tool;
     Tool m_active_tool;
@@ -101,7 +102,7 @@ public class PlayerTools : MonoBehaviour
             new FloodTool(KeyCode.Q, m_liquid_fill_rate)
         };
 
-        m_cursor = PhotonNetwork.Instantiate("PlayerCursorPrefab", transform.position, Quaternion.identity).GetComponent<PlayerCursor>();
+        m_cursor = GameObject.Instantiate(m_cursor_prefab);
 
         var camera = Camera.main;
         foreach (var tool in m_tools)
@@ -117,6 +118,7 @@ public class PlayerTools : MonoBehaviour
     void OnDisable()
     {
         SetActiveTool(null);
+        GameObject.Destroy(m_cursor.gameObject);
     }
 
     void Update()
