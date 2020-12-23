@@ -164,11 +164,11 @@ public class PlayerTools : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (Application.isEditor)
-            {
+            //if (Application.isEditor)
+            //{
 
-            }
-            else
+            //}
+            //else
             {
 
                 var camera = Game.Instance.GetCamera();
