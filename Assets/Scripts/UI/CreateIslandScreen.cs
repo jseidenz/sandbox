@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine.UI;
 using UnityEngine.Profiling;
+using System.Collections;
 
 public class CreateIslandScreen : MonoBehaviour
 {
@@ -68,8 +69,7 @@ public class CreateIslandScreen : MonoBehaviour
 
         m_randomize_button.onClick.AddListener(() =>
         {
-            RandomizeIslandName();
-            RandomizeWorld();
+            StartCoroutine(RandomizeWorldCoroutine());
         });
 
         m_create_button.onClick.AddListener(() =>
@@ -85,6 +85,13 @@ public class CreateIslandScreen : MonoBehaviour
                 });
             });
         });
+    }
+
+    IEnumerator RandomizeWorldCoroutine()
+    {
+        yield return null;
+        RandomizeIslandName();
+        RandomizeWorld();
     }
 
     void OnEnable()
