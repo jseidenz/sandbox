@@ -16,6 +16,9 @@ public abstract class Tool
 
     public KeyCode GetKeyCode() { return m_key_code; }
 
+    public Transform transform{ get; set; }
+    public GameObject gameObject { get => transform.gameObject; }
+
     KeyCode m_key_code;
 }
 
@@ -93,8 +96,14 @@ public class PlayerTools : MonoBehaviour
         m_tools = new Tool[]
         {
             m_default_tool,
-            new DigTool(KeyCode.Mouse0, m_dig_rate, m_dig_distance)
+            new DigTool(KeyCode.Mouse0, m_dig_rate, m_dig_distance),
+            new SprayTool(KeyCode.E, m_liquid_fill_rate)
         };
+
+        foreach(var tool in m_tools)
+        {
+            tool.transform = transform;
+        }
     }
 
     void OnDisable()
@@ -163,17 +172,6 @@ public class PlayerTools : MonoBehaviour
         }
 
         UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
-        if(Input.GetKey(KeyCode.E))
-        {
-            var command = new AddLiquidDensityCommand
-            {
-                m_position = transform.position,
-                m_amount = m_liquid_fill_rate * Time.deltaTime
-            };
-
-            Game.Instance.SendCommand(command);
-            command.Run();
-        }
 
 
         UpdateDigControl(KeyCode.Mouse0, -m_dig_rate);
