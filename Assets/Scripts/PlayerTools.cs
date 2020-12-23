@@ -22,6 +22,19 @@ public abstract class Tool
     public Transform transform{ get; set; }
     public GameObject gameObject { get => transform.gameObject; }
 
+    public float m_raycast_distance { get; set; }
+
+    protected bool CameraRayCast(out RaycastHit hit)
+    {
+        var ray = GetCameraRay();
+        return Physics.Raycast(ray, out hit, m_raycast_distance);
+    }
+
+    protected Ray GetCameraRay()
+    {
+        return Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+    }
+
     KeyCode m_key_code;
 }
 
@@ -99,8 +112,8 @@ public class PlayerTools : MonoBehaviour
         m_tools = new Tool[]
         {
             m_default_tool,
-            new DigTool(KeyCode.Mouse0, -m_dig_rate, m_dig_distance),
-            new DigTool(KeyCode.Mouse1, m_fill_rate, m_dig_distance),
+            new DigTool(KeyCode.Mouse0, -m_dig_rate),
+            new DigTool(KeyCode.Mouse1, m_fill_rate),
             new SprayTool(KeyCode.E, m_liquid_fill_rate),
         };
 
@@ -109,6 +122,7 @@ public class PlayerTools : MonoBehaviour
         {
             tool.transform = transform;
             tool.camera = camera;
+            tool.m_raycast_distance = m_dig_distance;
         }
 
         

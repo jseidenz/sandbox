@@ -2,11 +2,10 @@
 
 public class DigTool : Tool
 {
-    public DigTool(KeyCode key_code, float dig_rate, float dig_distance)
+    public DigTool(KeyCode key_code, float dig_rate)
     :   base(key_code)
     {
         m_dig_rate = dig_rate;
-        m_dig_distance = dig_distance;
     }
 
     public override bool TryStartUsing()
@@ -45,19 +44,6 @@ public class DigTool : Tool
         }
     }
 
-
-    bool CameraRayCast(out RaycastHit hit)
-    {
-        var ray = GetCameraRay();
-        return Physics.Raycast(ray, out hit, m_dig_distance);
-    }
-
-    Ray GetCameraRay()
-    {
-        return Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-    }
-
     float m_dig_rate;
-    float m_dig_distance;
     float m_locked_fill_height;
 }
