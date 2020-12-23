@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Threading.Tasks;
 public abstract class Tool
 {
     public Tool(KeyCode key_code)
@@ -42,7 +41,7 @@ public struct AddLiquidDensityCommand : ICommand
     public Vector3 m_position;
 }
 
-public class DigTool : MonoBehaviour 
+public class PlayerTools : MonoBehaviour 
 {
     [SerializeField] float m_fill_rate;
     [SerializeField] float m_dig_rate;
