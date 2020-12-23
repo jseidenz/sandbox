@@ -6,8 +6,8 @@ public class TorusMesh
 	Mesh m_mesh;
 	float m_radius;
 	float m_thickness;
-	float m_slices;
-	float m_slice_tesselation;
+	int m_slices;
+	int m_slice_tesselation;
 
 	public TorusMesh(float radius, float thickness, int slices, int slice_tessellation)
     {
@@ -34,16 +34,16 @@ public class TorusMesh
 
 	public void RebuildMesh()
     {
-		m_mesh.Clear();
-    }
+		var mesh = m_mesh;
+		var radius = m_radius;
+		var thickness = m_thickness;
+		var slices = m_slices;
+		var slice_tesselation = m_slice_tesselation;
 
-	public static Mesh CreateTorus(float radius, float thickness, int slices, int sliceTessellation, bool generateNormals, bool generateUVs)
-	{
-		Mesh m = new Mesh();
-		m.name = "Torus";
+		mesh.Clear();
 
 		if (slices < 3) slices = 3;
-		if (sliceTessellation < 3) sliceTessellation = 3;
+		if (slice_tesselation < 3) slice_tesselation = 3;
 
 		List<Vector3> vertices = new List<Vector3>();
 		List<Vector3> normals = new List<Vector3>();
@@ -51,11 +51,11 @@ public class TorusMesh
 		List<int> indices = new List<int>();
 
 		int circleVertexCount = slices + 1;
-		int sliceVertexCount = sliceTessellation + 1;
+		int sliceVertexCount = slice_tesselation + 1;
 		float pi = Mathf.PI;
 		float twoPi = Mathf.PI * 2.0f;
 		float invSlices = 1f / slices;
-		float intSliceTessellation = 1f / sliceTessellation;
+		float intSliceTessellation = 1f / slice_tesselation;
 		Vector3 axisY = Vector3.up;
 
 		for (int i = 0; i <= slices; ++i)
@@ -66,7 +66,7 @@ public class TorusMesh
 			Vector3 axisX = new Vector3(Mathf.Cos(circleAngle), 0f, Mathf.Sin(circleAngle));
 			Vector3 center = new Vector3(axisX.x * radius, 0f, axisX.z * radius);
 
-			for (int j = 0; j <= sliceTessellation; ++j)
+			for (int j = 0; j <= slice_tesselation; ++j)
 			{
 				float v = j * intSliceTessellation;
 				float tubeAngle = v * twoPi + pi;
@@ -98,17 +98,9 @@ public class TorusMesh
 			}
 		}
 
-		m.vertices = vertices.ToArray();
-		m.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
-		if (generateNormals)
-		{
-			m.normals = normals.ToArray();
-		}
-		if (generateUVs)
-		{
-			m.uv = uvs.ToArray();
-		}
-
-		return m;
+		m_mesh.vertices = vertices.ToArray();
+		m_mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
+		m_mesh.normals = normals.ToArray();
+		m_mesh.uv = uvs.ToArray();
 	}
 }
