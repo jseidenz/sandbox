@@ -133,6 +133,13 @@ public class VoxelChunk
                     occlusion_regions.Add(new Vector3Int(0, -1, 1));
                 }
 
+                int region_count = occlusion_regions.Count;
+                for(int j = 0; j <region_count; ++j)
+                {
+                    var region = occlusion_regions[j];
+                    occlusion_regions.Add(new Vector3Int(region.x, 1, region.z));
+                }
+
                 occlusion_region_chunk_offset_table[i] = occlusion_regions.ToArray();
                 occlusion_regions.Clear();
             }
@@ -573,7 +580,7 @@ public class VoxelChunk
                 var left_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels];
                 var right_far_density = m_layer_density_grid[left_near_cell_idx + m_layer_width_in_voxels + 1];
 
-                bool is_occluded = m_layer_above_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE && sample_type == SAMPLE_TYPE_FULL_SQUARE;
+                bool is_occluded = m_layer_above_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE && sample_type == SAMPLE_TYPE_FULL_SQUARE && m_layer_below_sample_grid[left_near_cell_idx] == SAMPLE_TYPE_FULL_SQUARE;
                 if (is_occluded) continue;
 
                 bool is_border_sample = x == start_x || x == max_x - 1 || y == start_y || y == max_y - 1;
