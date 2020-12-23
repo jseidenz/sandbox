@@ -18,6 +18,7 @@ public abstract class Tool
 
     public KeyCode GetKeyCode() { return m_key_code; }
 
+    public Camera camera { get; set; }
     public Transform transform{ get; set; }
     public GameObject gameObject { get => transform.gameObject; }
 
@@ -94,18 +95,24 @@ public class PlayerTools : MonoBehaviour
 
         m_default_tool = new DefaultTool();
         SetActiveTool(m_default_tool);
-
+        
         m_tools = new Tool[]
         {
             m_default_tool,
-            new DigTool(KeyCode.Mouse0, m_dig_rate, m_dig_distance),
-            new SprayTool(KeyCode.E, m_liquid_fill_rate)
+            new DigTool(KeyCode.Mouse0, -m_dig_rate, m_dig_distance),
+            new DigTool(KeyCode.Mouse1, m_fill_rate, m_dig_distance),
+            new SprayTool(KeyCode.E, m_liquid_fill_rate),
         };
 
-        foreach(var tool in m_tools)
+        var camera = Camera.main;
+        foreach (var tool in m_tools)
         {
             tool.transform = transform;
+            tool.camera = camera;
         }
+
+        
+
     }
 
     void OnDisable()
@@ -174,10 +181,6 @@ public class PlayerTools : MonoBehaviour
         }
 
         UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
-
-
-        UpdateDigControl(KeyCode.Mouse0, -m_dig_rate);
-        UpdateDigControl(KeyCode.Mouse1, m_fill_rate);
     }
 
     void UpdateLiquidControl(KeyCode key_code, float amount)
@@ -204,39 +207,6 @@ public class PlayerTools : MonoBehaviour
                 Game.Instance.GetLiquidSimulation().AddDensity(hit_point, amount * Time.deltaTime);
 
                 var command = new AddLiquidDensityCommand
-                {
-                    m_position = hit_point,
-                    m_amount = amount * Time.deltaTime
-                };
-
-                Game.Instance.SendCommand(command);
-                command.Run();
-            }
-        }
-    }
-
-    void UpdateDigControl(KeyCode key_code, float amount)
-    {
-        if (Input.GetKey(key_code))
-        {
-            if (Input.GetKeyDown(key_code))
-            {
-                if (CameraRayCast(out var hit))
-                {
-                    var bias = hit.normal.y * 0.05f;
-                    m_locked_fill_height = hit.point.y + bias;
-                }
-            }
-
-            var plane = new Plane(Vector3.up, new Vector3(0, m_locked_fill_height, 0));
-
-            var ray = GetCameraRay();
-            if (plane.Raycast(ray, out var distance))
-            {
-                var hit_point = ray.GetPoint(distance);
-                hit_point.y = m_locked_fill_height;
-
-                var command = new AddSolidDensityCommand
                 {
                     m_position = hit_point,
                     m_amount = amount * Time.deltaTime
