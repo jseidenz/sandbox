@@ -34,12 +34,26 @@ public class DigTool : MonoBehaviour
 
     float m_locked_fill_height;
 
+
+    TorusMesh m_cursor_mesh;
+
     void Awake()
     {
         if(!GetComponent<Photon.Pun.PhotonView>().IsMine)
         {
             GameObject.Destroy(this);
         }
+    }
+
+    void OnEnable()
+    {
+        //m_cursor_mesh = new TorusMesh(1, 0.3f, )
+    }
+
+    void OnDisable()
+    {
+        m_cursor_mesh.Destroy();
+        m_cursor_mesh = null;
     }
 
     void Update()
