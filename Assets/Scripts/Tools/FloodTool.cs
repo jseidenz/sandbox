@@ -36,7 +36,7 @@ public class FloodTool : Tool
             var cell_size_in_meters = Game.Instance.GetCellSizeInMeters();
             hit_point.x += 0.5f * cell_size_in_meters.x;
             hit_point.z += 0.5f * cell_size_in_meters.z;
-            hit_point.y += 1.99f * cell_size_in_meters.y;
+            hit_point.y += 1.05f * cell_size_in_meters.y;
 
             var command = new AddLiquidDensityCommand
             {
