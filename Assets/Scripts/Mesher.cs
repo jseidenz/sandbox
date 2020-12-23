@@ -124,11 +124,12 @@ public class Mesher
 
 
         Profiler.BeginSample("Triangulate");
+        int max_meshers_per_tick = 50;
         for (int y = m_grid_height_in_voxels - 1; y >= 0; --y)
         {
             var layer = m_layers[y];
 
-            layer.March(m_voxel_chunk_scratch_buffer, m_dirty_mesh_ids);            
+            layer.March(m_voxel_chunk_scratch_buffer, m_dirty_mesh_ids, ref max_meshers_per_tick);            
         }
         Profiler.EndSample();
     }

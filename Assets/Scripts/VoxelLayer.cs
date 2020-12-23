@@ -126,14 +126,15 @@ public class VoxelLayer
         }
     }
 
-    public void March(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_mesh_chunk_ids)
+    public void March(VoxelChunk.ScratchBuffer scratch_buffer, HashSet<Vector3Int> dirty_mesh_chunk_ids, ref int max_meshes_per_tick)
     {
         scratch_buffer.m_processed_chunks.Clear();
 
         foreach (var chunk_id in dirty_mesh_chunk_ids)
         {
-            if (chunk_id.y != m_layer_idx) continue;
+            if (max_meshes_per_tick <= 0) break;
 
+            if (chunk_id.y != m_layer_idx) continue;
 
             if (chunk_id.x < 0 || chunk_id.x >= m_width_in_chunks) 
             {
@@ -152,6 +153,7 @@ public class VoxelLayer
             if (!m_visible_voxel_chunks.Contains(chunk)) continue;
 
             chunk.March(scratch_buffer, m_vertex_attribute_descriptors);
+            max_meshes_per_tick--;
 
             scratch_buffer.m_processed_chunks.Add(chunk_id);
         }
