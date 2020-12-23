@@ -6,6 +6,8 @@ public abstract class Tool
         m_key_code = key_code;
     }
 
+    public virtual bool TryStartUsing() { return true; }
+
     public virtual void OnEnable() { }
 
     public virtual void OnDisable() { }
@@ -121,7 +123,7 @@ public class PlayerTools : MonoBehaviour
         {
             foreach(var tool in m_tools)
             {
-                if(Input.GetKey(tool.GetKeyCode()))
+                if(Input.GetKey(tool.GetKeyCode()) && tool.TryStartUsing())
                 {
                     SetActiveTool(tool);
                     break;
