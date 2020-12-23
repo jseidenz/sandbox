@@ -64,7 +64,7 @@ public class PlayerTools : MonoBehaviour
 {
     [SerializeField] float m_fill_rate;
     [SerializeField] float m_dig_rate;
-    [SerializeField] float m_dig_distance;
+    [SerializeField] float m_raycast_distance;
 
     [SerializeField] float m_liquid_fill_rate;
     [SerializeField] Material m_dig_cursor_material;
@@ -122,7 +122,7 @@ public class PlayerTools : MonoBehaviour
         {
             tool.transform = transform;
             tool.camera = camera;
-            tool.m_raycast_distance = m_dig_distance;
+            tool.m_raycast_distance = m_raycast_distance;
         }
 
         
@@ -249,6 +249,6 @@ public class PlayerTools : MonoBehaviour
     {
         var ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
 
-        return Physics.Raycast(ray, out hit, m_dig_distance);
+        return Physics.Raycast(ray, out hit, m_raycast_distance);
     }
 }
