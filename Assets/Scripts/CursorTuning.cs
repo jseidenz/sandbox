@@ -8,5 +8,6 @@ public class CursorTuning : ScriptableObject
     public float m_position_lerp_rate;
     public float m_radius_lerp_rate;
 
+    public float m_flood_sound_rate;
     public AudioClip[] m_flood_sounds;
 }

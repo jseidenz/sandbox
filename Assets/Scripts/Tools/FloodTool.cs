@@ -47,13 +47,21 @@ public class FloodTool : Tool
             Game.Instance.SendCommand(command);
             command.Run();
         }
+
+        m_time_till_next_flood_sound -= dt;
+        if(m_time_till_next_flood_sound < 0f)
+        {
+            m_time_till_next_flood_sound = m_cursor_tuning.m_flood_sound_rate;
+            m_cursor.PlaySound(m_cursor_tuning.m_flood_sounds[Random.Range(0, m_cursor_tuning.m_flood_sounds.Length)]);
+        }
     }
 
     public override void OnEnable()
     {
-        m_cursor.PlaySound(m_cursor_tuning.m_flood_sounds[Random.Range(0, m_cursor_tuning.m_flood_sounds.Length)]);
+        m_time_till_next_flood_sound = 0f;
     }
 
     float m_flood_rate;
     float m_locked_visual_height;
+    float m_time_till_next_flood_sound;
 }
