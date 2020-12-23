@@ -68,6 +68,7 @@ public class PlayerTools : MonoBehaviour
 
     [SerializeField] float m_liquid_fill_rate;
     [SerializeField] Material m_dig_cursor_material;
+    [SerializeField] CursorTuning m_cursor_tuning;
 
     float m_locked_fill_height;
 

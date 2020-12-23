@@ -1363,6 +1363,7 @@ MonoBehaviour:
   m_liquid_fill_rate: 50
   m_dig_cursor_material: {fileID: 2100000, guid: c921530ec8e205542b23ab99f7591ab4,
     type: 2}
+  m_cursor_tuning: {fileID: 11400000, guid: 27534b791dc1b8946a4611c5d6d70792, type: 2}
 --- !u!114 &-3246923266169404227
 MonoBehaviour:
   m_ObjectHideFlags: 0
