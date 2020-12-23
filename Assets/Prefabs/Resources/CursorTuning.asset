@@ -16,6 +16,7 @@ MonoBehaviour:
   m_default_thickness: 0.015
   m_position_lerp_rate: 30
   m_radius_lerp_rate: 12
+  m_flood_sound_rate: 0.55
   m_flood_sounds:
   - {fileID: 8300000, guid: 120fc5b08485dcd4089eace4debbc232, type: 3}
   - {fileID: 8300000, guid: 6b82ca531e941df4083ca4a0238ace12, type: 3}
