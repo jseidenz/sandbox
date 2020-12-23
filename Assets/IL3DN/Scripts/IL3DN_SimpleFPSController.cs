@@ -54,6 +54,8 @@ namespace IL3DN
         float m_jump_pressed_window_remaining;
         float m_time_until_floating;        
         bool m_is_underwater;
+        bool m_is_standing_in_simulation_water;
+        IL3DN_ChangeWalkingSound m_water_sounds;
         Animator m_animator;
 
         void Awake()
@@ -93,6 +95,8 @@ namespace IL3DN
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
             m_MouseLook.Init(transform, m_Camera.transform);
+
+            m_water_sounds = Game.Instance.m_water.GetComponent<IL3DN_ChangeWalkingSound>();
         }
 
         private void Update()
@@ -152,6 +156,31 @@ namespace IL3DN
             m_PreviouslyGrounded = m_CharacterController.isGrounded;
 
             m_animator.SetBool(GROUNDED_ID, m_CharacterController.isGrounded);
+        }
+
+        void LateUpdate()
+        {
+            bool was_standing_in_simulation_water = m_is_standing_in_simulation_water;
+            m_is_standing_in_simulation_water = false;
+            if (Game.Instance.GetSolidSimulation().TryGetDensityCellFromWorldPosition(transform.position, out var density_cell))
+            {
+                if (Game.Instance.GetLiquidSimulation().TryGetDensity(density_cell, out var density))
+                {
+                    m_is_standing_in_simulation_water = density > Game.Instance.GetLiquidIsoLevel();
+                }
+            }
+
+            if(was_standing_in_simulation_water != m_is_standing_in_simulation_water)
+            {
+                if (m_is_standing_in_simulation_water)
+                {
+                    SetOverrideSounds(m_water_sounds);
+                }
+                else
+                {
+                    isInSpecialSurface = false;
+                }
+            }
         }
 
         /// <summary>
@@ -379,14 +408,19 @@ namespace IL3DN
         /// <param name="other"></param>
         private void OnTriggerEnter(Collider other)
         {
-            IL3DN_ChangeWalkingSound soundScript = other.GetComponent<IL3DN_ChangeWalkingSound>();
-            if (soundScript != null)
+            var sound_script = other.GetComponent<IL3DN_ChangeWalkingSound>();
+            if (sound_script != null)
             {
-                footStepsOverride = soundScript.footStepsOverride;
-                jumpSoundOverride = soundScript.jumpSound;
-                landSoundOverride = soundScript.landSound;
-                isInSpecialSurface = true;
+                SetOverrideSounds(sound_script);
             }
+        }
+
+        void SetOverrideSounds(IL3DN_ChangeWalkingSound sound_script)
+        {
+            footStepsOverride = sound_script.footStepsOverride;
+            jumpSoundOverride = sound_script.jumpSound;
+            landSoundOverride = sound_script.landSound;
+            isInSpecialSurface = true;
         }
 
         /// <summary>

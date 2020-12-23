@@ -19,7 +19,7 @@ public class Game : MonoBehaviour
     [SerializeField] int m_voxel_chunk_dimensions;
     [SerializeField] float m_ground_plane_size;
     [SerializeField] float m_water_height;
-    [SerializeField] GameObject m_water;
+    [SerializeField] public GameObject m_water;
     [SerializeField] float m_solid_iso_level;
     [SerializeField] float m_liquid_iso_level;
     [SerializeField] bool m_use_height_map;
@@ -543,6 +543,11 @@ public class Game : MonoBehaviour
         if (!File.Exists(COMMAND_LINE_FILE)) return;
 
         File.Delete(COMMAND_LINE_FILE);
+    }
+
+    public float GetLiquidIsoLevel()
+    {
+        return m_liquid_iso_level;
     }
 
     public Vector3 GetVoxelSizeInMeters() { return m_voxel_size_in_meters; }
