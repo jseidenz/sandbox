@@ -3,7 +3,7 @@ public abstract class Tool
 {
     public Tool(KeyCode key_code)
     {
-
+        m_key_code = key_code;
     }
 
     public virtual void OnEnable() { }
@@ -48,7 +48,6 @@ public class PlayerTools : MonoBehaviour
     [SerializeField] float m_dig_distance;
 
     [SerializeField] float m_liquid_fill_rate;
-    [SerializeField] float m_liquid_remove_rate;
     [SerializeField] Material m_dig_cursor_material;
 
     float m_locked_fill_height;
@@ -93,7 +92,8 @@ public class PlayerTools : MonoBehaviour
 
         m_tools = new Tool[]
         {
-            m_default_tool
+            m_default_tool,
+            new DigTool(KeyCode.Mouse0, m_dig_rate, m_dig_distance)
         };
     }
 
