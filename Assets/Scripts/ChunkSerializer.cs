@@ -99,6 +99,36 @@ public class ChunkSerializer
         m_length += data_length_in_bytes;
     }
 
+    public void Write(Vector3Int[] data)
+    {
+        var data_length_in_structs = data.Length;
+        var data_length_in_bytes = 12 * data_length_in_structs;
+
+        if (m_position + data_length_in_bytes > m_buffer.Length)
+        {
+            throw new Exception($"No more room in buffer. m_position={m_position}, BufferLength={m_buffer.Length}, data_length_in_bytes={data_length_in_bytes}");
+        }
+
+        unsafe
+        {
+            fixed (byte* my_bytes = &m_buffer[m_position])
+            {
+                fixed (Vector3Int* data_structs = data)
+                {
+                    var my_structs = (Vector3Int*)my_bytes;
+
+                    for (int i = 0; i < data.Length; ++i)
+                    {
+                        my_structs[i] = data_structs[i];
+                    }
+                }
+            }
+        }
+
+        m_position += data_length_in_bytes;
+        m_length += data_length_in_bytes;
+    }
+
     public void Write(float[] data)
     {
         var data_length_in_floats = data.Length;
@@ -217,6 +247,34 @@ public class ChunkDeserializer
                 return value;
             }
         }
+    }
+
+    public void Read(Vector3Int[] output_data)
+    {
+        var data_size_in_structs = output_data.Length;
+        var data_size_in_bytes = data_size_in_structs * 12;
+
+        if (m_position + data_size_in_bytes > m_buffer.Length)
+        {
+            throw new System.Exception($"Reading past end of buffer. BufferLength={m_buffer.Length}, data_size_in_bytes={data_size_in_bytes}, position={m_position}");
+        }
+
+        unsafe
+        {
+            fixed (byte* serializer_bytes = &m_buffer[m_position])
+            {
+                var serializer_structs = (Vector3Int*)serializer_bytes;
+                fixed (Vector3Int* output_data_structs = &output_data[0])
+                {
+                    for (int i = 0; i < data_size_in_structs; ++i)
+                    {
+                        output_data_structs[i] = serializer_structs[i];
+                    }
+                }
+            }
+        }
+
+        m_position += data_size_in_bytes;
     }
 
     public void Read(float[] output_data)
