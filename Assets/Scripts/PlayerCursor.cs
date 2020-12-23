@@ -19,4 +19,11 @@ public class PlayerCursor : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, m_target_cursor_position, m_cursor_tuning.m_position_lerp_rate * Time.deltaTime);
         transform.position = m_target_cursor_position;
     }
+
+    public void PlaySound(AudioClip audio_clip)
+    {
+        var audio_source = GetComponent<AudioSource>();
+        audio_source.clip = audio_clip;
+        audio_source.Play();
+    }
 }

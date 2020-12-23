@@ -49,6 +49,11 @@ public class FloodTool : Tool
         }
     }
 
+    public override void OnEnable()
+    {
+        m_cursor.PlaySound(m_cursor_tuning.m_flood_sounds[Random.Range(0, m_cursor_tuning.m_flood_sounds.Length)]);
+    }
+
     float m_flood_rate;
     float m_locked_visual_height;
 }
