@@ -51,7 +51,7 @@ public class StartGameScreen : MonoBehaviour
 
         if(m_camera.transform.rotation != m_initial_camera_rotation)
         { 
-            m_camera.transform.rotation = Quaternion.Slerp(m_camera.transform.rotation, m_initial_camera_rotation, Time.deltaTime * 1.25f);
+            m_camera.transform.rotation = Quaternion.Slerp(m_camera.transform.rotation, m_initial_camera_rotation, Time.deltaTime * 2.5f);
         }
     }
 }
