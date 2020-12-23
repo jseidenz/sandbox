@@ -445,11 +445,11 @@ public class LiquidSimulation
 
     public void Load(ChunkDeserializer deserializer)
     {
-        deserializer.Read(m_min_dirty_cell_per_layer);
-        deserializer.Read(m_max_dirty_cell_per_layer);
-
         if (deserializer.TryGetChunk(LIQUID_SIMULATION_ID))
         {
+            deserializer.Read(m_min_dirty_cell_per_layer);
+            deserializer.Read(m_max_dirty_cell_per_layer);
+
             for (int y = 0; y < m_layers.Length; ++y)
             {
                 var layer = m_layers[y];

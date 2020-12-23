@@ -119,7 +119,7 @@ public class ChunkSerializer
 
                     for (int i = 0; i < data.Length; ++i)
                     {
-                        my_structs[i] = data_structs[i];
+                        //my_structs[i] = data_structs[i];
                     }
                 }
             }
@@ -268,7 +268,7 @@ public class ChunkDeserializer
                 {
                     for (int i = 0; i < data_size_in_structs; ++i)
                     {
-                        output_data_structs[i] = serializer_structs[i];
+                        //output_data_structs[i] = serializer_structs[i];
                     }
                 }
             }
