@@ -231,7 +231,6 @@ public class Game : MonoBehaviour
 
         m_camera.transform.parent = m_player_avatar.transform;
         m_camera.transform.localPosition = m_camera_offset;
-        m_camera.transform.forward = -Vector3.forward;
 
         m_has_spawned_avatar = true;
 
