@@ -25,8 +25,6 @@ class DefaultTool : Tool
         {
             m_cursor.gameObject.SetActive(true);
         }
-
-        m_cursor.m_target_cursor_radius = m_cursor_tuning.m_default_radius;
     }
 
     public override void OnDisable()
