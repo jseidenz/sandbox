@@ -44,10 +44,14 @@ public class StartGameScreen : MonoBehaviour
         }
 
         const float EPSILON = 0.0001f;
-        if((m_camera.transform.position - m_initial_camera_pos).sqrMagnitude > EPSILON)
+        if ((m_camera.transform.position - m_initial_camera_pos).sqrMagnitude > EPSILON)
         {
             m_camera.transform.position = Vector3.Lerp(m_camera.transform.position, m_initial_camera_pos, Time.deltaTime * 5);
-            m_camera.transform.rotation = Quaternion.Slerp(m_camera.transform.rotation, m_initial_camera_rotation, Time.deltaTime * 1f);
+        }
+
+        if(m_camera.transform.rotation != m_initial_camera_rotation)
+        { 
+            m_camera.transform.rotation = Quaternion.Slerp(m_camera.transform.rotation, m_initial_camera_rotation, Time.deltaTime * 1.25f);
         }
     }
 }
