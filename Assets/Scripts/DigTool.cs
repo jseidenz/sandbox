@@ -38,6 +38,40 @@ public class DigTool : MonoBehaviour
 
     TorusMesh m_cursor_mesh;
 
+    abstract class Tool
+    {
+        public Tool(KeyCode key_code)
+        {
+
+        }
+
+        public virtual void OnEnable() { }
+
+        public virtual void OnDisable() { }
+
+        public virtual void Update(float dt) { }
+
+        public virtual void LateUpdate(float dt) { }
+
+        public KeyCode GetKeyCode() { return m_key_code; }
+
+        KeyCode m_key_code;
+    }
+
+    class DefaultTool : Tool
+    {
+        public DefaultTool()
+        :   base(KeyCode.None)
+        {
+
+        }
+    }
+
+    Tool m_default_tool;
+    Tool m_active_tool;
+    Tool[] m_tools;
+
+
     void Awake()
     {
         if(!GetComponent<Photon.Pun.PhotonView>().IsMine)
@@ -46,19 +80,68 @@ public class DigTool : MonoBehaviour
         }
     }
 
+    void SetActiveTool(Tool tool)
+    {
+        if(m_active_tool != null)
+        {
+            m_active_tool.OnDisable();
+        }
+
+        m_active_tool = tool;
+        if (m_active_tool != null)
+        {
+            m_active_tool.OnEnable();
+        }
+    }
+
     void OnEnable()
     {
         m_cursor_mesh = new TorusMesh(1, 0.3f, 30);
+
+        m_default_tool = new DefaultTool();
+        SetActiveTool(m_default_tool);
+
+        m_tools = new Tool[]
+        {
+            m_default_tool
+        };
     }
 
     void OnDisable()
     {
+        SetActiveTool(null);
+
         m_cursor_mesh.Destroy();
         m_cursor_mesh = null;
     }
 
     void Update()
     {
+        bool is_default_tool_set = m_active_tool == m_default_tool;
+        if(is_default_tool_set)
+        {
+            foreach(var tool in m_tools)
+            {
+                if(Input.GetKey(tool.GetKeyCode()))
+                {
+                    SetActiveTool(tool);
+                    break;
+                }
+            }
+        }
+        else if(m_active_tool != null)
+        {
+            if(!Input.GetKey(m_active_tool.GetKeyCode()))
+            {
+                SetActiveTool(m_default_tool);
+            }
+        }
+
+        if(m_active_tool != null)
+        {
+            m_active_tool.Update(Time.deltaTime);
+        }
+
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.T))
         {
@@ -172,6 +255,14 @@ public class DigTool : MonoBehaviour
                 Game.Instance.SendCommand(command);
                 command.Run();
             }
+        }
+    }
+
+    void LateUpdate()
+    {
+        if(m_active_tool != null)
+        {
+                m_active_tool.LateUpdate(Time.deltaTime);
         }
     }
 
