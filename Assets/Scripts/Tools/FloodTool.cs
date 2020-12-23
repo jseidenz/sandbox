@@ -33,6 +33,10 @@ public class FloodTool : Tool
             var hit_point = ray.GetPoint(distance);
             hit_point.y = m_locked_fill_height;
 
+            var cell_size_in_meters = Game.Instance.GetCellSizeInMeters();
+            hit_point.x += 0.5f * cell_size_in_meters.x;
+            hit_point.z += 0.5f * cell_size_in_meters.z;
+
             var command = new AddLiquidDensityCommand
             {
                 m_position = hit_point,

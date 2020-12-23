@@ -30,16 +30,7 @@ public abstract class Tool
     protected bool CameraRayCast(out RaycastHit hit)
     {
         var ray = GetCameraRay();        
-        bool did_hit = Physics.Raycast(ray, out hit, m_raycast_distance);
-
-        var cell_size_in_meters = Game.Instance.GetCellSizeInMeters();
-
-        var point = hit.point;
-        point.x = (int)(point.x / Game.Instance.GetCellSizeInMeters().x) * cell_size_in_meters.x;
-        point.z = (int)(point.z / Game.Instance.GetCellSizeInMeters().z) * cell_size_in_meters.z;
-        hit.point = point;
-
-        return did_hit;
+        return Physics.Raycast(ray, out hit, m_raycast_distance);
     }
 
     protected Ray GetCameraRay()
