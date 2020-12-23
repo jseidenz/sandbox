@@ -114,8 +114,9 @@ namespace IL3DN
                 m_jump_window_remaining = m_jump_window;
             }
 
-            if(!m_Jump && m_jump_pressed_window_remaining > 0 && m_jump_window_remaining > 0)
+            if(!m_Jump && m_jump_pressed_window_remaining > 0 && m_jump_window_remaining > 0 && !m_Jumping)
             {
+                m_jump_window_remaining = 0;
                 m_jump_pressed_window_remaining = 0;
                 m_Jump = true;
             }
