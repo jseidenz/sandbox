@@ -59,38 +59,7 @@ public class DigTool : MonoBehaviour
 
     void Update()
     {
-#if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            if(CameraRayCast(out var hit))
-            {
-                float teleport_vertical_offset = 1f;
-                GetComponent<IL3DN.IL3DN_SimpleFPSController>().Teleport(hit.point + new Vector3(0, teleport_vertical_offset, 0));
-            }
-        }
-#endif
-
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (Application.isEditor)
-            {
-
-            }
-            else
-            {
-
-                var camera = Game.Instance.GetCamera();
-                MainMenu.Instance.m_pause_screen.SetTransforms(transform.localPosition, transform.localRotation, camera.transform.localPosition, camera.transform.localRotation);
-
-                Game.Instance.DestroyAvatar();
-                MainMenu.Instance.gameObject.SetActive(true);
-                MainMenu.Instance.GetComponent<CanvasGroup>().alpha = 1f;
-                MainMenu.Instance.TransitionScreens(null, MainMenu.Instance.m_pause_screen.gameObject);
-            }
-        }
-
-        UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate);
-        if(Input.GetKey(KeyCode.E))
+        if (Input.GetKey(KeyCode.E))
         {
             var command = new AddLiquidDensityCommand
             {
@@ -102,22 +71,54 @@ public class DigTool : MonoBehaviour
             command.Run();
         }
 
+        bool did_raycast_hit = CameraRayCast(out var raycast_hit);
 
-        UpdateDigControl(KeyCode.Mouse0, -m_dig_rate);
-        UpdateDigControl(KeyCode.Mouse1, m_fill_rate);
+        if(!did_raycast_hit)
+        {
+            return;
+        }
+
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            float teleport_vertical_offset = 1f;
+            GetComponent<IL3DN.IL3DN_SimpleFPSController>().Teleport(raycast_hit.point + new Vector3(0, teleport_vertical_offset, 0));
+        }
+#endif
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (Application.isEditor)
+            {
+
+            }
+            else
+            {
+                var camera = Game.Instance.GetCamera();
+                MainMenu.Instance.m_pause_screen.SetTransforms(transform.localPosition, transform.localRotation, camera.transform.localPosition, camera.transform.localRotation);
+
+                Game.Instance.DestroyAvatar();
+                MainMenu.Instance.gameObject.SetActive(true);
+                MainMenu.Instance.GetComponent<CanvasGroup>().alpha = 1f;
+                MainMenu.Instance.TransitionScreens(null, MainMenu.Instance.m_pause_screen.gameObject);
+            }
+        }
+
+        UpdateLiquidControl(KeyCode.Q, m_liquid_fill_rate, raycast_hit);
+
+
+        UpdateDigControl(KeyCode.Mouse0, -m_dig_rate, raycast_hit);
+        UpdateDigControl(KeyCode.Mouse1, m_fill_rate, raycast_hit);
     }
 
-    void UpdateLiquidControl(KeyCode key_code, float amount)
+    void UpdateLiquidControl(KeyCode key_code, float amount, RaycastHit hit)
     {
         if (Input.GetKey(key_code))
         {
             if (Input.GetKeyDown(key_code))
             {
-                if (CameraRayCast(out var hit))
-                {
-                    var bias = 1f * hit.normal.y;
-                    m_locked_fill_height = hit.point.y + bias;
-                }
+                var bias = 1f * hit.normal.y;
+                m_locked_fill_height = hit.point.y + bias;
             }
 
             var plane = new Plane(Vector3.up, new Vector3(0, m_locked_fill_height, 0));
@@ -127,8 +128,6 @@ public class DigTool : MonoBehaviour
             {
                 var hit_point = ray.GetPoint(distance);
                 hit_point.y = m_locked_fill_height;
-
-                Game.Instance.GetLiquidSimulation().AddDensity(hit_point, amount * Time.deltaTime);
 
                 var command = new AddLiquidDensityCommand
                 {
@@ -142,17 +141,14 @@ public class DigTool : MonoBehaviour
         }
     }
 
-    void UpdateDigControl(KeyCode key_code, float amount)
+    void UpdateDigControl(KeyCode key_code, float amount, RaycastHit hit)
     {
         if (Input.GetKey(key_code))
         {
             if (Input.GetKeyDown(key_code))
             {
-                if (CameraRayCast(out var hit))
-                {
-                    var bias = hit.normal.y * 0.05f;
-                    m_locked_fill_height = hit.point.y + bias;
-                }
+                var bias = hit.normal.y * 0.05f;
+                m_locked_fill_height = hit.point.y + bias;
             }
 
             var plane = new Plane(Vector3.up, new Vector3(0, m_locked_fill_height, 0));
