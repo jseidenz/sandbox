@@ -183,7 +183,7 @@ public class VoxelLayer
         return bounds;
     }
 
-    public void BindCamera(Camera camera)
+    public void BindCamera(Camera camera, float bounding_sphere_radius_multiplier)
     {
         m_culling_group = new CullingGroup();
         m_culling_group.targetCamera = camera;
@@ -192,7 +192,6 @@ public class VoxelLayer
         var bounding_spheres = new BoundingSphere[m_voxel_chunks.Length];
         int bounding_sphere_idx = 0;
 
-        const float SHADOW_SIZE_MULTIPLIER = 2;
         for (int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
         {
             for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
@@ -200,7 +199,7 @@ public class VoxelLayer
                 var bounds = GetChunkBounds(chunk_x, chunk_y);
 
                 var bounds_radius = bounds.size.magnitude * 0.5f;
-                bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(bounds.center, bounds_radius * SHADOW_SIZE_MULTIPLIER);
+                bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(bounds.center, bounds_radius * bounding_sphere_radius_multiplier);
             }
         }
 

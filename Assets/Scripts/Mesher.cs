@@ -42,7 +42,7 @@ public class Mesher
         bool cast_shadows,
         bool is_liquid,
         Material prepass_material,
-        BevelTuning bevel_tuning
+        BevelTuning bevel_tuning        
         )
     {
         m_voxel_chunk_dimensions = voxel_chunk_dimesnions;
@@ -87,11 +87,11 @@ public class Mesher
         }
     }
 
-    public void BindCamera(Camera camera)
+    public void BindCamera(Camera camera, float bounding_sphere_radius_multiplier)
     {
         foreach(var layer in m_layers)
         {
-            layer.BindCamera(camera);
+            layer.BindCamera(camera, bounding_sphere_radius_multiplier);
         }
     }
 
