@@ -12,6 +12,7 @@ public class PlayerCursor : MonoBehaviour
     public Vector3 m_target_cursor_position;
     [SyncVar]
     public float m_target_cursor_radius;
+    Transform m_camera_transform;
 
 
     void OnEnable()
@@ -20,6 +21,7 @@ public class PlayerCursor : MonoBehaviour
         m_target_cursor_radius = m_cursor_tuning.m_default_radius;
         m_mesh_filter = GetComponent<MeshFilter>();
         m_mesh_filter.sharedMesh = m_cursor_mesh.GetMesh();
+        m_camera_transform = Camera.main.transform;
     }
 
     void OnDisable()
@@ -34,5 +36,6 @@ public class PlayerCursor : MonoBehaviour
         m_cursor_mesh.SetRadius(new_radius);
         transform.position = Vector3.Lerp(transform.position, m_target_cursor_position, m_cursor_tuning.m_position_lerp_rate * Time.deltaTime);
         transform.position = m_target_cursor_position;
+        transform.up = (m_camera_transform.position - transform.position).normalized;
     }
 }

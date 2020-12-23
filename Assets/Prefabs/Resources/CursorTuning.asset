@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7fb71e99da2937429dbc68c9979b3c0, type: 3}
   m_Name: CursorTuning
   m_EditorClassIdentifier: 
-  m_default_radius: 0.13
+  m_default_radius: 0.01
   m_default_thickness: 0.015
   m_position_lerp_rate: 30
   m_radius_lerp_rate: 12
