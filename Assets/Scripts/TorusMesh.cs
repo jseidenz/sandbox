@@ -9,6 +9,11 @@ public class TorusMesh
 	int m_slices;
 	int m_slice_tesselation;
 
+	List<Vector3> m_vertices = new List<Vector3>();
+	List<Vector3> m_normals = new List<Vector3>();
+	List<Vector2> m_uvs = new List<Vector2>();
+	List<int> m_indices = new List<int>();
+
 	public TorusMesh(float radius, float thickness, int slices, int slice_tessellation)
     {
 		m_mesh = new Mesh();
@@ -45,10 +50,15 @@ public class TorusMesh
 		if (slices < 3) slices = 3;
 		if (slice_tesselation < 3) slice_tesselation = 3;
 
-		var vertices = new List<Vector3>();
-		var normals = new List<Vector3>();
-		var uvs = new List<Vector2>();
-		var indices = new List<int>();
+		var vertices = m_vertices;
+		var normals = m_normals;
+		var uvs = m_uvs;
+		var indices = m_indices;
+
+		m_vertices.Clear();
+		m_normals.Clear();
+		m_uvs.Clear();
+		m_indices.Clear();
 
 		int circle_vertex_count = slices + 1;
 		int slive_vertex_count = slice_tesselation + 1;
@@ -85,22 +95,22 @@ public class TorusMesh
 				normals.Add(normal);
 				uvs.Add(uv);
 
-				int iNext = (i + 1) % circle_vertex_count;
+				int i_next = (i + 1) % circle_vertex_count;
 				int jNext = (j + 1) % slive_vertex_count;
 
 				indices.Add(i * slive_vertex_count + j);
 				indices.Add(i * slive_vertex_count + jNext);
-				indices.Add(iNext * slive_vertex_count + j);
+				indices.Add(i_next * slive_vertex_count + j);
 
 				indices.Add(i * slive_vertex_count + jNext);
-				indices.Add(iNext * slive_vertex_count + jNext);
-				indices.Add(iNext * slive_vertex_count + j);
+				indices.Add(i_next * slive_vertex_count + jNext);
+				indices.Add(i_next * slive_vertex_count + j);
 			}
 		}
 
-		mesh.vertices = vertices.ToArray();
-		mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
-		mesh.normals = normals.ToArray();
-		mesh.uv = uvs.ToArray();
+		mesh.SetVertices(m_vertices);
+		mesh.SetNormals(m_normals);
+		mesh.SetUVs(0, m_uvs);
+		mesh.SetIndices(m_indices, MeshTopology.Triangles, 0);
 	}
 }
