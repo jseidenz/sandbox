@@ -33,7 +33,8 @@ public class NameScreen : MonoBehaviour
         widget.transform.localPosition = new Vector3(0, m_name_height, 0);
         widget.transform.localRotation = Quaternion.identity;
         widget.transform.localScale = Vector3.one;
-        widget.m_text.text = player_name.GetComponent<Photon.Pun.PhotonView>().Owner.NickName;
+        widget.m_owner = player_name.GetComponent<Photon.Pun.PhotonView>().Owner;
+        widget.m_text.text = widget.m_owner.NickName;
         widget.gameObject.SetActive(true);
         m_player_names[player_name] = widget;
     }
@@ -44,6 +45,13 @@ public class NameScreen : MonoBehaviour
         foreach(var kvp in m_player_names)
         {
             if (kvp.Key == null) continue;
+            if (kvp.Value.m_owner == null) continue;
+
+            var nick_name = kvp.Value.m_owner.NickName;
+            if (nick_name != kvp.Value.m_text.text)
+            {
+                kvp.Value.m_text.text = nick_name;
+            }
 
             var widget_transform = kvp.Value.transform;
             var avatar_pos = kvp.Key.transform.position;

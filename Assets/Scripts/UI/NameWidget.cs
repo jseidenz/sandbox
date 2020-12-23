@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using System;
-using UnityEngine.UI;
 
 public class NameWidget : MonoBehaviour
 {
+    public Photon.Realtime.Player m_owner;
     [SerializeField] public TMPro.TextMeshProUGUI m_text;
 }
