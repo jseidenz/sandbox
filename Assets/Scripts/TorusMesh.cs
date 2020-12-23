@@ -14,15 +14,15 @@ public class TorusMesh
 	List<Vector2> m_uvs = new List<Vector2>();
 	List<int> m_indices = new List<int>();
 
-	public TorusMesh(float radius, float thickness, int slices, int slice_tessellation)
+	public TorusMesh(float radius, float thickness, int tesselation)
     {
 		m_mesh = new Mesh();
 		m_mesh.name = "Torus";
 
 		m_radius = radius;
 		m_thickness = thickness;
-		m_slices = slices;
-		m_slice_tesselation = slice_tessellation;
+		m_slices = tesselation * 2;
+		m_slice_tesselation = tesselation;
 
 		RebuildMesh();
     }

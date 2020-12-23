@@ -47,7 +47,7 @@ public class DigTool : MonoBehaviour
 
     void OnEnable()
     {
-        //m_cursor_mesh = new TorusMesh(1, 0.3f, )
+        m_cursor_mesh = new TorusMesh(1, 0.3f, 30);
     }
 
     void OnDisable()
