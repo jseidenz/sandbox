@@ -31,6 +31,7 @@ public class DigTool : MonoBehaviour
 
     [SerializeField] float m_liquid_fill_rate;
     [SerializeField] float m_liquid_remove_rate;
+    [SerializeField] Material m_dig_cursor_material;
 
     float m_locked_fill_height;
 
