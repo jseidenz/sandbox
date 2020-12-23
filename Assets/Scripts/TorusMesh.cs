@@ -45,62 +45,62 @@ public class TorusMesh
 		if (slices < 3) slices = 3;
 		if (slice_tesselation < 3) slice_tesselation = 3;
 
-		List<Vector3> vertices = new List<Vector3>();
-		List<Vector3> normals = new List<Vector3>();
-		List<Vector2> uvs = new List<Vector2>();
-		List<int> indices = new List<int>();
+		var vertices = new List<Vector3>();
+		var normals = new List<Vector3>();
+		var uvs = new List<Vector2>();
+		var indices = new List<int>();
 
-		int circleVertexCount = slices + 1;
-		int sliceVertexCount = slice_tesselation + 1;
+		int circle_vertex_count = slices + 1;
+		int slive_vertex_count = slice_tesselation + 1;
 		float pi = Mathf.PI;
-		float twoPi = Mathf.PI * 2.0f;
-		float invSlices = 1f / slices;
-		float intSliceTessellation = 1f / slice_tesselation;
-		Vector3 axisY = Vector3.up;
+		float two_pi = Mathf.PI * 2.0f;
+		float inv_slices = 1f / slices;
+		float inv_slice_tesselation = 1f / slice_tesselation;
+		var axis_y = Vector3.up;
 
 		for (int i = 0; i <= slices; ++i)
 		{
-			float u = i * invSlices;
-			float circleAngle = u * twoPi;
+			float u = i * inv_slices;
+			float circleAngle = u * two_pi;
 
-			Vector3 axisX = new Vector3(Mathf.Cos(circleAngle), 0f, Mathf.Sin(circleAngle));
-			Vector3 center = new Vector3(axisX.x * radius, 0f, axisX.z * radius);
+			var axis_x = new Vector3(Mathf.Cos(circleAngle), 0f, Mathf.Sin(circleAngle));
+			var center = new Vector3(axis_x.x * radius, 0f, axis_x.z * radius);
 
 			for (int j = 0; j <= slice_tesselation; ++j)
 			{
-				float v = j * intSliceTessellation;
-				float tubeAngle = v * twoPi + pi;
+				float v = j * inv_slice_tesselation;
+				float tubeAngle = v * two_pi + pi;
 
 				float x = Mathf.Cos(tubeAngle);
 				float y = Mathf.Sin(tubeAngle);
 
-				Vector3 xVector = x * axisX;
-				Vector3 yVector = y * axisY;
+				var x_vector = x * axis_x;
+				var y_vector = y * axis_y;
 
-				Vector3 vertex = xVector * thickness + yVector * thickness + center;
-				Vector3 normal = xVector + yVector;
-				Vector2 uv = new Vector2(u, v);
+				var vertex = x_vector * thickness + y_vector * thickness + center;
+				var normal = x_vector + y_vector;
+				var uv = new Vector2(u, v);
 
 				vertices.Add(vertex);
 				normals.Add(normal);
 				uvs.Add(uv);
 
-				int iNext = (i + 1) % circleVertexCount;
-				int jNext = (j + 1) % sliceVertexCount;
+				int iNext = (i + 1) % circle_vertex_count;
+				int jNext = (j + 1) % slive_vertex_count;
 
-				indices.Add(i * sliceVertexCount + j);
-				indices.Add(i * sliceVertexCount + jNext);
-				indices.Add(iNext * sliceVertexCount + j);
+				indices.Add(i * slive_vertex_count + j);
+				indices.Add(i * slive_vertex_count + jNext);
+				indices.Add(iNext * slive_vertex_count + j);
 
-				indices.Add(i * sliceVertexCount + jNext);
-				indices.Add(iNext * sliceVertexCount + jNext);
-				indices.Add(iNext * sliceVertexCount + j);
+				indices.Add(i * slive_vertex_count + jNext);
+				indices.Add(iNext * slive_vertex_count + jNext);
+				indices.Add(iNext * slive_vertex_count + j);
 			}
 		}
 
-		m_mesh.vertices = vertices.ToArray();
-		m_mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
-		m_mesh.normals = normals.ToArray();
-		m_mesh.uv = uvs.ToArray();
+		mesh.vertices = vertices.ToArray();
+		mesh.SetIndices(indices.ToArray(), MeshTopology.Triangles, 0);
+		mesh.normals = normals.ToArray();
+		mesh.uv = uvs.ToArray();
 	}
 }
