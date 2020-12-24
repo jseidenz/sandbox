@@ -331,25 +331,30 @@ public class VoxelChunk
     {
         scratch_buffer.Clear();
 
-        Profiler.BeginSample("GatherDensitySamples");
-        var density_samples = scratch_buffer.m_density_samples;
-        GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count);
-        Profiler.EndSample();
+        if (m_is_empty)
+        {
+            m_mesh.Clear();
+        }
+        else
+        {
+            Profiler.BeginSample("GatherDensitySamples");
+            var density_samples = scratch_buffer.m_density_samples;
+            GatherDensitySamples(scratch_buffer.m_density_samples, out var density_sample_count);
+            Profiler.EndSample();
 
-        Profiler.BeginSample("March");
-        Triangulate(scratch_buffer, density_samples, density_sample_count, out var vert_count, out var triangle_count);
-        Profiler.EndSample();
+            Profiler.BeginSample("March");
+            Triangulate(scratch_buffer, density_samples, density_sample_count, out var vert_count, out var triangle_count);
+            Profiler.EndSample();
 
 
-        Profiler.BeginSample("UpdateMeshData");
-        m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
-        m_mesh.SetVertexBufferParams(vert_count, vertex_attribute_descriptors);
+            Profiler.BeginSample("UpdateMeshData");
+            m_mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt16;
+            m_mesh.SetVertexBufferParams(vert_count, vertex_attribute_descriptors);
 
-        m_mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_count, 0, m_mesh_update_flags);
-        m_mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_count, 0, false);
-        Profiler.EndSample();
-
-        m_is_empty = triangle_count == 0;
+            m_mesh.SetVertexBufferData(scratch_buffer.m_vertices, 0, 0, vert_count, 0, m_mesh_update_flags);
+            m_mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_count, 0, false);
+            Profiler.EndSample();
+        }
 
         if (m_generate_collision)
         {
@@ -505,6 +510,7 @@ public class VoxelChunk
         var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
         var start_x = System.Math.Max(m_density_grid_x - 1, 0);
 
+        bool is_empty = true;
         for (int y = start_y; y < max_y; ++y)
         {
             var vertical_occlusion_region = DirtyOcclusionRegion.Center;
@@ -550,8 +556,15 @@ public class VoxelChunk
                 }
 
                 m_layer_sample_grid[left_near_cell_idx] = (byte)sample_type;
+
+                if(sample_type != SAMPLE_TYPE_EMTPY)
+                {
+                    is_empty = false;
+                }
             }
         }
+
+        m_is_empty = is_empty;
 
         Profiler.EndSample();
 
