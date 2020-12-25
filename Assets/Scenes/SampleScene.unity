@@ -12811,6 +12811,21 @@ PrefabInstance:
       propertyPath: m_use_height_map
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_voxel_chunk_dimensions
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_solid_voxel_chunk_dimenions
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 4905298800713076011, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
+        type: 3}
+      propertyPath: m_liquid_voxel_chunk_dimenions
+      value: 32
+      objectReference: {fileID: 0}
     - target: {fileID: 6796537255132227347, guid: cfaa4a05acd54f64c8961cfe4d45c0a7,
         type: 3}
       propertyPath: m_Name
