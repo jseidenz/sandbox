@@ -273,6 +273,25 @@ public class VoxelLayer
         }
     }
 
+    public void UpdateVisibility(Vector3Int min_chunk_idx, Vector3Int max_chunk_idx)
+    {
+        bool is_layer_visible = m_layer_idx >= min_chunk_idx.y && m_layer_idx <= max_chunk_idx.y;
+
+        for(int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
+        {
+            bool is_y_visible = is_layer_visible && chunk_y >= min_chunk_idx.z && chunk_y <= max_chunk_idx.z;
+
+            for(int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
+            {
+                bool is_visible = is_y_visible && chunk_x >= min_chunk_idx.x && chunk_x <= max_chunk_idx.x;
+
+                var chunk_idx = chunk_x + chunk_y * m_width_in_chunks;
+                var chunk = m_voxel_chunks[chunk_idx];
+                chunk.SetVisibility(is_visible);
+            }
+        }
+    }
+
     internal void OnDestroy()
     {
         m_culling_group.Dispose();

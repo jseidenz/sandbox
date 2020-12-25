@@ -44,6 +44,7 @@ public class Game : MonoBehaviour
     LiquidLayeredBrush m_liquid_brush;
     GameObject m_player_avatar;
     List<DensityCell> m_dirty_solid_density_cells = new List<DensityCell>();
+    Vector3[] m_frustum_corners = new Vector3[4];
 
 
     HashSet<Vector3Int> m_solid_density_dirty_chunk_ids = new HashSet<Vector3Int>();
@@ -276,6 +277,21 @@ public class Game : MonoBehaviour
                 m_world_generator = null;
             }
         }
+
+        m_camera.CalculateFrustumCorners(new Rect(0, 0, 1, 1), m_camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, m_frustum_corners);
+
+        var min_frustum_point = m_camera.transform.position;
+        var max_frustum_point = min_frustum_point;
+
+        foreach(var frustum_corner in m_frustum_corners)
+        {
+            min_frustum_point = Vector3.Min(frustum_corner, min_frustum_point);
+            max_frustum_point = Vector3.Max(frustum_corner, max_frustum_point);
+        }
+
+        m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point);
+        m_solid_mesher.UpdateVisibility(max_frustum_point, max_frustum_point);
+
 
         m_solid_density_dirty_chunk_ids.Clear();
         m_dirty_solid_density_cells.Clear();

@@ -1160,6 +1160,11 @@ public class VoxelChunk
         m_generate_collision = is_enabled;
     }
 
+    public void SetVisibility(bool is_visible)
+    {
+        m_is_visible = is_visible;
+    }
+
     public void Render(float dt, Material prepass_material, Material material, bool cast_shadows)
     {
         if (!m_is_empty)
@@ -1194,6 +1199,7 @@ public class VoxelChunk
     bool m_generate_collision;
     BevelTuning m_bevel_tuning;
     bool m_is_liquid;
+    bool m_is_visible;
     MeshUpdateFlags m_mesh_update_flags = MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontRecalculateBounds
 #if !UNITY_EDITOR
         | MeshUpdateFlags.DontValidateIndices

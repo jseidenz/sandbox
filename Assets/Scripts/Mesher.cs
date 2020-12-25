@@ -177,6 +177,22 @@ public class Mesher
         }
     }
 
+    public void UpdateVisibility(Vector3 min_frustum_corner, Vector3 max_frustum_corner)
+    {
+        var min_chunk_idx = new Vector3Int((int)(min_frustum_corner.x / m_voxel_chunk_dimensions), (int)(min_frustum_corner.y / m_voxel_chunk_dimensions), (int)(min_frustum_corner.z / m_voxel_chunk_dimensions));
+        var max_chunk_idx = new Vector3Int((int)(max_frustum_corner.x / m_voxel_chunk_dimensions), (int)(max_frustum_corner.y / m_voxel_chunk_dimensions), (int)(max_frustum_corner.z / m_voxel_chunk_dimensions));
+
+        min_chunk_idx = Vector3Int.Max(min_chunk_idx, new Vector3Int(0, 0, 0));
+        min_chunk_idx = Vector3Int.Min(min_chunk_idx, new Vector3Int(m_grid_width_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_height_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_depth_in_voxels / m_voxel_chunk_dimensions - 1));
+        max_chunk_idx = Vector3Int.Max(max_chunk_idx, new Vector3Int(0, 0, 0));
+        max_chunk_idx = Vector3Int.Min(max_chunk_idx, new Vector3Int(m_grid_width_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_height_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_depth_in_voxels / m_voxel_chunk_dimensions - 1));
+
+        foreach (var layer in m_layers)
+        {
+            layer.UpdateVisibility(min_chunk_idx, max_chunk_idx);
+        }
+    }
+
     public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }
     public int GetGridWidthInVoxels() { return m_grid_depth_in_voxels; }
 
