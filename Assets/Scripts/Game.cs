@@ -43,11 +43,8 @@ public class Game : MonoBehaviour
     SolidLayeredBrush m_solid_brush;
     LiquidLayeredBrush m_liquid_brush;
     GameObject m_player_avatar;
-    ChunkVisibilityMatrix m_solid_chunk_visibility_matrix;
-    ChunkVisibilityMatrix m_liquid_chunk_visibility_matrix;
     List<DensityCell> m_dirty_solid_density_cells = new List<DensityCell>();
     Vector3[] m_frustum_corners = new Vector3[4];
-    Plane[] m_frustum_planes = new Plane[6];
 
 
     HashSet<Vector3Int> m_solid_density_dirty_chunk_ids = new HashSet<Vector3Int>();
@@ -89,9 +86,6 @@ public class Game : MonoBehaviour
         ProcessCommandLineFile();
 
         GenerateWorld(solid_layers, liquid_layers);
-        m_solid_chunk_visibility_matrix = new ChunkVisibilityMatrix(m_voxel_size_in_meters, new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_solid_voxel_chunk_dimenions);
-        m_liquid_chunk_visibility_matrix = new ChunkVisibilityMatrix(m_voxel_size_in_meters, new Vector3Int(m_grid_width_in_voxels, m_grid_height_in_voxels, m_grid_depth_in_voxels), m_liquid_voxel_chunk_dimenions);
-
 
         Instance = this;
     }
@@ -281,7 +275,6 @@ public class Game : MonoBehaviour
             }
         }
 
-
         m_camera.CalculateFrustumCorners(new Rect(0, 0, 1, 1), m_camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, m_frustum_corners);
 
         var min_frustum_point = m_camera.transform.position;
@@ -294,14 +287,10 @@ public class Game : MonoBehaviour
             max_frustum_point = Vector3.Max(world_space_corner, max_frustum_point);
         }
 
-        GeometryUtility.CalculateFrustumPlanes(m_camera, m_frustum_planes);
+        var frustum_planes = GeometryUtility.CalculateFrustumPlanes(m_camera);
 
-        var camera_pos = m_camera.transform.position;
-        m_solid_chunk_visibility_matrix.Update(m_camera, camera_pos, m_frustum_corners, m_frustum_planes);
-        m_liquid_chunk_visibility_matrix.Update(m_camera, camera_pos, m_frustum_corners, m_frustum_planes);
-
-        m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, m_frustum_planes);
-        m_liquid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, m_frustum_planes);
+        m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, frustum_planes);
+        m_liquid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, frustum_planes);
 
 
         m_solid_density_dirty_chunk_ids.Clear();
