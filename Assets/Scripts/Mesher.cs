@@ -161,12 +161,12 @@ public class Mesher
         }
     }
 
-    public void UpdateVisibility(Vector3 min_frustum_corner, Vector3 max_frustum_corner)
+    public void UpdateVisibility(Vector3 min_frustum_corner, Vector3 max_frustum_corner, Plane[] frustum_planes)
     {
         Profiler.BeginSample("UpdateVisibility");
         Vector3 one_over_chunk_size_in_meters = new Vector3(1f / ((float)m_voxel_chunk_dimensions * m_voxel_size_in_meters.x), 1f / (m_voxel_size_in_meters.y), 1f / ((float)m_voxel_chunk_dimensions * m_voxel_size_in_meters.z));
-        var min_chunk_idx = new Vector3Int((int)(min_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)(min_frustum_corner.y * one_over_chunk_size_in_meters.y), (int)(min_frustum_corner.z * one_over_chunk_size_in_meters.z));
-        var max_chunk_idx = new Vector3Int((int)(max_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)(max_frustum_corner.y * one_over_chunk_size_in_meters.y), (int)(max_frustum_corner.z * one_over_chunk_size_in_meters.z));
+        var min_chunk_idx = new Vector3Int((int)(min_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)(min_frustum_corner.y * one_over_chunk_size_in_meters.y) + 1, (int)(min_frustum_corner.z * one_over_chunk_size_in_meters.z));
+        var max_chunk_idx = new Vector3Int((int)(max_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)((max_frustum_corner.y + m_voxel_size_in_meters.y) * one_over_chunk_size_in_meters.y) + 1, (int)(max_frustum_corner.z * one_over_chunk_size_in_meters.z));
 
         min_chunk_idx = Vector3Int.Max(min_chunk_idx, new Vector3Int(0, 0, 0));
         min_chunk_idx = Vector3Int.Min(min_chunk_idx, new Vector3Int(m_grid_width_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_height_in_voxels - 1, m_grid_depth_in_voxels / m_voxel_chunk_dimensions - 1));
@@ -175,7 +175,7 @@ public class Mesher
 
         foreach (var layer in m_layers)
         {
-            layer.UpdateVisibility(min_chunk_idx, max_chunk_idx);
+            layer.UpdateVisibility(min_chunk_idx, max_chunk_idx, frustum_planes);
         }
         Profiler.EndSample();
     }

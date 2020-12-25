@@ -287,8 +287,10 @@ public class Game : MonoBehaviour
             max_frustum_point = Vector3.Max(world_space_corner, max_frustum_point);
         }
 
-        m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point);
-        m_liquid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point);
+        var frustum_planes = GeometryUtility.CalculateFrustumPlanes(m_camera);
+
+        m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, frustum_planes);
+        m_liquid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, frustum_planes);
 
 
         m_solid_density_dirty_chunk_ids.Clear();
