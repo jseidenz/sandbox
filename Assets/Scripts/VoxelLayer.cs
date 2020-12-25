@@ -21,6 +21,8 @@ public class VoxelLayer
         float density_height_weight, 
         VertexAttributeDescriptor[] vertex_attribute_descriptors,
         bool is_liquid,
+        Material material,
+        bool cast_shadows,
         BevelTuning bevel_tuning
         )
     {
@@ -49,7 +51,7 @@ public class VoxelLayer
             for(int x = 0; x < m_width_in_chunks; ++x)
             {
                 var bounds = GetChunkBounds(x, y);
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_sample_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, is_liquid, bevel_tuning);
+                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_sample_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, is_liquid, material, cast_shadows, bevel_tuning);
             }
         }
     }
@@ -255,14 +257,17 @@ public class VoxelLayer
     }
     void OnCullingGroupStateChanged(CullingGroupEvent evt)
     {
-        if(evt.hasBecomeVisible)
+        var voxel_chunk = m_voxel_chunks[evt.index];
+        if (evt.hasBecomeVisible)
         {
-            m_visible_voxel_chunks.Add(m_voxel_chunks[evt.index]);
+            m_visible_voxel_chunks.Add(voxel_chunk);
         }
         else
         {
-            m_visible_voxel_chunks.Remove(m_voxel_chunks[evt.index]);
+            m_visible_voxel_chunks.Remove(voxel_chunk);
         }
+
+        voxel_chunk.SetVisibility(evt.hasBecomeVisible);
     }
 
     public void SetCollisionGenerationEnabled(bool is_enabled)

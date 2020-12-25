@@ -287,6 +287,8 @@ public class VoxelChunk
         float density_height_weight,        
         Bounds bounds,
         bool is_liquid,
+        Material material,
+        bool cast_shadows,
         BevelTuning bevel_tuning
         )
     {
@@ -309,6 +311,22 @@ public class VoxelChunk
         m_mesh.name = "VoxelChunk";
         m_mesh.bounds = bounds;
 
+        var mesh_renderer_go = new GameObject($"{name}MeshRenderer");
+
+        m_mesh_renderer = mesh_renderer_go.AddComponent<MeshRenderer>();
+        m_mesh_renderer.sharedMaterial = material;
+        if(cast_shadows)
+        {
+            m_mesh_renderer.shadowCastingMode = ShadowCastingMode.On;
+        }
+        else
+        {
+            m_mesh_renderer.shadowCastingMode = ShadowCastingMode.Off;
+        }
+        var mesh_filter = mesh_renderer_go.AddComponent<MeshFilter>();
+        mesh_filter.sharedMesh = m_mesh;
+        m_mesh_renderer.gameObject.SetActive(false);
+
         if (m_generate_collision)
         {
             var collider_go = new GameObject($"{name}VoxelCollider");
@@ -325,6 +343,11 @@ public class VoxelChunk
     {
         m_layer_above_sample_grid = layer_above_sample_grid;
         m_layer_below_sample_grid = layer_below_sample_grid;
+    }
+
+    public void SetVisibility(bool is_visible)
+    {
+        m_mesh_renderer.gameObject.SetActive(is_visible);
     }
 
     public void March(VoxelChunk.ScratchBuffer scratch_buffer, VertexAttributeDescriptor[] vertex_attribute_descriptors)
@@ -1166,7 +1189,7 @@ public class VoxelChunk
             {
                 Graphics.DrawMesh(m_mesh, matrix, prepass_material, 0, null, 0, null, false, false, false);
             }
-            Graphics.DrawMesh(m_mesh, matrix, material, 0, null, 0, null, cast_shadows);
+            //Graphics.DrawMesh(m_mesh, matrix, material, 0, null, 0, null, cast_shadows);
         }
     }
 
@@ -1178,6 +1201,7 @@ public class VoxelChunk
     int m_layer_height_in_voxels;
     Mesh m_mesh;
     MeshCollider m_collider;
+    MeshRenderer m_mesh_renderer;
     float m_iso_level;
     float m_bot_y;
     float m_top_y;
