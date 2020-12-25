@@ -75,9 +75,6 @@ public class Game : MonoBehaviour
         m_solid_mesher = CreateSolidMesher(solid_layers, m_solid_brush);
         m_liquid_mesher = CreateLiquidMesher(m_liquid_simulation.GetLayers(), m_liquid_brush);
 
-        m_solid_mesher.BindCamera(m_camera, 2f);
-        m_liquid_mesher.BindCamera(m_camera, 1f);
-
         CreateGroundPlane(m_solid_brush);
 
         m_water = GameObject.Instantiate(m_water);
@@ -397,12 +394,6 @@ public class Game : MonoBehaviour
     public Camera GetCamera()
     {
         return m_camera;
-    }
-
-    void OnDestroy()
-    {
-        m_solid_mesher.OnDestroy();
-        m_liquid_mesher.OnDestroy();
     }
 
     public string GetSaveFilePath()

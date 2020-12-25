@@ -87,14 +87,6 @@ public class Mesher
         }
     }
 
-    public void BindCamera(Camera camera, float bounding_sphere_radius_multiplier)
-    {
-        foreach(var layer in m_layers)
-        {
-            layer.BindCamera(camera, bounding_sphere_radius_multiplier);
-        }
-    }
-
     public void Render(float dt)
     {
         Profiler.BeginSample("Render");
@@ -146,14 +138,6 @@ public class Mesher
         Profiler.EndSample();
     }
 
-    public void OnDestroy()
-    {
-        foreach(var layer in m_layers)
-        {
-            layer.OnDestroy();
-        }
-    }
-
     public void SetCollisionGenerationEnabled(bool is_enabled)
     {
         foreach(var layer in m_layers)
@@ -179,6 +163,7 @@ public class Mesher
 
     public void UpdateVisibility(Vector3 min_frustum_corner, Vector3 max_frustum_corner)
     {
+        Profiler.BeginSample("UpdateVisibility");
         Vector3 one_over_chunk_size_in_meters = new Vector3(1f / ((float)m_voxel_chunk_dimensions * m_voxel_size_in_meters.x), 1f / (m_voxel_size_in_meters.y), 1f / ((float)m_voxel_chunk_dimensions * m_voxel_size_in_meters.z));
         var min_chunk_idx = new Vector3Int((int)(min_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)(min_frustum_corner.y * one_over_chunk_size_in_meters.y), (int)(min_frustum_corner.z * one_over_chunk_size_in_meters.z));
         var max_chunk_idx = new Vector3Int((int)(max_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)(max_frustum_corner.y * one_over_chunk_size_in_meters.y), (int)(max_frustum_corner.z * one_over_chunk_size_in_meters.z));
@@ -192,6 +177,7 @@ public class Mesher
         {
             layer.UpdateVisibility(min_chunk_idx, max_chunk_idx);
         }
+        Profiler.EndSample();
     }
 
     public int GetGridHeightInVoxels() { return m_grid_depth_in_voxels; }

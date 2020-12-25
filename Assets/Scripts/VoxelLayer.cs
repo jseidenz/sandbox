@@ -184,31 +184,6 @@ public class VoxelLayer
         return bounds;
     }
 
-    public void BindCamera(Camera camera, float bounding_sphere_radius_multiplier)
-    {
-        m_culling_group = new CullingGroup();
-        m_culling_group.targetCamera = camera;
-        m_culling_group.onStateChanged += OnCullingGroupStateChanged;
-
-        var bounding_spheres = new BoundingSphere[m_voxel_chunks.Length];
-        int bounding_sphere_idx = 0;
-
-        for (int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
-        {
-            for (int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
-            {
-                var bounds = GetChunkBounds(chunk_x, chunk_y);
-
-                var bounds_radius = bounds.size.magnitude * 0.5f;
-                bounding_spheres[bounding_sphere_idx++] = new BoundingSphere(bounds.center, bounds_radius * bounding_sphere_radius_multiplier);
-            }
-        }
-
-        m_culling_group.SetBoundingSpheres(bounding_spheres);
-        m_culling_group.SetBoundingSphereCount(bounding_spheres.Length);
-    }
-
-
     public void Render(float dt, Material prepass_material, Material material, bool cast_shadows)
     {
         foreach(var chunk in m_visible_voxel_chunks)
@@ -253,17 +228,6 @@ public class VoxelLayer
 
         return chunk_grid_y * m_width_in_chunks + chunk_grid_x;
     }
-    void OnCullingGroupStateChanged(CullingGroupEvent evt)
-    {
-        if(evt.hasBecomeVisible)
-        {
-            //m_visible_voxel_chunks.Add(m_voxel_chunks[evt.index]);
-        }
-        else
-        {
-            //m_visible_voxel_chunks.Remove(m_voxel_chunks[evt.index]);
-        }
-    }
 
     public void SetCollisionGenerationEnabled(bool is_enabled)
     {
@@ -288,6 +252,9 @@ public class VoxelLayer
                 var chunk_idx = chunk_x + chunk_y * m_width_in_chunks;
                 var chunk = m_voxel_chunks[chunk_idx];
 
+                bool was_visible = chunk.GetVisibility();
+                if (was_visible == is_visible) continue;
+
                 if(is_visible)
                 {
                     m_visible_voxel_chunks.Add(chunk);
@@ -302,12 +269,6 @@ public class VoxelLayer
         }
     }
 
-    internal void OnDestroy()
-    {
-        m_culling_group.Dispose();
-        m_culling_group = null;
-    }
-
     Color m_color;
     float[] m_density_grid;
     byte[] m_sample_grid;
@@ -315,7 +276,6 @@ public class VoxelLayer
     int m_height_in_voxels;
     int m_width_in_chunks;
     int m_height_in_chunks;
-    CullingGroup m_culling_group;
     Vector3 m_voxel_size_in_meters;
     float m_one_over_voxel_chunk_dimensions;
     int m_voxel_chunk_dimensions;

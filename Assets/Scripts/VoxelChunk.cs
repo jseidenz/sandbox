@@ -1165,6 +1165,8 @@ public class VoxelChunk
         m_is_visible = is_visible;
     }
 
+    public bool GetVisibility() { return m_is_visible; }
+
     public void Render(float dt, Material prepass_material, Material material, bool cast_shadows)
     {
         if (!m_is_empty)
