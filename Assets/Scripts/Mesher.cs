@@ -179,13 +179,14 @@ public class Mesher
 
     public void UpdateVisibility(Vector3 min_frustum_corner, Vector3 max_frustum_corner)
     {
-        var min_chunk_idx = new Vector3Int((int)(min_frustum_corner.x / m_voxel_chunk_dimensions), (int)(min_frustum_corner.y / m_voxel_chunk_dimensions), (int)(min_frustum_corner.z / m_voxel_chunk_dimensions));
-        var max_chunk_idx = new Vector3Int((int)(max_frustum_corner.x / m_voxel_chunk_dimensions), (int)(max_frustum_corner.y / m_voxel_chunk_dimensions), (int)(max_frustum_corner.z / m_voxel_chunk_dimensions));
+        Vector3 one_over_chunk_size_in_meters = new Vector3(1f / ((float)m_voxel_chunk_dimensions * m_voxel_size_in_meters.x), 1f / (m_voxel_size_in_meters.y), 1f / ((float)m_voxel_chunk_dimensions * m_voxel_size_in_meters.z));
+        var min_chunk_idx = new Vector3Int((int)(min_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)(min_frustum_corner.y * one_over_chunk_size_in_meters.y), (int)(min_frustum_corner.z * one_over_chunk_size_in_meters.z));
+        var max_chunk_idx = new Vector3Int((int)(max_frustum_corner.x * one_over_chunk_size_in_meters.x), (int)(max_frustum_corner.y * one_over_chunk_size_in_meters.y), (int)(max_frustum_corner.z * one_over_chunk_size_in_meters.z));
 
         min_chunk_idx = Vector3Int.Max(min_chunk_idx, new Vector3Int(0, 0, 0));
-        min_chunk_idx = Vector3Int.Min(min_chunk_idx, new Vector3Int(m_grid_width_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_height_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_depth_in_voxels / m_voxel_chunk_dimensions - 1));
+        min_chunk_idx = Vector3Int.Min(min_chunk_idx, new Vector3Int(m_grid_width_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_height_in_voxels - 1, m_grid_depth_in_voxels / m_voxel_chunk_dimensions - 1));
         max_chunk_idx = Vector3Int.Max(max_chunk_idx, new Vector3Int(0, 0, 0));
-        max_chunk_idx = Vector3Int.Min(max_chunk_idx, new Vector3Int(m_grid_width_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_height_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_depth_in_voxels / m_voxel_chunk_dimensions - 1));
+        max_chunk_idx = Vector3Int.Min(max_chunk_idx, new Vector3Int(m_grid_width_in_voxels / m_voxel_chunk_dimensions - 1, m_grid_height_in_voxels - 1, m_grid_depth_in_voxels / m_voxel_chunk_dimensions - 1));
 
         foreach (var layer in m_layers)
         {

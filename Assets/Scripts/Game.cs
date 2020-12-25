@@ -285,12 +285,13 @@ public class Game : MonoBehaviour
 
         foreach(var frustum_corner in m_frustum_corners)
         {
-            min_frustum_point = Vector3.Min(frustum_corner, min_frustum_point);
-            max_frustum_point = Vector3.Max(frustum_corner, max_frustum_point);
+            var world_space_corner = m_camera.transform.TransformVector(frustum_corner);
+            min_frustum_point = Vector3.Min(world_space_corner, min_frustum_point);
+            max_frustum_point = Vector3.Max(world_space_corner, max_frustum_point);
         }
 
         m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point);
-        m_solid_mesher.UpdateVisibility(max_frustum_point, max_frustum_point);
+        m_liquid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point);
 
 
         m_solid_density_dirty_chunk_ids.Clear();

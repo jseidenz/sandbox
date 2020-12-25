@@ -257,11 +257,11 @@ public class VoxelLayer
     {
         if(evt.hasBecomeVisible)
         {
-            m_visible_voxel_chunks.Add(m_voxel_chunks[evt.index]);
+            //m_visible_voxel_chunks.Add(m_voxel_chunks[evt.index]);
         }
         else
         {
-            m_visible_voxel_chunks.Remove(m_voxel_chunks[evt.index]);
+            //m_visible_voxel_chunks.Remove(m_voxel_chunks[evt.index]);
         }
     }
 
@@ -287,6 +287,16 @@ public class VoxelLayer
 
                 var chunk_idx = chunk_x + chunk_y * m_width_in_chunks;
                 var chunk = m_voxel_chunks[chunk_idx];
+
+                if(is_visible)
+                {
+                    m_visible_voxel_chunks.Add(chunk);
+                }
+                else
+                {
+                    m_visible_voxel_chunks.Remove(chunk);
+                }
+
                 chunk.SetVisibility(is_visible);
             }
         }
