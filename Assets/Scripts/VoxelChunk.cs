@@ -331,7 +331,8 @@ public class VoxelChunk
     {
         scratch_buffer.Clear();
 
-        if (m_is_empty)
+        var triangle_count = 0;
+        if (!m_has_any_samples)
         {
             m_mesh.Clear();
         }
@@ -343,7 +344,7 @@ public class VoxelChunk
             Profiler.EndSample();
 
             Profiler.BeginSample("March");
-            Triangulate(scratch_buffer, density_samples, density_sample_count, out var vert_count, out var triangle_count);
+            Triangulate(scratch_buffer, density_samples, density_sample_count, out var vert_count, out triangle_count);
             Profiler.EndSample();
 
 
@@ -355,6 +356,8 @@ public class VoxelChunk
             m_mesh.SetTriangles(scratch_buffer.m_triangles, 0, triangle_count, 0, false);
             Profiler.EndSample();
         }
+
+        m_is_empty = triangle_count == 0;
 
         if (m_generate_collision)
         {
@@ -510,7 +513,7 @@ public class VoxelChunk
         var max_x = System.Math.Min(m_density_grid_x + m_chunk_dimension_in_voxels + 1, m_layer_width_in_voxels - 1);
         var start_x = System.Math.Max(m_density_grid_x - 1, 0);
 
-        bool is_empty = true;
+        bool has_any_samples = false;
         for (int y = start_y; y < max_y; ++y)
         {
             var vertical_occlusion_region = DirtyOcclusionRegion.Center;
@@ -559,12 +562,12 @@ public class VoxelChunk
 
                 if(sample_type != SAMPLE_TYPE_EMTPY)
                 {
-                    is_empty = false;
+                    has_any_samples = true;
                 }
             }
         }
 
-        m_is_empty = is_empty;
+        m_has_any_samples = has_any_samples;
 
         Profiler.EndSample();
 
@@ -1186,6 +1189,7 @@ public class VoxelChunk
     int m_density_grid_x;
     int m_density_grid_y;
     int m_chunk_dimension_in_voxels;
+    bool m_has_any_samples;
     bool m_is_empty = true;
     bool m_generate_collision;
     BevelTuning m_bevel_tuning;
