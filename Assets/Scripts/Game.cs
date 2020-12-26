@@ -268,8 +268,6 @@ public class Game : MonoBehaviour
 
     void UpdateSolidMesherVisibility(Vector3[] camera_frustum_corners)
     {
-        m_camera.CalculateFrustumCorners(new Rect(0, 0, 1, 1), m_camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, m_frustum_corners);
-
         var min_frustum_point = m_camera.transform.position;
         var max_frustum_point = min_frustum_point;
 
