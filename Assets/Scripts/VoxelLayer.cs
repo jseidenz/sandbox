@@ -256,50 +256,59 @@ public class VoxelLayer
 
         bool is_layer_visible = m_layer_idx >= min_visible_chunk_idx.y && m_layer_idx <= max_visible_chunk_idx.y;
 
-        m_newly_visible_chunk_indices.Clear();
-        m_newly_invisible_chunk_indices.Clear();
-
-        for (int chunk_y = min_changed_idx.z; chunk_y <= max_changed_idx.z; ++chunk_y)
+        if (is_layer_visible)
         {
-            bool is_y_visible = is_layer_visible && chunk_y >= min_visible_chunk_idx.z && chunk_y <= max_visible_chunk_idx.z;
+            m_newly_visible_chunk_indices.Clear();
+            m_newly_invisible_chunk_indices.Clear();
 
-            for(int chunk_x = min_changed_idx.x; chunk_x <= max_changed_idx.x; ++chunk_x)
+            for (int chunk_y = min_changed_idx.z; chunk_y <= max_changed_idx.z; ++chunk_y)
             {
-                var chunk_idx = chunk_y * m_width_in_chunks + chunk_x;
-                var bounds_entry = m_bounds_grid[chunk_idx];
-                bool is_visible = is_y_visible && chunk_x >= min_visible_chunk_idx.x && chunk_x <= max_visible_chunk_idx.x;
-
-                if(is_visible)
+                for (int chunk_x = min_changed_idx.x; chunk_x <= max_changed_idx.x; ++chunk_x)
                 {
-                    is_visible = GeometryUtility.TestPlanesAABB(frustum_planes, bounds_entry.m_bounds);
-                }
+                    var chunk_idx = chunk_y * m_width_in_chunks + chunk_x;
+                    var bounds_entry = m_bounds_grid[chunk_idx];
 
-                bool was_visible = bounds_entry.m_is_visible;
-                if (was_visible == is_visible) continue;
+                    bool is_visible = GeometryUtility.TestPlanesAABB(frustum_planes, bounds_entry.m_bounds);
 
-                if(is_visible)
-                {
-                    m_newly_visible_chunk_indices.Add(chunk_idx);
-                }
-                else
-                {
-                    m_newly_invisible_chunk_indices.Add(chunk_idx);
+
+                    bool was_visible = bounds_entry.m_is_visible;
+                    if (was_visible == is_visible) continue;
+
+                    if (is_visible)
+                    {
+                        m_newly_visible_chunk_indices.Add(chunk_idx);
+                    }
+                    else
+                    {
+                        m_newly_invisible_chunk_indices.Add(chunk_idx);
+                    }
                 }
             }
-        }
 
-        foreach(var chunk_idx in m_newly_invisible_chunk_indices)
-        {
-            ref var bounds_entry = ref m_bounds_grid[chunk_idx];
-            bounds_entry.m_is_visible = false;
-            m_visible_voxel_chunks.Remove(m_voxel_chunks[chunk_idx]);
-        }
+            foreach (var chunk_idx in m_newly_invisible_chunk_indices)
+            {
+                ref var bounds_entry = ref m_bounds_grid[chunk_idx];
+                bounds_entry.m_is_visible = false;
+                m_visible_voxel_chunks.Remove(m_voxel_chunks[chunk_idx]);
+            }
 
-        foreach (var chunk_idx in m_newly_visible_chunk_indices)
+            foreach (var chunk_idx in m_newly_visible_chunk_indices)
+            {
+                ref var bounds_entry = ref m_bounds_grid[chunk_idx];
+                bounds_entry.m_is_visible = true;
+                m_visible_voxel_chunks.Add(m_voxel_chunks[chunk_idx]);
+            }
+        }
+        else
         {
-            ref var bounds_entry = ref m_bounds_grid[chunk_idx];
-            bounds_entry.m_is_visible = true;
-            m_visible_voxel_chunks.Add(m_voxel_chunks[chunk_idx]);
+            for(int chunk_idx = 0; chunk_idx < m_bounds_grid.Length; ++chunk_idx)
+            {
+                ref var bounds_entry = ref m_bounds_grid[chunk_idx];
+                if (!bounds_entry.m_is_visible) continue;
+
+                bounds_entry.m_is_visible = false;
+                m_visible_voxel_chunks.Remove(m_voxel_chunks[chunk_idx]);
+            }
         }
 
         m_previous_min_visible_idx = min_visible_chunk_idx;
