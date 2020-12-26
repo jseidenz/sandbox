@@ -33,6 +33,7 @@ public class Game : MonoBehaviour
     [SerializeField] bool m_draw_liquid_meshes;
     [SerializeField] BevelTuning m_bevel_tuning;
     [SerializeField] LiquidTuning m_liquid_tuning;
+    [SerializeField] Light m_main_light;
     
 
     LiquidSimulation m_liquid_simulation;
