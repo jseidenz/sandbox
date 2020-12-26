@@ -275,9 +275,8 @@ public class Game : MonoBehaviour
 
         foreach (var frustum_corner in camera_frustum_corners)
         {
-            var world_space_corner = m_camera.transform.TransformVector(frustum_corner);
-            min_frustum_point = Vector3.Min(world_space_corner, min_frustum_point);
-            max_frustum_point = Vector3.Max(world_space_corner, max_frustum_point);
+            min_frustum_point = Vector3.Min(frustum_corner, min_frustum_point);
+            max_frustum_point = Vector3.Max(frustum_corner, max_frustum_point);
         }
 
         var frustum_planes = GeometryUtility.CalculateFrustumPlanes(m_camera);
@@ -291,9 +290,8 @@ public class Game : MonoBehaviour
 
         foreach (var frustum_corner in camera_frustum_corners)
         {
-            var world_space_corner = m_camera.transform.TransformVector(frustum_corner);
-            min_frustum_point = Vector3.Min(world_space_corner, min_frustum_point);
-            max_frustum_point = Vector3.Max(world_space_corner, max_frustum_point);
+            min_frustum_point = Vector3.Min(frustum_corner, min_frustum_point);
+            max_frustum_point = Vector3.Max(frustum_corner, max_frustum_point);
         }
 
         var frustum_planes = GeometryUtility.CalculateFrustumPlanes(m_camera);
@@ -312,6 +310,10 @@ public class Game : MonoBehaviour
 
 
         m_camera.CalculateFrustumCorners(new Rect(0, 0, 1, 1), m_camera.farClipPlane, Camera.MonoOrStereoscopicEye.Mono, m_frustum_corners);
+        for(int i = 0; i < m_frustum_corners.Length; ++i)
+        {
+            m_frustum_corners[i] = m_camera.transform.TransformVector(m_frustum_corners[i]);
+        }
 
         UpdateSolidMesherVisibility(m_frustum_corners);
         UpdateLiquidMesherVisibility(m_frustum_corners);
