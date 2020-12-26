@@ -6,6 +6,12 @@ public class VoxelLayer
 {
     static int COLOR_ID = Shader.PropertyToID("_Color");
 
+    struct BoundsEntry
+    {
+        public Bounds m_bounds;
+        public bool m_is_visible;
+    }
+
     public VoxelLayer(
         string name, 
         float[] density_grid, 
@@ -43,13 +49,19 @@ public class VoxelLayer
         m_width_in_chunks = width_in_voxels / voxel_chunk_dimensions;
         m_height_in_chunks = height_in_voxels / voxel_chunk_dimensions;
         m_voxel_chunks = new VoxelChunk[m_width_in_chunks * m_height_in_chunks];
+        m_bounds_grid = new BoundsEntry[m_width_in_chunks * m_height_in_chunks];
 
-        for(int y = 0; y < m_height_in_chunks; ++y)
+        for (int y = 0, chunk_idx = 0; y < m_height_in_chunks; ++y)
         {
-            for(int x = 0; x < m_width_in_chunks; ++x)
+            for(int x = 0; x < m_width_in_chunks; ++x, ++chunk_idx)
             {
                 var bounds = GetChunkBounds(x, y);
-                m_voxel_chunks[y * m_width_in_chunks + x] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_sample_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, is_liquid, bevel_tuning);
+                m_voxel_chunks[chunk_idx] = new VoxelChunk(name, x * voxel_chunk_dimensions, y * voxel_chunk_dimensions, voxel_chunk_dimensions, width_in_voxels, height_in_voxels, m_density_grid, m_sample_grid, voxel_size_in_meters, iso_level, bot_y, top_y, generate_collision, density_height_weight, bounds, is_liquid, bevel_tuning);
+                m_bounds_grid[chunk_idx] = new BoundsEntry
+                {
+                    m_bounds = bounds,
+                    m_is_visible = false
+                };
             }
         }
     }
@@ -241,37 +253,49 @@ public class VoxelLayer
     {
         bool is_layer_visible = m_layer_idx >= min_chunk_idx.y && m_layer_idx <= max_chunk_idx.y;
 
-        for(int chunk_y = 0; chunk_y < m_height_in_chunks; ++chunk_y)
+        m_newly_visible_chunk_indices.Clear();
+        m_newly_invisible_chunk_indices.Clear();
+
+        for (int chunk_y = 0, chunk_idx = 0; chunk_y < m_height_in_chunks; ++chunk_y)
         {
             bool is_y_visible = is_layer_visible && chunk_y >= min_chunk_idx.z && chunk_y <= max_chunk_idx.z;
 
-            for(int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x)
+            for(int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x, ++chunk_idx)
             {
-                var chunk_idx = chunk_x + chunk_y * m_width_in_chunks;
-                var chunk = m_voxel_chunks[chunk_idx];
-
-
+                var bounds_entry = m_bounds_grid[chunk_idx];
                 bool is_visible = is_y_visible && chunk_x >= min_chunk_idx.x && chunk_x <= max_chunk_idx.x;
 
                 if(is_visible)
                 {
-                    //is_visible = GeometryUtility.TestPlanesAABB(frustum_planes, chunk.GetBounds());
+                    is_visible = GeometryUtility.TestPlanesAABB(frustum_planes, bounds_entry.m_bounds);
                 }
 
-                bool was_visible = chunk.GetVisibility();
+                bool was_visible = bounds_entry.m_is_visible;
                 if (was_visible == is_visible) continue;
 
                 if(is_visible)
                 {
-                    m_visible_voxel_chunks.Add(chunk);
+                    m_newly_visible_chunk_indices.Add(chunk_idx);
                 }
                 else
                 {
-                    m_visible_voxel_chunks.Remove(chunk);
+                    m_newly_invisible_chunk_indices.Add(chunk_idx);
                 }
-
-                chunk.SetVisibility(is_visible);
             }
+        }
+
+        foreach(var chunk_idx in m_newly_invisible_chunk_indices)
+        {
+            ref var bounds_entry = ref m_bounds_grid[chunk_idx];
+            bounds_entry.m_is_visible = false;
+            m_visible_voxel_chunks.Remove(m_voxel_chunks[chunk_idx]);
+        }
+
+        foreach (var chunk_idx in m_newly_visible_chunk_indices)
+        {
+            ref var bounds_entry = ref m_bounds_grid[chunk_idx];
+            bounds_entry.m_is_visible = true;
+            m_visible_voxel_chunks.Add(m_voxel_chunks[chunk_idx]);
         }
     }
 
@@ -286,6 +310,9 @@ public class VoxelLayer
     float m_one_over_voxel_chunk_dimensions;
     int m_voxel_chunk_dimensions;
     VoxelChunk[] m_voxel_chunks;
+    BoundsEntry[] m_bounds_grid;
+    List<int> m_newly_visible_chunk_indices = new List<int>();
+    List<int> m_newly_invisible_chunk_indices = new List<int>();
     float m_bot_y;
     float m_top_y;
     int m_layer_idx;
