@@ -34,7 +34,8 @@ public class Game : MonoBehaviour
     [SerializeField] BevelTuning m_bevel_tuning;
     [SerializeField] LiquidTuning m_liquid_tuning;
     [SerializeField] Light m_main_light;
-    
+    [SerializeField] float m_shadow_pullback;
+
 
     LiquidSimulation m_liquid_simulation;
     SolidSimulation m_solid_simulation;
@@ -271,14 +272,20 @@ public class Game : MonoBehaviour
         var min_frustum_point = m_camera.transform.position;
         var max_frustum_point = min_frustum_point;
 
+        var shadow_pullback_vec = m_shadow_pullback * m_main_light.transform.forward;
+
+        min_frustum_point = Vector3.Min(min_frustum_point, min_frustum_point + shadow_pullback_vec);
+        max_frustum_point = Vector3.Max(max_frustum_point, max_frustum_point + shadow_pullback_vec);
+
         foreach (var frustum_corner in camera_frustum_corners)
         {
             min_frustum_point = Vector3.Min(frustum_corner, min_frustum_point);
+            min_frustum_point = Vector3.Min(frustum_corner + shadow_pullback_vec, min_frustum_point);
             max_frustum_point = Vector3.Max(frustum_corner, max_frustum_point);
+            max_frustum_point = Vector3.Max(frustum_corner + shadow_pullback_vec, max_frustum_point);
         }
 
-        var frustum_planes = GeometryUtility.CalculateFrustumPlanes(m_camera);
-        m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, frustum_planes);
+        m_solid_mesher.UpdateVisibility(min_frustum_point, max_frustum_point, null);
     }
 
     void UpdateLiquidMesherVisibility(Vector3[] camera_frustum_corners)

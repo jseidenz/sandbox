@@ -268,7 +268,7 @@ public class VoxelLayer
                     var chunk_idx = chunk_y * m_width_in_chunks + chunk_x;
                     var bounds_entry = m_bounds_grid[chunk_idx];
 
-                    bool is_visible = GeometryUtility.TestPlanesAABB(frustum_planes, bounds_entry.m_bounds);
+                    bool is_visible = frustum_planes == null || GeometryUtility.TestPlanesAABB(frustum_planes, bounds_entry.m_bounds);
 
 
                     bool was_visible = bounds_entry.m_is_visible;
