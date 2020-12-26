@@ -249,21 +249,25 @@ public class VoxelLayer
         }
     }
 
-    public void UpdateVisibility(Vector3Int min_chunk_idx, Vector3Int max_chunk_idx, Plane[] frustum_planes)
+    public void UpdateVisibility(Vector3Int min_visible_chunk_idx, Vector3Int max_visible_chunk_idx, Plane[] frustum_planes)
     {
-        bool is_layer_visible = m_layer_idx >= min_chunk_idx.y && m_layer_idx <= max_chunk_idx.y;
+        var min_changed_idx = Vector3Int.Min(min_visible_chunk_idx, m_previous_min_visible_idx);
+        var max_changed_idx = Vector3Int.Max(max_visible_chunk_idx, m_previous_max_visible_idx);
+
+        bool is_layer_visible = m_layer_idx >= min_visible_chunk_idx.y && m_layer_idx <= max_visible_chunk_idx.y;
 
         m_newly_visible_chunk_indices.Clear();
         m_newly_invisible_chunk_indices.Clear();
 
-        for (int chunk_y = 0, chunk_idx = 0; chunk_y < m_height_in_chunks; ++chunk_y)
+        for (int chunk_y = min_changed_idx.z; chunk_y <= max_changed_idx.z; ++chunk_y)
         {
-            bool is_y_visible = is_layer_visible && chunk_y >= min_chunk_idx.z && chunk_y <= max_chunk_idx.z;
+            bool is_y_visible = is_layer_visible && chunk_y >= min_visible_chunk_idx.z && chunk_y <= max_visible_chunk_idx.z;
 
-            for(int chunk_x = 0; chunk_x < m_width_in_chunks; ++chunk_x, ++chunk_idx)
+            for(int chunk_x = min_changed_idx.x; chunk_x <= max_changed_idx.x; ++chunk_x)
             {
+                var chunk_idx = chunk_y * m_width_in_chunks + chunk_x;
                 var bounds_entry = m_bounds_grid[chunk_idx];
-                bool is_visible = is_y_visible && chunk_x >= min_chunk_idx.x && chunk_x <= max_chunk_idx.x;
+                bool is_visible = is_y_visible && chunk_x >= min_visible_chunk_idx.x && chunk_x <= max_visible_chunk_idx.x;
 
                 if(is_visible)
                 {
@@ -297,6 +301,9 @@ public class VoxelLayer
             bounds_entry.m_is_visible = true;
             m_visible_voxel_chunks.Add(m_voxel_chunks[chunk_idx]);
         }
+
+        m_previous_min_visible_idx = min_visible_chunk_idx;
+        m_previous_max_visible_idx = max_visible_chunk_idx;
     }
 
     Color m_color;
@@ -316,6 +323,8 @@ public class VoxelLayer
     float m_bot_y;
     float m_top_y;
     int m_layer_idx;
+    Vector3Int m_previous_min_visible_idx;
+    Vector3Int m_previous_max_visible_idx;
     HashSet<VoxelChunk> m_visible_voxel_chunks = new HashSet<VoxelChunk>();
     VertexAttributeDescriptor[] m_vertex_attribute_descriptors;
     BevelTuning m_bevel_tuning;
